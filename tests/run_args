@@ -164,11 +164,10 @@ Files:
     def test_mix_opts_actions(self):
         (args, acts, virt) = self.parse(
             ['-q', '--built-tree=.', '--shell-fail', '--source', 'mysrc_1.dsc', '-B',
-             'x.click', '--timeout-copy=5', '--leave-lang', './/'])
+             'x.click', '--timeout-copy=5', './/'])
 
         self.assertEqual(args.verbosity, 0)
         self.assertEqual(args.timeout_copy, 5)
-        self.assertEqual(args.set_lang, False)
 
         self.assertEqual(acts, [('built-tree', '.', False),
                                 ('source', 'mysrc_1.dsc', True),

@@ -24,12 +24,17 @@ else:
 sys.path.insert(1, our_base)
 
 import adt_run_args
+import adt_testbed
 
 
 class T(unittest.TestCase):
     def setUp(self):
         self.workdir = tempfile.TemporaryDirectory(prefix='run_args.')
         os.chdir(self.workdir.name)
+        self.orig_timeouts = adt_testbed.timeouts.copy()
+
+    def tearDown(self):
+        adt_testbed.timeouts = self.orig_timeouts
 
     def parse(self, args, default_virt=True):
         if default_virt and '---' not in args:
@@ -144,8 +149,8 @@ Files:
         args = self.parse(['./'])[0]
         self.assertEqual(args.verbosity, 1)
         self.assertEqual(args.shell_fail, False)
-        self.assertEqual(args.timeout_copy, 300)
-        self.assertEqual(args.set_lang, 'C.UTF-8')
+        self.assertEqual(adt_testbed.timeouts['test'], 10000)
+        self.assertEqual(adt_testbed.timeouts['copy'], 300)
 
     def test_options(self):
         (args, acts, virt) = self.parse(
@@ -154,8 +159,8 @@ Files:
              '---', 'adt-virt-foo', '-d', '-s', '--', '-d'])
         self.assertEqual(args.verbosity, 0)
         self.assertEqual(args.shell_fail, True)
-        self.assertEqual(args.timeout_copy, 5)
-        self.assertEqual(args.set_lang, 'en_US.UTF-8')
+        self.assertEqual(adt_testbed.timeouts['copy'], 5)
+        self.assertEqual(args.env, ['LANG=en_US.UTF-8'])
         self.assertEqual(args.auto_control, True)
 
         self.assertEqual(acts, [('built-tree', './', False)])
@@ -179,11 +184,11 @@ Files:
             ['--timeout-short=37', '--timeout-factor=0.5',
              '--timeout-build=1337', '--source', 'x.dsc', '---', 'null'])
         # explicit, not affected by factor
-        self.assertEqual(args.timeout_short, 37)
-        self.assertEqual(args.timeout_build, 1337)
+        self.assertEqual(adt_testbed.timeouts['short'], 37)
+        self.assertEqual(adt_testbed.timeouts['build'], 1337)
         # default, with factor
-        self.assertEqual(args.timeout_copy, int(adt_run_args.timeouts['copy'] * 0.5))
-        self.assertEqual(args.timeout_test, int(adt_run_args.timeouts['test'] * 0.5))
+        self.assertEqual(adt_testbed.timeouts['copy'], 150)
+        self.assertEqual(adt_testbed.timeouts['test'], 5000)
 
     def test_read_file(self):
         argfile = os.path.join(self.workdir.name, 'myopts')

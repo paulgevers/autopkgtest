@@ -2227,7 +2227,7 @@ class SchrootRunner(AdtTestCase):
         # check binaries
         bins = os.listdir(os.path.join(outdir, 'binaries'))
         self.assertEqual(set(bins),
-                         set(['Release', 'Packages.gz', 'Packages', 'testpkg.deb']))
+                         set(['Release', 'Packages', 'testpkg.deb']))
 
         # check for cruft in outdir
         self.assertEqual(set(os.listdir(outdir)),

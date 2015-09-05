@@ -549,7 +549,7 @@ bad                  FAIL non-zero exit status 1
         # test should time out
         self.assertEqual(code, 4, err)
         self.assertIn("timed out on command", err)
-        self.assertNotIn('totest', out)
+        self.assertRegex(out, 'totest\s+FAIL timed out', out)
 
         # should show test stdout
         self.assertIn('start', out)
@@ -569,7 +569,7 @@ bad                  FAIL non-zero exit status 1
         # test should time out
         self.assertEqual(code, 4, err)
         self.assertIn("timed out on command", err)
-        self.assertNotIn('totest', out)
+        self.assertRegex(out, 'totest\s+FAIL timed out', out)
         self.assertLess(duration, 10, err)
 
         # should not leave test process running
@@ -2717,7 +2717,7 @@ class LxcRunner(AdtTestCase):
         # test should time out
         self.assertEqual(code, 4, err)
         self.assertIn("timed out on command", err)
-        self.assertNotIn('totest', out)
+        self.assertRegex(out, 'totest\s+FAIL timed out', out)
 
         # should show test stdout
         self.assertIn('start', out)
@@ -3902,6 +3902,7 @@ class SshRunnerWithScript(AdtTestCase):
         self.assertIn("timed out on command", err)
         self.assertIn('StartTest\n', out)
         self.assertNotIn('PASS', out)
+        self.assertRegex(out, 'to\s+FAIL timed out', out)
         self.assertNotIn('NotReached', err)
         self.assertLess(duration, 60, err)
 

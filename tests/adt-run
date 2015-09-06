@@ -55,12 +55,12 @@ have_autodep8 = subprocess.call(['which', 'autodep8'], stdout=subprocess.PIPE) =
 
 
 class AdtTestCase(unittest.TestCase):
-    '''Base class for adt-run tests'''
+    '''Base class and common tests for adt-run'''
 
-    def __init__(self, virt, *args, **kwargs):
+    def __init__(self, virt_args, *args, **kwargs):
         super(AdtTestCase, self).__init__(*args, **kwargs)
         self.adt_run_path = os.path.join(root_dir, 'run-from-checkout')
-        self.virt = 'adt-virt-' + virt
+        self.virt_args = virt_args
         self.orig_home = os.path.expanduser('~')
 
     def setUp(self):
@@ -125,7 +125,7 @@ class AdtTestCase(unittest.TestCase):
         self.assertEqual(dbp.returncode, 0, err)
         return os.path.join(os.path.dirname(srcdir), 'testpkg_1.dsc')
 
-    def adt_run(self, args, virt_args=[], env=None):
+    def adt_run(self, args, virt_args=None, env=None):
         '''Run adt-run with given arguments with configured virt runner.
 
          @args: command line args of adt-run, excluding "adt-run" itself; "---
@@ -136,7 +136,7 @@ class AdtTestCase(unittest.TestCase):
         '''
         # run adt command
         adt = subprocess.Popen([self.adt_run_path] + args +
-                               ['---', self.virt] + virt_args,
+                               ['---'] + (virt_args or self.virt_args),
                                stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                                env=env)
         (out, err) = adt.communicate()
@@ -145,7 +145,7 @@ class AdtTestCase(unittest.TestCase):
 
 class NullRunner(AdtTestCase):
     def __init__(self, *args, **kwargs):
-        super(NullRunner, self).__init__('null', *args, **kwargs)
+        super(NullRunner, self).__init__(['null'], *args, **kwargs)
 
     def test_tree_norestrictions_nobuild_success(self):
         '''source tree, no build, no restrictions, test success'''
@@ -1079,7 +1079,7 @@ if ($pid) { # parent
                  'NullRunnerRoot tests need to run as root')
 class NullRunnerRoot(AdtTestCase):
     def __init__(self, *args, **kwargs):
-        super(NullRunnerRoot, self).__init__('null', *args, **kwargs)
+        super(NullRunnerRoot, self).__init__(['null'], *args, **kwargs)
 
     def test_tmpdir_for_other_users(self):
         '''$TMPDIR is accessible to non-root users'''
@@ -1178,7 +1178,7 @@ rm $TMPDIR/rootowned.txt $TMPDIR/world.txt
                  'chroot runner needs to run as root')
 class ChrootRunner(AdtTestCase):
     def __init__(self, *args, **kwargs):
-        super(ChrootRunner, self).__init__('chroot', *args, **kwargs)
+        super(ChrootRunner, self).__init__(['chroot', '/uninited'], *args, **kwargs)
 
     def setUp(self):
         super(ChrootRunner, self).setUp()
@@ -1256,6 +1256,8 @@ class ChrootRunner(AdtTestCase):
         os.chmod(p, 0o177)
         os.makedirs(os.path.join(self.chroot, 'etc', 'apt', 'sources.list.d'))
 
+        self.virt_args[-1] = self.chroot
+
     def tearDown(self):
         # these sometimes fail on EBUSY
         subprocess.call('for p in %(c)s/dev %(c)s/proc; do while mountpoint $p >/dev/null; do umount $p; sleep 0.1; done; done' %
@@ -1268,8 +1270,7 @@ class ChrootRunner(AdtTestCase):
         p = self.build_src('Tests: pass\nDepends:\nRestrictions: needs-root\n',
                            {'pass': '#!/bin/sh\necho I am fine\n'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
-                                        [self.chroot])
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p])
         # test should succeed
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS', out)
@@ -1293,8 +1294,7 @@ class ChrootRunner(AdtTestCase):
         p = self.build_src('Tests: nz\nDepends: fancypkg\nRestrictions: needs-root\n',
                            {'nz': '#!/bin/sh\necho I am sick\nexit 7'})
 
-        (code, out, err) = self.adt_run(['-d', '--no-built-binaries', '--unbuilt-tree=' + p],
-                                        [self.chroot])
+        (code, out, err) = self.adt_run(['-d', '--no-built-binaries', '--unbuilt-tree=' + p])
         self.assertEqual(code, 4, err)
         self.assertRegex(out, 'nz\s+FAIL non-zero exit status 7')
 
@@ -1314,8 +1314,7 @@ class ChrootRunner(AdtTestCase):
         p = self.build_src('Tests: se\nDepends:\nRestrictions: needs-root\n',
                            {'se': '#!/bin/sh\necho I am sick >&2'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
-                                        [self.chroot])
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p])
         self.assertEqual(code, 4, err)
         self.assertRegex(out, 'se\s+FAIL stderr: I am sick\n')
 
@@ -1328,8 +1327,7 @@ class ChrootRunner(AdtTestCase):
         p = self.build_src('Tests: senz\nDepends:\nRestrictions: needs-root\n',
                            {'senz': '#!/bin/sh\necho I am sick >&2\nexit 7\n'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--built-tree=' + p],
-                                        [self.chroot])
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--built-tree=' + p])
         # test should fail
         self.assertEqual(code, 4, err)
         self.assertRegex(out, 'senz\s+FAIL non-zero exit status 7')
@@ -1343,8 +1341,7 @@ class ChrootRunner(AdtTestCase):
         p = self.build_src('Tests: pass\nDepends:\nRestrictions: allow-stderr needs-root',
                            {'pass': '#!/bin/sh\necho I am fine >&2\necho babble'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--built-tree=' + p],
-                                        [self.chroot])
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--built-tree=' + p])
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS')
 
@@ -1362,8 +1359,7 @@ Depends: fancypkg,
 Restrictions: needs-root
 ''', {'pass': '#!/bin/sh\ntrue'})
 
-        (code, out, err) = self.adt_run(['-d', '-B', '--unbuilt-tree=' + p],
-                                        [self.chroot])
+        (code, out, err) = self.adt_run(['-d', '-B', '--unbuilt-tree=' + p])
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS')
 
@@ -1389,7 +1385,7 @@ Restrictions: needs-root
         # run this under C locale to test that UTF-8 debian/control is still
         # handled correctly
         (code, out, err) = self.adt_run(['-d', '-B', '--unbuilt-tree=' + p],
-                                        [self.chroot], env={'LC_ALL': 'C'})
+                                        env={'LC_ALL': 'C'})
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS')
 
@@ -1415,8 +1411,7 @@ Restrictions: needs-root
         subprocess.check_call(['sed', '-i', '/^Build-Depends:/ s/:.*/: bdepyes <!nocheck>, bdepno <stage1> <cross>/',
                                os.path.join(p, 'debian', 'control')])
 
-        (code, out, err) = self.adt_run(['-d', '-B', '--unbuilt-tree=' + p],
-                                        [self.chroot])
+        (code, out, err) = self.adt_run(['-d', '-B', '--unbuilt-tree=' + p])
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS')
 
@@ -1433,8 +1428,7 @@ Restrictions: needs-root
         logfile = os.path.join(self.workdir, 'adt.log')
         (code, out, err) = self.adt_run(['--no-built-binaries', '-d',
                                          '--unbuilt-tree=' + p,
-                                         '--log-file=' + logfile],
-                                        [self.chroot])
+                                         '--log-file=' + logfile])
         with open(logfile) as f:
             log = f.read()
 
@@ -1472,8 +1466,7 @@ Restrictions: needs-root
 
         (code, out, err) = self.adt_run(['--no-built-binaries',
                                          '--unbuilt-tree=' + p,
-                                         '--output-dir=' + outdir],
-                                        [self.chroot])
+                                         '--output-dir=' + outdir])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -1504,8 +1497,7 @@ Restrictions: needs-root
         p = self.build_src('Tests: pass subdir/p\nDepends:\nRestrictions: needs-root',
                            {'pass': '#!/bin/sh\ntrue'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
-                                        [self.chroot])
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p])
         # invalid test gets skipped
         self.assertEqual(code, 2, err)
         self.assertRegex(out, 'subdir/p\s+SKIP test name may not contain /.*')
@@ -1520,8 +1512,7 @@ Restrictions: needs-root
         p = self.build_src('Tests: rambo\nDepends:\nRestrictions: needs-root breaks-testbed',
                            {'rambo': '#!/bin/sh\ntouch /zap\n'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
-                                        [self.chroot])
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p])
         # test should be skipped as chroot runner doesn't provide revert
         self.assertEqual(code, 2)
         self.assertRegex(out, 'rambo\s+SKIP Test breaks testbed')
@@ -1537,8 +1528,7 @@ Restrictions: needs-root
 
         (code, out, err) = self.adt_run(['--no-built-binaries',
                                          '--unbuilt-tree=' + p,
-                                         '--summary=' + summary],
-                                        [self.chroot])
+                                         '--summary=' + summary])
         self.assertEqual(code, 4, err)
         self.assertRegex(out, 'se\s+FAIL stderr: fancy ‴ʎɔuɐɟ″!\n')
 
@@ -1557,7 +1547,7 @@ Restrictions: needs-root
         # copy that into the chroot where fake apt-get source can find it
         shutil.copytree(p, os.path.join(self.chroot, 'aptget-src'))
 
-        (code, out, err) = self.adt_run(['testpkg'], [self.chroot])
+        (code, out, err) = self.adt_run(['testpkg'])
         # test should succeed
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS', out)
@@ -1582,8 +1572,7 @@ Restrictions: needs-root
                                          'sleep 3; cp /bin/cp /bin/cp_cp; '
                                          'echo setup_success > /setup.log',
                                          '--setup-commands', 'cp /bin/cp /bin/cp_cp',
-                                         '--timeout-short=1', '--timeout-copy=1'],
-                                        [self.chroot])
+                                         '--timeout-short=1', '--timeout-copy=1'])
         # test should succeed
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS', out)
@@ -1612,8 +1601,7 @@ Restrictions: needs-root
 
         (code, out, err) = self.adt_run(['-B', '-d', '--unbuilt-tree=' + p,
                                          '--setup-commands', cmds,
-                                         '--setup-commands', cmds2],
-                                        [self.chroot])
+                                         '--setup-commands', cmds2])
         # test should succeed
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS', out)
@@ -1636,8 +1624,7 @@ Restrictions: needs-root
 
         (code, out, err) = self.adt_run(['-B', '--unbuilt-tree=' + p, '-o', outdir,
                                          '--copy', '%s:/mytestdata/Makefile' % os.path.join(root_dir, 'Makefile'),
-                                         '--copy', '%s:/mytestdata/tree' % os.path.join(test_dir, 'testpkg')],
-                                        [self.chroot])
+                                         '--copy', '%s:/mytestdata/tree' % os.path.join(test_dir, 'testpkg')])
         # test should succeed
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS', out)
@@ -1675,8 +1662,7 @@ deb http://something.else.net/ fluffy addons
 ''')
 
         (code, out, err) = self.adt_run(['-B', '-d', '--unbuilt-tree=' + p,
-                                         '--apt-pocket', 'proposed'],
-                                        [self.chroot])
+                                         '--apt-pocket', 'proposed'])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -1698,7 +1684,7 @@ deb-src http://bar.debian.org/ fluffy-proposed extras
                            {'ic': '#!/bin/sh\necho container ok',
                             'im': '#!/bin/sh\necho machine ok'})
 
-        (code, out, err) = self.adt_run(['-B', '--built-tree=' + p], [self.chroot])
+        (code, out, err) = self.adt_run(['-B', '--built-tree=' + p])
         self.assertEqual(code, 2, out + err)
         self.assertRegex(out, 'ic\s+SKIP .*container', out)
         self.assertRegex(out, 'im\s+SKIP .*machine', out)
@@ -1710,8 +1696,7 @@ deb-src http://bar.debian.org/ fluffy-proposed extras
         p = self.build_src('Tests: g\nDepends:\nRestrictions: needs-root\n',
                            {'g': '#!/bin/sh\npwd\nLC_ALL=C ls .\n'})
 
-        (code, out, err) = self.adt_run(['-B', '--unbuilt-tree=' + p],
-                                        [self.chroot])
+        (code, out, err) = self.adt_run(['-B', '--unbuilt-tree=' + p])
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'g\s+PASS', out)
 
@@ -1724,7 +1709,7 @@ deb-src http://bar.debian.org/ fluffy-proposed extras
         '''package without debian/tests/'''
 
         p = self.build_src(None, None)
-        (code, out, err) = self.adt_run(['-B', '--unbuilt-tree=' + p], [self.chroot])
+        (code, out, err) = self.adt_run(['-B', '--unbuilt-tree=' + p])
         self.assertEqual(code, 8, err)
         self.assertRegex(out, 'SKIP no tests in this package', out)
 
@@ -1738,8 +1723,7 @@ deb-src http://bar.debian.org/ fluffy-proposed extras
         with open(custom_control, 'w') as f:
             f.write('Tests: pass\nDepends:\nRestrictions: needs-root')
 
-        (code, out, err) = self.adt_run(['-B', '--override-control=' + custom_control, p + '//'],
-                                        [self.chroot])
+        (code, out, err) = self.adt_run(['-B', '--override-control=' + custom_control, p + '//'])
         # test should succeed
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS', out)
@@ -1757,8 +1741,7 @@ deb-src http://bar.debian.org/ fluffy-proposed extras
         '''nonexisting --override-control'''
 
         p = self.build_src('Tests: NOTME\nDepends: nonexisting\n', {})
-        (code, out, err) = self.adt_run(['--override-control=/nonexisting', p + '/'],
-                                        [self.chroot])
+        (code, out, err) = self.adt_run(['--override-control=/nonexisting', p + '/'])
         self.assertEqual(code, 20, err)
         self.assertIn('/nonexisting', err)
 
@@ -1774,7 +1757,7 @@ deb-src http://bar.debian.org/ fluffy-proposed extras
 
         os.chdir(self.workdir)
         (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
-                                        [os.path.basename(self.chroot)])
+                                        virt_args=['chroot', os.path.basename(self.chroot)])
         # test should succeed
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS', out)
@@ -1792,7 +1775,7 @@ deb-src http://bar.debian.org/ fluffy-proposed extras
             f.write(' -d \n%s' % self.chroot)
 
         (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
-                                        ['@' + argfile])
+                                        virt_args = ['chroot', '@' + argfile])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -1809,8 +1792,7 @@ deb-src http://bar.debian.org/ fluffy-proposed extras
         outdir = os.path.join(self.workdir, 'out')
         (code, out, err) = self.adt_run(['--setup-commands', 'rm /usr/bin/dpkg-query',
                                          '-d', '--built-tree=' + p,
-                                         '--output-dir=' + outdir],
-                                        [self.chroot])
+                                         '--output-dir=' + outdir])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -1831,8 +1813,8 @@ deb-src http://bar.debian.org/ fluffy-proposed extras
                      'Set $ADT_TEST_SCHROOT to an existing schroot')
 class SchrootRunner(AdtTestCase):
     def __init__(self, *args, **kwargs):
-        super(SchrootRunner, self).__init__('schroot', *args, **kwargs)
-        self.schroot_name = os.environ.get('ADT_TEST_SCHROOT')
+        super(SchrootRunner, self).__init__(['schroot', os.environ['ADT_TEST_SCHROOT']],
+                                             *args, **kwargs)
 
     def test_tree_norestrictions_nobuild_success(self):
         '''source tree, no build, no restrictions, test success'''
@@ -1847,8 +1829,7 @@ class SchrootRunner(AdtTestCase):
                             'echo I am fine\n',
                             'p2': '#!/bin/sh\necho I am also fine\n'})
 
-        (code, out, err) = self.adt_run(['-d', '--no-built-binaries', '--unbuilt-tree=' + p],
-                                        [self.schroot_name])
+        (code, out, err) = self.adt_run(['-d', '--no-built-binaries', '--unbuilt-tree=' + p])
         # test should succeed
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'p1\s+PASS', out)
@@ -1876,8 +1857,7 @@ class SchrootRunner(AdtTestCase):
         p = self.build_src('Tests: nz\nDepends:\nRestrictions: needs-root\n',
                            {'nz': '#!/bin/sh\necho I am sick\nexit 7'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
-                                        [self.schroot_name])
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p])
         self.assertEqual(code, 4, err)
         self.assertRegex(out, 'nz\s+FAIL non-zero exit status 7')
 
@@ -1895,8 +1875,7 @@ class SchrootRunner(AdtTestCase):
         p = self.build_src('Tests: se\nDepends:\nRestrictions: needs-root\n',
                            {'se': '#!/bin/sh\necho I am sick >&2'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
-                                        [self.schroot_name])
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p])
         self.assertEqual(code, 4, err)
         self.assertRegex(out, 'se\s+FAIL stderr: I am sick\n')
 
@@ -1909,8 +1888,7 @@ class SchrootRunner(AdtTestCase):
         p = self.build_src('Tests: senz\nDepends:\nRestrictions: needs-root\n',
                            {'senz': '#!/bin/sh\necho I am sick >&2\nexit 7\n'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--built-tree=' + p],
-                                        [self.schroot_name])
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--built-tree=' + p])
         # test should fail
         self.assertEqual(code, 4)
         self.assertRegex(out, 'senz\s+FAIL non-zero exit status 7')
@@ -1924,8 +1902,7 @@ class SchrootRunner(AdtTestCase):
         p = self.build_src('Tests: pass\nDepends:\nRestrictions: allow-stderr',
                            {'pass': '#!/bin/sh\necho I am fine >&2\necho babble'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--built-tree=' + p],
-                                        [self.schroot_name])
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--built-tree=' + p])
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS', out)
 
@@ -1945,8 +1922,7 @@ class SchrootRunner(AdtTestCase):
         subprocess.check_call(['sed', '-i', '/^Build-Depends:/ a\Build-Depends-Indep: aspell-doc, nonexisting <cross>',
                                os.path.join(p, 'debian', 'control')])
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
-                                        [self.schroot_name])
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p])
         # test should succeed
         self.assertEqual(code, 0, out + err)
         self.assertRegex(out, 'pass\s+PASS', out)
@@ -1965,8 +1941,7 @@ class SchrootRunner(AdtTestCase):
         p = self.build_dsc('Tests: pass\nDepends: coreutils\nRestrictions: build-needed\n',
                            {'pass': '#!/bin/sh -e\n./test_built | grep -q "built script OK"\n'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', p],
-                                        [self.schroot_name])
+        (code, out, err) = self.adt_run(['--no-built-binaries', p])
         # test should succeed
         self.assertRegex(out, 'pass\s+PASS', out)
         self.assertEqual(code, 0, err)
@@ -1990,7 +1965,7 @@ class SchrootRunner(AdtTestCase):
         subprocess.check_call(['sed', '-i', '/^Depends:/ s/$/, aspell-doc/',
                                os.path.join(p, 'debian', 'control')])
 
-        (code, out, err) = self.adt_run(['--unbuilt-tree=' + p], [self.schroot_name])
+        (code, out, err) = self.adt_run(['--unbuilt-tree=' + p])
 
         # should build and install package
         self.assertIn('dh build', err)
@@ -2028,8 +2003,7 @@ class SchrootRunner(AdtTestCase):
         with open(os.path.join(p, 'debian', 'rules'), 'w') as f:
             f.write('bwhahahahano!')
 
-        (code, out, err) = self.adt_run(['-d', '-B', '--binary', deb, '--unbuilt-tree=' + p],
-                                        [self.schroot_name])
+        (code, out, err) = self.adt_run(['-d', '-B', '--binary', deb, '--unbuilt-tree=' + p])
 
         # should install package
         self.assertNotIn('dh build', err)
@@ -2067,8 +2041,7 @@ class SchrootRunner(AdtTestCase):
             f.write('bwhahahahano!')
 
         # --no-built-binaries should be implied here
-        (code, out, err) = self.adt_run(['-d', deb, '--built-tree=' + p],
-                                        [self.schroot_name])
+        (code, out, err) = self.adt_run(['-d', deb, '--built-tree=' + p])
 
         # should install package
         self.assertNotIn('dh build', err)
@@ -2100,7 +2073,7 @@ class SchrootRunner(AdtTestCase):
         changes = glob('%s/testpkg_1_*.changes' % os.path.dirname(p))
         self.assertEqual(len(changes), 1)
         changes = changes[0]
-        (code, out, err) = self.adt_run([changes], [self.schroot_name])
+        (code, out, err) = self.adt_run([changes])
 
         # should not rebuild
         self.assertNotIn('dh build', err)
@@ -2130,8 +2103,7 @@ class SchrootRunner(AdtTestCase):
         logfile = os.path.join(self.workdir, 'adt.log')
         (code, out, err) = self.adt_run(['-d', '--no-built-binaries',
                                          '--unbuilt-tree=' + p,
-                                         '--log-file=' + logfile],
-                                        [self.schroot_name])
+                                         '--log-file=' + logfile])
         with open(logfile) as f:
             log = f.read()
 
@@ -2164,8 +2136,7 @@ class SchrootRunner(AdtTestCase):
         outdir = os.path.join(self.workdir, 'out')
 
         (code, out, err) = self.adt_run(['--unbuilt-tree=' + p,
-                                         '--output-dir=' + outdir],
-                                        [self.schroot_name])
+                                         '--output-dir=' + outdir])
 
         # test results
         self.assertEqual(code, 4, err)
@@ -2247,8 +2218,7 @@ class SchrootRunner(AdtTestCase):
 
         (code, out, err) = self.adt_run(['--no-built-binaries',
                                          '--unbuilt-tree=' + p,
-                                         '--user=nobody'],
-                                        [self.schroot_name])
+                                         '--user=nobody'])
         self.assertEqual(code, 0, err)
 
         # should install dependencies
@@ -2273,8 +2243,7 @@ class SchrootRunner(AdtTestCase):
 
         (code, out, err) = self.adt_run(['--no-built-binaries',
                                          '--unbuilt-tree=' + p,
-                                         '--user=nobody'],
-                                        [self.schroot_name])
+                                         '--user=nobody'])
         self.assertEqual(code, 0, err)
 
         # should install dependencies
@@ -2292,8 +2261,7 @@ class SchrootRunner(AdtTestCase):
         p = self.build_src('Tests: rambo\nDepends:\nRestrictions: needs-root breaks-testbed',
                            {'rambo': '#!/bin/sh\ntouch /zap\n'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
-                                        [self.schroot_name])
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p])
         # test should be skipped as chroot runner doesn't provide revert
         self.assertEqual(code, 2)
         self.assertRegex(out, 'rambo\s+SKIP Test breaks testbed')
@@ -2306,8 +2274,7 @@ class SchrootRunner(AdtTestCase):
                            {'ic': '#!/bin/sh\necho container ok',
                             'im': '#!/bin/sh\necho machine ok'})
 
-        (code, out, err) = self.adt_run(['-B', '--built-tree=' + p],
-                                        [self.schroot_name])
+        (code, out, err) = self.adt_run(['-B', '--built-tree=' + p])
         self.assertEqual(code, 2, out + err)
         self.assertRegex(out, 'ic\s+SKIP .*container', out)
         self.assertRegex(out, 'im\s+SKIP .*machine', out)
@@ -2322,7 +2289,7 @@ class SchrootRunner(AdtTestCase):
                             'test -e /usr/share/doc/apt-doc/copyright ||'
                             'echo "apt-doc not installed!" >&2'})
 
-        (code, out, err) = self.adt_run(['--unbuilt-tree=' + p], [self.schroot_name])
+        (code, out, err) = self.adt_run(['--unbuilt-tree=' + p])
         self.assertEqual(code, 0, out + err)
         self.assertIn('Unpacking apt-doc', out)
         self.assertIn('built script OK', out)
@@ -2341,7 +2308,7 @@ class SchrootRunner(AdtTestCase):
                             'test -e /usr/share/doc/apt-doc/copyright ||'
                             'echo "apt-doc not installed!" >&2'})
 
-        (code, out, err) = self.adt_run(['--unbuilt-tree=' + p], [self.schroot_name])
+        (code, out, err) = self.adt_run(['--unbuilt-tree=' + p])
         self.assertEqual(code, 0, out + err)
 
     def test_needs_recommends_first(self):
@@ -2358,13 +2325,13 @@ class SchrootRunner(AdtTestCase):
                             'test ! -e /usr/share/doc/apt-doc/copyright ||'
                             'echo "apt-doc unexpectedly installed!" >&2'})
 
-        (code, out, err) = self.adt_run(['--unbuilt-tree=' + p], [self.schroot_name])
+        (code, out, err) = self.adt_run(['--unbuilt-tree=' + p])
         self.assertEqual(code, 0, out + err)
 
     def test_apt_autodep8(self):
         '''apt, autodep8'''
 
-        (code, out, err) = self.adt_run(['libtest-carp-perl'], [self.schroot_name])
+        (code, out, err) = self.adt_run(['libtest-carp-perl'])
         if not have_autodep8:
             self.assertEqual(code, 8, err)
             self.assertIn('SKIP no tests in this package', out)
@@ -2379,7 +2346,7 @@ class SchrootRunner(AdtTestCase):
     def test_apt_no_autocontrol(self):
         '''apt, disable automatic test generation'''
 
-        (code, out, err) = self.adt_run(['--no-auto-control', 'libtest-carp-perl'], [self.schroot_name])
+        (code, out, err) = self.adt_run(['--no-auto-control', 'libtest-carp-perl'])
         self.assertEqual(code, 8, err)
         self.assertIn('SKIP no tests in this package', out)
 
@@ -2389,8 +2356,7 @@ class SchrootRunner(AdtTestCase):
         p = self.build_src('Tests: p\nDepends: unknown, libc6 (>= 99:99)\n',
                            {'p': '#!/bin/sh -e\ntrue'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
-                                        [self.schroot_name])
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p])
         self.assertEqual(code, 12, err)
         self.assertRegex(err, '[dD]epends.*unknown', err)
         self.assertRegex(err, 'Test dependencies are unsatisfiable', err)
@@ -2405,8 +2371,7 @@ class SchrootRunner(AdtTestCase):
         with open(os.path.join(p, 'debian', 'testpkg.postinst'), 'w') as f:
             f.write('#!/bin/sh -e\necho "BROKEN POSTINST"\nexit 1')
 
-        (code, out, err) = self.adt_run(['--unbuilt-tree=' + p],
-                                        [self.schroot_name])
+        (code, out, err) = self.adt_run(['--unbuilt-tree=' + p])
         self.assertEqual(code, 12, err)
         self.assertIn('BROKEN POSTINST', out)
         self.assertRegex(out, 'blame: .*/testpkg', out)
@@ -2417,14 +2382,15 @@ class SchrootRunner(AdtTestCase):
                      'Set $ADT_TEST_LXC to an existing container')
 class LxcRunner(AdtTestCase):
     def __init__(self, *args, **kwargs):
-        super(LxcRunner, self).__init__('lxc', *args, **kwargs)
         self.container_name = os.environ.get('ADT_TEST_LXC')
-        self.virt_args = ['--ephemeral', self.container_name]
+        vargs = ['lxc', '--ephemeral', self.container_name]
         # check for unprivileged containers
         if os.getuid() > 0 and subprocess.call(
                 ['lxc-info', '-n', self.container_name],
                 stdout=subprocess.PIPE, stderr=subprocess.STDOUT) != 0:
-            self.virt_args.insert(0, '--sudo')
+            vargs.insert(1, '--sudo')
+
+        super(LxcRunner, self).__init__(vargs, *args, **kwargs)
 
     def test_tree_norestrictions_nobuild_success(self):
         '''source tree, no build, no restrictions, test success'''
@@ -2433,7 +2399,6 @@ class LxcRunner(AdtTestCase):
                            {'pass': '#!/bin/sh\necho I am fine; echo "SOMEVAR: >$SOMEVAR<"; echo "PATH: $PATH"\n'})
 
         (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
-                                        self.virt_args,
                                         env={'SOMEVAR': 'junk',
                                              'HOME': os.environ['HOME'],
                                              'PATH': '/something/broken:' + os.environ.get('PATH', '')})
@@ -2459,8 +2424,7 @@ class LxcRunner(AdtTestCase):
         p = self.build_src('Tests: nz\nDepends:\n',
                            {'nz': '#!/bin/sh\necho I am sick\nexit 7'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
-                                        self.virt_args)
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p])
         self.assertEqual(code, 4, err)
         self.assertRegex(out, 'nz\s+FAIL non-zero exit status 7')
 
@@ -2478,8 +2442,7 @@ class LxcRunner(AdtTestCase):
         p = self.build_src('Tests: se\nDepends:\n',
                            {'se': '#!/bin/sh\necho I am sick >&2'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
-                                        self.virt_args)
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p])
         self.assertEqual(code, 4, err)
         self.assertRegex(out, 'se\s+FAIL stderr: I am sick\n')
 
@@ -2492,8 +2455,7 @@ class LxcRunner(AdtTestCase):
         p = self.build_src('Tests: senz\nDepends:\n',
                            {'senz': '#!/bin/sh\necho I am sick >&2\nexit 7\n'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--built-tree=' + p],
-                                        self.virt_args)
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--built-tree=' + p])
         # test should fail
         self.assertEqual(code, 4, err)
         self.assertRegex(out, 'senz\s+FAIL non-zero exit status 7')
@@ -2507,8 +2469,7 @@ class LxcRunner(AdtTestCase):
         p = self.build_src('Tests: pass\nDepends:\nRestrictions: allow-stderr',
                            {'pass': '#!/bin/sh\necho I am fine >&2\necho babble'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--built-tree=' + p],
-                                        self.virt_args)
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--built-tree=' + p])
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS', out)
 
@@ -2525,8 +2486,7 @@ class LxcRunner(AdtTestCase):
                            {'pass': '#!/bin/sh -e\n./test_built | grep -q "built script OK"\n'
                             './test_abspath | grep -q "built script OK"\necho GOOD'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
-                                        self.virt_args)
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p])
         # test should succeed
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS', out)
@@ -2545,8 +2505,7 @@ class LxcRunner(AdtTestCase):
         p = self.build_dsc('Tests: pass\nDepends: coreutils\nRestrictions: build-needed\n',
                            {'pass': '#!/bin/sh -e\n./test_built | grep -q "built script OK"\n'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', p],
-                                        self.virt_args)
+        (code, out, err) = self.adt_run(['--no-built-binaries', p])
         # test should succeed
         self.assertRegex(out, 'pass\s+PASS', out)
         self.assertEqual(code, 0, err)
@@ -2570,8 +2529,7 @@ class LxcRunner(AdtTestCase):
         subprocess.check_call(['sed', '-i', '/^Depends:/ s/$/, aspell-doc/',
                                os.path.join(p, 'debian', 'control')])
 
-        (code, out, err) = self.adt_run(['--unbuilt-tree=' + p],
-                                        self.virt_args)
+        (code, out, err) = self.adt_run(['--unbuilt-tree=' + p])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -2595,7 +2553,7 @@ class LxcRunner(AdtTestCase):
 
         virt_args = [a for a in self.virt_args if a != '--ephemeral']
         (code, out, err) = self.adt_run(['--no-built-binaries', '--built-tree=' + p],
-                                        virt_args)
+                                        virt_args=virt_args)
         # test should fail
         self.assertEqual(code, 4, err)
         self.assertRegex(out, 'senz\s+FAIL non-zero exit status 7')
@@ -2613,8 +2571,7 @@ class LxcRunner(AdtTestCase):
                            {'zap': '#!/bin/sh\ntouch /zap\n',
                             'boom': '#!/bin/sh\n[ ! -e /zap ]; touch /boom'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p, '-d'],
-                                        self.virt_args)
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p, '-d'])
         # both tests should run; the second one (boom) should not see the
         # effect of the first one (/zap existing)
         self.assertEqual(code, 0, err)
@@ -2631,8 +2588,7 @@ class LxcRunner(AdtTestCase):
         # we expect a normal user for LXC
         (code, out, err) = self.adt_run(['-B', '-d', p + '//', '--setup-commands',
                                          '[ -n "$ADT_NORMAL_USER" ]; getent passwd $ADT_NORMAL_USER;'
-                                         'echo setupok >> /setup.log'],
-                                        self.virt_args)
+                                         'echo setupok >> /setup.log'])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -2657,7 +2613,7 @@ class LxcRunner(AdtTestCase):
                            {'ic': '#!/bin/sh\necho container ok',
                             'im': '#!/bin/sh\necho machine ok'})
 
-        (code, out, err) = self.adt_run(['-B', '--built-tree=' + p], self.virt_args)
+        (code, out, err) = self.adt_run(['-B', '--built-tree=' + p])
         self.assertEqual(code, 2, out + err)
         self.assertRegex(out, 'ic\s+PASS', out)
         self.assertRegex(out, 'im\s+SKIP .*machine', out)
@@ -2679,8 +2635,7 @@ class LxcRunner(AdtTestCase):
                                     cat rw_flag
                                     whoami'''})
 
-        (code, out, err) = self.adt_run(['-B', p + '//', '--user=nobody'],
-                                        self.virt_args)
+        (code, out, err) = self.adt_run(['-B', p + '//', '--user=nobody'])
         self.assertEqual(code, 0, err)
 
         # test should succeed
@@ -2696,8 +2651,7 @@ class LxcRunner(AdtTestCase):
 
         # we expect a normal user for LXC
         (code, out, err) = self.adt_run(['-B', p + '//', '--setup-commands',
-                                         'rm -f /etc/default/locale /etc/environment'],
-                                        self.virt_args)
+                                         'rm -f /etc/default/locale /etc/environment'])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -2713,7 +2667,7 @@ class LxcRunner(AdtTestCase):
         p = self.build_dsc('Tests: totest\nDepends:\n',
                            {'totest': '#!/bin/sh\necho start\nsleep 10\necho after_sleep\n'})
 
-        (code, out, err) = self.adt_run(['-B', '-d', '--timeout-test=3', p], self.virt_args)
+        (code, out, err) = self.adt_run(['-B', '-d', '--timeout-test=3', p])
         # test should time out
         self.assertEqual(code, 4, err)
         self.assertIn("timed out on command", err)
@@ -2743,8 +2697,8 @@ class LxcRunner(AdtTestCase):
         os.mkdir(outdir)
 
         virt_args = [a for a in self.virt_args if a != '--ephemeral']
-        (code, out, err) = self.adt_run(['--output-dir=' + outdir, '-B', p +
-                                         '//'], virt_args)
+        (code, out, err) = self.adt_run(['--output-dir=' + outdir, '-B', p + '//'],
+                                        virt_args=virt_args)
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -2825,7 +2779,7 @@ class LxcRunner(AdtTestCase):
         '''
         p = self.build_src('Tests: t255\nDepends:\n', {'t255': '#!/bin/sh\nexit 255'})
 
-        (code, out, err) = self.adt_run(['-B', p + '//'], self.virt_args)
+        (code, out, err) = self.adt_run(['-B', p + '//'])
         self.assertEqual(code, 4, err)
         self.assertRegex(out, 't255\s+FAIL non-zero exit status 253')
         self.assertNotIn('testbed auxverb failed with', err)
@@ -2844,8 +2798,7 @@ class LxcRunner(AdtTestCase):
 
         (code, out, err) = self.adt_run(
             ['-d', '-B', p + '//',
-             '--timeout-build=10', '--timeout-test=5'],
-            self.virt_args)
+             '--timeout-build=10', '--timeout-test=5'])
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'bg\s+PASS', out)
         self.assertIn('TEST DONE\n', out)
@@ -2855,8 +2808,7 @@ class LxcRunner(AdtTestCase):
                      'Set $ADT_TEST_QEMU to an existing autopkgtest QEMU image')
 class QemuRunner(AdtTestCase):
     def __init__(self, *args, **kwargs):
-        super(QemuRunner, self).__init__('qemu', *args, **kwargs)
-        self.image = os.environ.get('ADT_TEST_QEMU')
+        super(QemuRunner, self).__init__(['qemu', os.environ['ADT_TEST_QEMU']], *args, **kwargs)
 
     def test_tree_norestrictions_nobuild_success(self):
         '''source tree, no build, no restrictions, test success'''
@@ -2873,8 +2825,7 @@ class QemuRunner(AdtTestCase):
                             'fi\n'
                             })
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
-                                        [self.image])
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p])
         # test should succeed
         self.assertEqual(code, 0, err)
         self.assertIn('Unpacking aspell-doc', out)
@@ -2899,7 +2850,7 @@ class QemuRunner(AdtTestCase):
                             './test_abspath\n'
                             'grep ^processor /proc/cpuinfo  |wc -l\n'})
 
-        (code, out, err) = self.adt_run([p], ['-c', '2', self.image])
+        (code, out, err) = self.adt_run([p], self.virt_args + ['-c', '2'])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -2930,8 +2881,7 @@ class QemuRunner(AdtTestCase):
                             'ls /usr/share/doc/aspell-doc/copyright\n',
                             'boom': '#!/bin/sh\n[ ! -e /zap ]; touch /boom'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p, '-d'],
-                                        [self.image])
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p, '-d'])
         # both tests should run; the second one (boom) should not see the
         # effect of the first one (/zap existing)
         self.assertEqual(code, 0, err)
@@ -2948,7 +2898,7 @@ class QemuRunner(AdtTestCase):
 
         (code, out, err) = self.adt_run(['-B', '-d', p + '//',
                                          '--setup-commands', 'echo setupok >> /setup.log'],
-                                        ['--show-boot', self.image])
+                                        self.virt_args + ['--show-boot'])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -2978,8 +2928,7 @@ class QemuRunner(AdtTestCase):
                                  './test_built\n./test_abspath\n'})
 
         (code, out, err) = self.adt_run(['-B', '-d', p + '//', '--setup-commands',
-                                         'apt-get install --reinstall -y cron'],
-                                        [self.image])
+                                         'apt-get install --reinstall -y cron'])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -3003,8 +2952,7 @@ class QemuRunner(AdtTestCase):
                            {'t': '#!/bin/sh -e\ntest -e /run/autopkgtest_no_reboot.stamp'})
 
         (code, out, err) = self.adt_run(['-B', '-d', p + '//', '--setup-commands',
-                                         'apt-get install --reinstall -y cron; touch /run/autopkgtest_no_reboot.stamp'],
-                                        [self.image])
+                                         'apt-get install --reinstall -y cron; touch /run/autopkgtest_no_reboot.stamp'])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -3035,7 +2983,7 @@ class QemuRunner(AdtTestCase):
         outdir = os.path.join(self.workdir, 'out')
         os.mkdir(outdir)
 
-        (code, out, err) = self.adt_run(['--output-dir=' + outdir, '-B', p + '//'], [self.image])
+        (code, out, err) = self.adt_run(['--output-dir=' + outdir, '-B', p + '//'])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -3076,8 +3024,7 @@ class QemuRunner(AdtTestCase):
                   'mount -o bind,ro $M/cache /var/cache; '
 
         (code, out, err) = self.adt_run(['--output-dir=' + outdir, '-B', p + '//',
-                                         '--setup-commands', ro_sbin],
-                                        [self.image])
+                                         '--setup-commands', ro_sbin])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -3142,7 +3089,7 @@ class QemuRunner(AdtTestCase):
         outdir = os.path.join(self.workdir, 'out')
         os.mkdir(outdir)
 
-        (code, out, err) = self.adt_run(['--output-dir=' + outdir, '-B', p + '//'], [self.image])
+        (code, out, err) = self.adt_run(['--output-dir=' + outdir, '-B', p + '//'])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -3175,7 +3122,7 @@ class QemuRunner(AdtTestCase):
                            {'ic': '#!/bin/sh\necho container ok',
                             'im': '#!/bin/sh\necho machine ok'})
 
-        (code, out, err) = self.adt_run(['-B', '--built-tree=' + p], [self.image])
+        (code, out, err) = self.adt_run(['-B', '--built-tree=' + p])
         self.assertEqual(code, 0, out + err)
         self.assertRegex(out, 'ic\s+PASS', out)
         self.assertRegex(out, 'im\s+PASS', out)
@@ -3195,7 +3142,7 @@ class QemuRunner(AdtTestCase):
                                     rm -r $ADTTMP/one
                                     whoami'''})
 
-        (code, out, err) = self.adt_run(['-B', p + '//'], [self.image])
+        (code, out, err) = self.adt_run(['-B', p + '//'])
         self.assertEqual(code, 0, err)
 
         # test should succeed
@@ -3222,7 +3169,7 @@ class QemuRunner(AdtTestCase):
                                     cat rw_flag
                                     whoami'''})
 
-        (code, out, err) = self.adt_run(['-B', p + '//', '--user=nobody'], [self.image])
+        (code, out, err) = self.adt_run(['-B', p + '//', '--user=nobody'])
         self.assertEqual(code, 0, err)
 
         # test should succeed
@@ -3244,7 +3191,7 @@ class QemuRunner(AdtTestCase):
                                     rm -r $ADTTMP/one
                                     whoami'''})
 
-        (code, out, err) = self.adt_run(['-B', p + '//'], ['-u', 'nobody', self.image])
+        (code, out, err) = self.adt_run(['-B', p + '//'], self.virt_args + ['-u', 'nobody'])
         self.assertEqual(code, 0, err)
 
         # test should succeed
@@ -3262,8 +3209,7 @@ class QemuRunner(AdtTestCase):
         outdir = os.path.join(self.workdir, 'out')
         (code, out, err) = self.adt_run(['--output-dir=' + outdir,
                                          '--timeout-copy=1',
-                                         '-B', p + '//'],
-                                        [self.image])
+                                         '-B', p + '//'])
 
         # test should time out
         self.assertEqual(code, 16, err)
@@ -3298,8 +3244,7 @@ class QemuRunner(AdtTestCase):
         outdir = os.path.join(self.workdir, 'out')
         (code, out, err) = self.adt_run(['--output-dir=' + outdir,
                                          '--timeout-copy=6',
-                                         '-B', p + '//'],
-                                        [self.image])
+                                         '-B', p + '//'])
 
         # test should succeed
         self.assertEqual(code, 0, out + err)
@@ -3312,7 +3257,7 @@ class QemuRunner(AdtTestCase):
     def test_apt_libpng(self):
         '''apt, libpng'''
 
-        (code, out, err) = self.adt_run(['-d', 'libpng'], [self.image])
+        (code, out, err) = self.adt_run(['-d', 'libpng'])
         # test should succeed
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'Unpacking libpng.*-dev')
@@ -3328,8 +3273,8 @@ class QemuRunner(AdtTestCase):
                      'Set $ADT_TEST_SCHROOT_CLICK to an existing schroot')
 class SchrootClickRunner(AdtTestCase):
     def __init__(self, *args, **kwargs):
-        super(SchrootClickRunner, self).__init__('schroot', *args, **kwargs)
-        self.schroot_name = os.environ.get('ADT_TEST_SCHROOT_CLICK')
+        super(SchrootClickRunner, self).__init__(
+            ['schroot', os.environ['ADT_TEST_SCHROOT_CLICK']], *args, **kwargs)
         self.click = os.path.join(test_dir, 'testclick_0.1_all.click')
         self.click_src = os.path.join(test_dir, 'testclick')
 
@@ -3341,9 +3286,7 @@ class SchrootClickRunner(AdtTestCase):
         sumfile = os.path.join(self.workdir, 'summary')
 
         (code, out, err) = self.adt_run(
-            ['-d', '-o', outdir, '--summary-file', sumfile,
-             self.click_src, self.click],
-            [self.schroot_name])
+            ['-d', '-o', outdir, '--summary-file', sumfile, self.click_src, self.click])
         self.assertEqual(code, 4, err)
 
         # one test (broken) should fail, the others succeed
@@ -3374,8 +3317,7 @@ simple               PASS
 
         (code, out, err) = self.adt_run(
             ['-d', '--summary-file', sumfile,
-             '--click-source', self.click_src, '--click', self.click],
-            [self.schroot_name])
+             '--click-source', self.click_src, '--click', self.click])
         self.assertEqual(code, 4, err)
 
         # one test (broken) should fail, the others succeed
@@ -3396,8 +3338,7 @@ simple               PASS
         (code, out, err) = self.adt_run(
             ['-d', '--summary-file', sumfile, '--setup-commands',
              os.path.join(root_dir, 'setup-commands', 'ro-apt'),
-             self.click_src, self.click],
-            [self.schroot_name])
+             self.click_src, self.click])
         self.assertEqual(code, 4, err)
 
         # one test (broken) should fail, the others succeed
@@ -3426,8 +3367,7 @@ simple               PASS
              '--setup-commands', 'click install --all-users /root/testclick.click',
              '--setup-commands',
              os.path.join(root_dir, 'setup-commands', 'ro-apt'),
-             self.click_src, '--click', 'testclick'],
-            [self.schroot_name])
+             self.click_src, '--click', 'testclick'])
         self.assertEqual(code, 4, err)
 
         # one test (broken) should fail, the others succeed
@@ -3451,8 +3391,7 @@ simple               PASS
              '--setup-commands', 'click install --user $ADT_NORMAL_USER /root/testclick.click',
              '--setup-commands',
              os.path.join(root_dir, 'setup-commands', 'ro-apt'),
-             self.click_src, '--click', 'testclick'],
-            [self.schroot_name])
+             self.click_src, '--click', 'testclick'])
         self.assertEqual(code, 4, err)
 
         # one test (broken) should fail, the others succeed
@@ -3479,8 +3418,7 @@ simple               PASS
         (code, out, err) = self.adt_run(
             ['--summary-file', sumfile,
              '--override-control', custom_manifest,
-             '--click-source', self.click_src, '--click', self.click],
-            [self.schroot_name])
+             '--click-source', self.click_src, '--click', self.click])
         self.assertEqual(code, 0, err)
 
         with open(sumfile) as f:
@@ -3503,8 +3441,7 @@ simple               PASS
 
         (code, out, err) = self.adt_run(
             ['-B', p + '//', '--setup-commands',
-             os.path.join(root_dir, 'setup-commands', 'ubuntu-touch-session')],
-            [self.schroot_name])
+             os.path.join(root_dir, 'setup-commands', 'ubuntu-touch-session')])
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 't\s+PASS', out)
 
@@ -3513,7 +3450,7 @@ simple               PASS
                      'Set $ADT_TEST_LXC to an existing container')
 class SshRunnerNoScript(AdtTestCase):
     def __init__(self, *args, **kwargs):
-        super(SshRunnerNoScript, self).__init__('ssh', *args, **kwargs)
+        super(SshRunnerNoScript, self).__init__(['invalid'], *args, **kwargs)
         self.info = {}
 
     def start_container(self, install_key=True, sudo=False, sudo_nopwd=False,
@@ -3534,6 +3471,7 @@ class SshRunnerNoScript(AdtTestCase):
         for l in out.splitlines():
             (k, v) = l.split('=', 1)
             self.info[k] = v
+        self.virt_args = ['ssh', '-d', '-H', self.info['hostname'], '-l', self.info['login'], '-i', self.info['identity']]
 
     def tearDown(self):
         if self.info:
@@ -3551,9 +3489,7 @@ class SshRunnerNoScript(AdtTestCase):
                            {'pass': '#!/bin/sh\necho I am fine >&2\necho babble\nwhoami',
                             'rootonly': '#!/bin/sh\necho NOTME>&2; exit 1'})
 
-        (code, out, err) = self.adt_run(
-            ['-d', '-B', p + '//'],
-            ['-d', '-H', self.info['hostname'], '-l', self.info['login'], '-i', self.info['identity']])
+        (code, out, err) = self.adt_run(['-d', '-B', p + '//'])
         self.assertEqual(code, 2, err)
         self.assertRegex(out, 'pass\s+PASS', out)
         self.assertRegex(out, 'rootonly\s+SKIP.*needs root', out)
@@ -3575,10 +3511,8 @@ class SshRunnerNoScript(AdtTestCase):
         p = self.build_src('Tests: pass\nDepends:\nRestrictions: needs-root',
                            {'pass': '#!/bin/sh\necho hello\nwhoami'})
 
-        (code, out, err) = self.adt_run(
-            ['-d', '-B', p + '//'],
-            ['-d', '-H', self.info['hostname'], '-l', self.info['login'],
-             '-i', self.info['identity'], '-P', self.info['password']])
+        (code, out, err) = self.adt_run(['-d', '-B', p + '//'],
+                                        self.virt_args + ['-P', self.info['password']])
         self.assertEqual(code, 0, out + err)
         self.assertRegex(out, 'pass\s+PASS', out)
 
@@ -3595,9 +3529,7 @@ class SshRunnerNoScript(AdtTestCase):
         p = self.build_src('Tests: pass\nDepends:\nRestrictions: needs-root',
                            {'pass': '#!/bin/sh\necho hello\nwhoami'})
 
-        (code, out, err) = self.adt_run(
-            ['-d', '-B', p + '//'],
-            ['-d', '-H', self.info['hostname'], '-l', self.info['login'], '-i', self.info['identity']])
+        (code, out, err) = self.adt_run(['-d', '-B', p + '//'])
         self.assertEqual(code, 0, out + err)
         self.assertRegex(out, 'pass\s+PASS', out)
 
@@ -3615,9 +3547,10 @@ class SshRunnerNoScript(AdtTestCase):
         p = self.build_src('Tests: pass\nDepends:\nRestrictions: allow-stderr',
                            {'pass': '#!/bin/sh\necho I am fine >&2\necho babble'})
 
+        # drop "-i key" argument
         (code, out, err) = self.adt_run(
             ['-d', '-B', p + '//'],
-            ['-d', '-H', self.info['hostname'], '-l', self.info['login'], '-P', self.info['password']])
+            self.virt_args[:-2] + ['-P', self.info['password']])
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS', out)
 
@@ -3643,10 +3576,7 @@ class SshRunnerNoScript(AdtTestCase):
             f.write('\n\noverride_dh_auto_build:\n\tsleep 60 &\n'
                     '\tdh_auto_build\n')
 
-        (code, out, err) = self.adt_run(
-            ['-d', '-B', p + '//',
-             '--timeout-build=10', '--timeout-test=5'],
-            ['-d', '-H', self.info['hostname'], '-l', self.info['login'], '-i', self.info['identity']])
+        (code, out, err) = self.adt_run(['-d', '-B', p + '//', '--timeout-build=10', '--timeout-test=5'])
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'bg\s+PASS', out)
         self.assertIn('TEST DONE\n', out)
@@ -3668,10 +3598,8 @@ class SshRunnerNoScript(AdtTestCase):
         outdir = os.path.join(self.workdir, 'out')
         os.mkdir(outdir)
 
-        (code, out, err) = self.adt_run(
-            ['-d', '-o', outdir, '-B', p + '//'],
-            ['-d', '-H', self.info['hostname'], '-l', self.info['login'],
-             '-i', self.info['identity'], '--reboot'])
+        (code, out, err) = self.adt_run(['-d', '-o', outdir, '-B', p + '//'],
+                                        self.virt_args + ['--reboot'])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -3722,10 +3650,8 @@ class SshRunnerNoScript(AdtTestCase):
         outdir = os.path.join(self.workdir, 'out')
         os.mkdir(outdir)
 
-        (code, out, err) = self.adt_run(
-            ['-d', '-o', outdir, '-B', p + '//'],
-            ['-d', '-H', self.info['hostname'], '-l', self.info['login'],
-             '-i', self.info['identity'], '--reboot'])
+        (code, out, err) = self.adt_run(['-d', '-o', outdir, '-B', p + '//'],
+                                        self.virt_args + ['--reboot'])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -3759,9 +3685,7 @@ class SshRunnerNoScript(AdtTestCase):
 
         p = self.build_src('Tests: t255\nDepends:\n', {'t255': '#!/bin/sh\nexit 255'})
 
-        (code, out, err) = self.adt_run(
-            ['-d', '-B', p + '//'],
-            ['-d', '-H', self.info['hostname'], '-l', self.info['login'], '-i', self.info['identity']])
+        (code, out, err) = self.adt_run(['-d', '-B', p + '//'])
         self.assertEqual(code, 4, err)
         self.assertRegex(out, 't255\s+FAIL non-zero exit status 253')
         self.assertNotIn('testbed auxverb failed with', err)
@@ -3771,9 +3695,10 @@ class SshRunnerNoScript(AdtTestCase):
                      'Set $ADT_TEST_LXC to an existing container')
 class SshRunnerWithScript(AdtTestCase):
     def __init__(self, *args, **kwargs):
-        super(SshRunnerWithScript, self).__init__('ssh', *args, **kwargs)
-        self.container_template = os.environ.get('ADT_TEST_LXC')
-        self.script = os.path.join(test_dir, 'ssh-setup-lxc')
+        super(SshRunnerWithScript, self).__init__(
+            ['ssh', '--debug', '--setup-script', os.path.join(test_dir, 'ssh-setup-lxc'),
+             '--', os.environ['ADT_TEST_LXC'], '-k'],
+            *args, **kwargs)
 
     def test_no_root(self):
         '''no root'''
@@ -3783,8 +3708,8 @@ class SshRunnerWithScript(AdtTestCase):
                            {'pass': '#!/bin/sh\necho I am fine >&2\necho babble\nwhoami',
                             'rootonly': '#!/bin/sh\necho NOTME>&2; exit 1'})
 
-        (code, out, err) = self.adt_run(['-d', '-B', p + '//'],
-                                        ['-ds', self.script, '--', '-k', self.container_template])
+        # drop -s
+        (code, out, err) = self.adt_run(['-d', '-B', p + '//'])
         self.assertEqual(code, 2, err)
         self.assertRegex(out, 'pass\s+PASS', out)
         self.assertRegex(out, 'rootonly\s+SKIP.*needs root', out)
@@ -3806,8 +3731,7 @@ class SshRunnerWithScript(AdtTestCase):
                            {'p1': '#!/bin/sh -e\necho hellop1\ntouch /stomp\nwhoami',
                             'p2': '#!/bin/sh -e\n[ ! -e /stomp ]\necho hellop2\nwhoami'})
 
-        (code, out, err) = self.adt_run(['-d', '-B', p + '//'],
-                                        ['-ds', self.script, '--', '-ks', self.container_template])
+        (code, out, err) = self.adt_run(['-d', '-B', p + '//'], self.virt_args + ['-s'])
         self.assertEqual(code, 0, out + err)
         self.assertRegex(out, 'p1\s+PASS', out)
         self.assertRegex(out, 'p2\s+PASS', out)
@@ -3825,8 +3749,7 @@ class SshRunnerWithScript(AdtTestCase):
         p = self.build_src('Tests: pass\nDepends:\nRestrictions: needs-root',
                            {'pass': '#!/bin/sh\necho hello\nwhoami'})
 
-        (code, out, err) = self.adt_run(['-d', '-B', p + '//'],
-                                        ['-ds', self.script, '--', '-kS', self.container_template])
+        (code, out, err) = self.adt_run(['-d', '-B', p + '//'], self.virt_args + ['-S'])
         self.assertEqual(code, 0, out + err)
         self.assertRegex(out, 'pass\s+PASS', out)
 
@@ -3844,8 +3767,8 @@ class SshRunnerWithScript(AdtTestCase):
         p = self.build_src('Tests: pass\nDepends:\nRestrictions: allow-stderr',
                            {'pass': '#!/bin/sh\necho I am fine >&2\necho babble'})
 
-        (code, out, err) = self.adt_run(['-d', '-B', p + '//'],
-                                        ['-ds', self.script, '--', self.container_template])
+        # drop -k option
+        (code, out, err) = self.adt_run(['-d', '-B', p + '//'], self.virt_args[:-1])
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS', out)
 
@@ -3860,8 +3783,7 @@ class SshRunnerWithScript(AdtTestCase):
     def test_apt_source(self):
         '''apt source'''
 
-        (code, out, err) = self.adt_run(['libpng'],
-                                        ['-s', self.script, '--', '-ks', self.container_template])
+        (code, out, err) = self.adt_run(['libpng'], self.virt_args + ['-s'])
         self.assertEqual(code, 0, out + err)
         self.assertRegex(out, 'build\s+PASS', out)
 
@@ -3875,7 +3797,7 @@ class SshRunnerWithScript(AdtTestCase):
              '--setup-commands', 'apt-get install -y --no-install-recommends click',
              os.path.join(test_dir, 'testclick'),
              os.path.join(test_dir, 'testclick_0.1_all.click')],
-            ['-s', self.script, '--', '-sk', self.container_template],
+            self.virt_args + ['-s'],
             env=env)
         self.assertEqual(code, 4, err)
 
@@ -3895,8 +3817,7 @@ class SshRunnerWithScript(AdtTestCase):
                            {'to': '#!/bin/sh\necho StartTest; sleep 60; echo NotReached >&2'})
 
         time_start = time.time()
-        (code, out, err) = self.adt_run(['-d', '-B', p + '//', '--timeout-test=5'],
-                                        ['-ds', self.script, '--', '-k', self.container_template])
+        (code, out, err) = self.adt_run(['-d', '-B', p + '//', '--timeout-test=5'])
         duration = time.time() - time_start
         self.assertEqual(code, 4, err)
         self.assertIn("timed out on command", err)
@@ -3911,8 +3832,7 @@ class SshRunnerWithScript(AdtTestCase):
 
         p = self.build_src('Tests: f\nDepends:\n', {'f': '#!/bin/sh\npkill sshd'})
 
-        (code, out, err) = self.adt_run(['-d', '-B', p + '//'],
-                                        ['-ds', self.script, '--', '-k', self.container_template])
+        (code, out, err) = self.adt_run(['-d', '-B', p + '//'])
         self.assertEqual(code, 16, err)
         # this is a failure of the auxverb
         self.assertIn('testbed auxverb failed with exit code 255', err)
@@ -3923,8 +3843,7 @@ class SshRunnerWithScript(AdtTestCase):
 
         p = self.build_src('Tests: f\nDepends:\n', {'f': '#!/bin/sh -e\nno_such_command'})
 
-        (code, out, err) = self.adt_run(['-d', '-B', p + '//'],
-                                        ['-ds', self.script, '--', '-k', self.container_template])
+        (code, out, err) = self.adt_run(['-d', '-B', p + '//'])
         self.assertEqual(code, 4, err)
         self.assertRegex(out, 'f\s+FAIL non-zero exit status 127', out)
         # this isn't a failure of the auxverb
@@ -3935,9 +3854,9 @@ class SshRunnerWithScript(AdtTestCase):
                      'ubuntu-device-flash not installed')
 class SshRunnerSnappy(AdtTestCase):
     def __init__(self, *args, **kwargs):
-        super(SshRunnerSnappy, self).__init__('ssh', *args, **kwargs)
-        self.virt_args = ['--debug', '-s',
-                          os.path.join(root_dir, 'ssh-setup', 'snappy')]
+        super(SshRunnerSnappy, self).__init__(
+            ['ssh', '--debug', '-s', os.path.join(root_dir, 'ssh-setup', 'snappy')],
+            *args, **kwargs)
 
     def test_default_download(self):
         '''downloaded temp image'''
@@ -3947,7 +3866,7 @@ class SshRunnerSnappy(AdtTestCase):
                            {'user': '#!/bin/sh\necho I am fine\nwhoami\nsnappy info',
                             'root': '#!/bin/sh\necho I am powerful\nwhoami'})
 
-        (code, out, err) = self.adt_run(['-d', '-B', p + '//'], self.virt_args)
+        (code, out, err) = self.adt_run(['-d', '-B', p + '//'])
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'user\s+PASS', out)
         self.assertRegex(out, 'root\s+PASS', out)
@@ -3998,7 +3917,7 @@ class SshRunnerSnappy(AdtTestCase):
         outdir = os.path.join(self.workdir, 'out')
         os.mkdir(outdir)
 
-        (code, out, err) = self.adt_run(['-B', p + '//', '--output-dir', outdir], self.virt_args)
+        (code, out, err) = self.adt_run(['-B', p + '//', '--output-dir', outdir])
 
         # test should succeed
         self.assertEqual(code, 0, err)

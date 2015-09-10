@@ -1779,7 +1779,7 @@ deb-src http://bar.debian.org/ fluffy-proposed extras
             f.write(' -d \n%s' % self.chroot)
 
         (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
-                                        virt_args = ['chroot', '@' + argfile])
+                                        virt_args=['chroot', '@' + argfile])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -1818,7 +1818,7 @@ deb-src http://bar.debian.org/ fluffy-proposed extras
 class SchrootRunner(AdtTestCase):
     def __init__(self, *args, **kwargs):
         super(SchrootRunner, self).__init__(['schroot', os.environ['ADT_TEST_SCHROOT']],
-                                             *args, **kwargs)
+                                            *args, **kwargs)
 
     def test_tree_norestrictions_nobuild_success(self):
         '''source tree, no build, no restrictions, test success'''

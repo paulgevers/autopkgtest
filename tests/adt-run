@@ -1416,8 +1416,12 @@ Restrictions: needs-root
         self.assertRegex(out, 'pass\s+PASS')
 
         self.assertIn('synthesised dependency bdepyes\n', err)
-        self.assertNotIn('bdepno', err)
         self.assertIn('synthesised dependency build-essential\n', err)
+
+        dpkg_deps_ver = subprocess.check_output(['perl', '-MDpkg::Deps', '-e', 'print $Dpkg::Deps::VERSION'],
+                                                universal_newlines=True)
+        if dpkg_deps_ver >= '1.04':
+            self.assertNotIn('bdepno', err)
 
     def test_logfile(self):
         '''--log-file option'''

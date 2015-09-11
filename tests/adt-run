@@ -164,6 +164,8 @@ class NullRunner(AdtTestCase):
         self.assertRegex(out, '(^|\n)I am fine\n')
         # should show summary
         self.assertRegex(err, '@@@ summary\npass\s+PASS\nadt-run: DBG')
+        # should log kernel version
+        self.assertRegex(err, 'testbed running kernel: Linux \d')
         # should not have any test stderr
         self.assertNotIn(' stderr ', err)
 

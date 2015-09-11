@@ -178,7 +178,8 @@ open() {
     echo "Creating nova instance $SRVNAME ..."
 
     # generate cloud-init user data; mostly for manage_etc_hosts, but also get
-    # rid of some unnecessary stuff in the VM
+    # rid of some unnecessary stuff in the VM; also fix /etc/hosts to work
+    # around LP #1494678
     local userdata=`mktemp`
     cat <<EOF > $userdata
 #cloud-config
@@ -199,6 +200,7 @@ runcmd:
  - echo 'Acquire::Languages "none";' > /etc/apt/apt.conf.d/90nolanguages
  - echo 'force-unsafe-io' > /etc/dpkg/dpkg.cfg.d/autopkgtest
  - printf '$EXTRA_ENV' >> /etc/environment
+ - sed -i -r '/^127.0.1.1/ s/adt-[^ ]+\\./adt\\./' /etc/hosts
 EOF
 
     EXTRA_OPTS=''

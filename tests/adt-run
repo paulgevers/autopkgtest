@@ -32,6 +32,7 @@ import tempfile
 import shutil
 import fnmatch
 import time
+import json
 from glob import glob
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
@@ -351,6 +352,14 @@ class NullRunner(AdtTestCase):
             self.assertRegex(lines[1], '^[0-9a-z.-]+\t[0-9a-z.~-]+')
             self.assertIn('bash\t', contents)
 
+        # check testinfo
+        with open(os.path.join(outdir, 'testinfo.json')) as f:
+            info = json.load(f)
+        u = os.uname()
+        self.assertEqual(info['kernel_version'],
+                         '%s %s %s' % (u.sysname, u.release, u.version))
+        self.assertNotIn('test_kernel_versions', info)
+
         # test don't pull in any additional dependencies
         for t in ['sP', 'sF', 'bP']:
             self.assertEqual(os.path.getsize(os.path.join(
@@ -361,7 +370,8 @@ class NullRunner(AdtTestCase):
         files = [i for i in os.listdir(outdir)
                  if not fnmatch.fnmatch(i, '[sb]*-std*') and
                  not fnmatch.fnmatch(i, '[sb]*-packages')]
-        self.assertEqual(set(files), set(['log', 'summary', 'testpkg-version', 'testbed-packages']))
+        self.assertEqual(set(files), set(['log', 'summary', 'testpkg-version',
+                                          'testbed-packages', 'testinfo.json']))
 
     def test_tree_output_dir_nonempty(self):
         '''existing and non-empty --output-dir'''
@@ -1222,6 +1232,7 @@ class ChrootRunner(AdtTestCase):
         install_elf('/bin/sed')
         install_elf('/bin/readlink')
         install_elf('/bin/grep')
+        install_elf('/bin/uname')
         install_elf('/usr/bin/test')
         install_elf('/usr/bin/awk')
         install_elf('/usr/bin/env')
@@ -1487,7 +1498,7 @@ Restrictions: needs-root
                  not fnmatch.fnmatch(i, 'a*-packages')]
         self.assertEqual(set(files),
                          set(['log', 'artifacts', 'testpkg-version',
-                              'testbed-packages', 'summary']))
+                              'testbed-packages', 'summary', 'testinfo.json']))
 
         # check artifact; a2 should overwrite a1's health.txt
         with open(os.path.join(outdir, 'artifacts', 'health.txt')) as f:
@@ -2209,8 +2220,9 @@ class SchrootRunner(AdtTestCase):
         # check for cruft in outdir
         self.assertEqual(set(os.listdir(outdir)),
                          set(['log', 'summary', 'binaries', 'testpkg-version',
-                              'testbed-packages', 'ok-packages', 'ok-stdout',
-                              'broken-packages', 'broken-stderr']))
+                              'testbed-packages', 'testinfo.json',
+                              'ok-packages', 'ok-stdout', 'broken-packages',
+                              'broken-stderr']))
 
     def test_user(self):
         '''--user option'''
@@ -2717,6 +2729,9 @@ class LxcRunner(AdtTestCase):
         self.assertIn('test process requested reboot with marker mark1', err)
         self.assertIn('test process requested reboot with marker mark2', err)
 
+        self.assertRegex(err, 'testbed running kernel: Linux \d')
+        self.assertNotIn('running kernel changed', err)
+
         # should not have any test stderr
         self.assertNotIn(' stderr ', err)
 
@@ -2738,6 +2753,8 @@ class LxcRunner(AdtTestCase):
               echo one > $ADT_ARTIFACTS/mark1.txt
               /tmp/autopkgtest-reboot-prepare mark2
               touch /var/post-prepare-2
+              printf '#!/bin/sh\necho Linux 1.2.3-testy foobar' > /usr/local/bin/uname
+              chmod 755 /usr/local/bin/uname
               reboot ;;
           mark2)
               echo "test in mark2"
@@ -2767,6 +2784,9 @@ class LxcRunner(AdtTestCase):
         self.assertIn('test process requested preparation for reboot with marker mark1', err)
         self.assertIn('test process requested preparation for reboot with marker mark2', err)
 
+        self.assertIn('running kernel changed: Linux 1.2.3-testy foobar (current test: r, last reboot marker: mark2)\n', err)
+        self.assertNotIn('running kernel changed: Linux 1.2.3-testy foobar (current test s', err)
+
         # should not have any test stderr
         self.assertNotIn(' stderr ', err)
 
@@ -2777,6 +2797,13 @@ class LxcRunner(AdtTestCase):
             self.assertEqual(f.read(), 'one\n')
         with open(os.path.join(outdir, 'artifacts', 'mark2.txt')) as f:
             self.assertEqual(f.read(), 'two\n')
+        with open(os.path.join(outdir, 'testinfo.json')) as f:
+            info = json.load(f)
+        u = os.uname()
+        self.assertEqual(info['kernel_version'],
+                         '%s %s %s' % (u.sysname, u.release, u.version))
+        self.assertEqual(info['test_kernel_versions'],
+                         [['r', 'mark2', 'Linux 1.2.3-testy foobar']])
 
     def test_exit_255(self):
         '''test exits with code 255

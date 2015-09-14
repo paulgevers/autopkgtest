@@ -363,6 +363,7 @@ class NullRunner(AdtTestCase):
         self.assertNotIn('test_kernel_versions', info)
         self.assertEqual(info['custom_environment'],
                          ['ADT_COLOR=blue', 'ADT_SOMETHING=foo bar'])
+        self.assertEqual(info['virt_server'], 'adt-virt-null')
 
         # test don't pull in any additional dependencies
         for t in ['sP', 'sF', 'bP']:
@@ -2220,6 +2221,15 @@ class SchrootRunner(AdtTestCase):
         bins = os.listdir(os.path.join(outdir, 'binaries'))
         self.assertEqual(set(bins),
                          set(['Release', 'Packages', 'testpkg.deb']))
+
+        # check testinfo
+        with open(os.path.join(outdir, 'testinfo.json')) as f:
+            info = json.load(f)
+        u = os.uname()
+        self.assertEqual(info['kernel_version'],
+                         '%s %s %s' % (u.sysname, u.release, u.version))
+        self.assertNotIn('test_kernel_versions', info)
+        self.assertEqual(info['virt_server'], 'adt-virt-schroot ' + self.virt_args[1])
 
         # check for cruft in outdir
         self.assertEqual(set(os.listdir(outdir)),

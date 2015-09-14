@@ -292,6 +292,8 @@ class NullRunner(AdtTestCase):
 
         (code, out, err) = self.adt_run(['--no-built-binaries',
                                          '--unbuilt-tree=' + p,
+                                         '--env=ADT_COLOR=blue',
+                                         '--env=ADT_SOMETHING=foo bar',
                                          '--output-dir=' + outdir])
 
         # test results
@@ -359,6 +361,8 @@ class NullRunner(AdtTestCase):
         self.assertEqual(info['kernel_version'],
                          '%s %s %s' % (u.sysname, u.release, u.version))
         self.assertNotIn('test_kernel_versions', info)
+        self.assertEqual(info['custom_environment'],
+                         ['ADT_COLOR=blue', 'ADT_SOMETHING=foo bar'])
 
         # test don't pull in any additional dependencies
         for t in ['sP', 'sF', 'bP']:

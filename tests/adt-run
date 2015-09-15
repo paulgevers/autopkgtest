@@ -1835,7 +1835,7 @@ deb-src http://bar.debian.org/ fluffy-proposed extras
                      'Set $ADT_TEST_SCHROOT to an existing schroot')
 class SchrootRunner(AdtTestCase):
     def __init__(self, *args, **kwargs):
-        super(SchrootRunner, self).__init__(['schroot', os.environ['ADT_TEST_SCHROOT']],
+        super(SchrootRunner, self).__init__(['schroot', os.environ.get('ADT_TEST_SCHROOT')],
                                             *args, **kwargs)
 
     def test_tree_norestrictions_nobuild_success(self):
@@ -2855,7 +2855,7 @@ class LxcRunner(AdtTestCase):
                      'Set $ADT_TEST_QEMU to an existing autopkgtest QEMU image')
 class QemuRunner(AdtTestCase):
     def __init__(self, *args, **kwargs):
-        super(QemuRunner, self).__init__(['qemu', os.environ['ADT_TEST_QEMU']], *args, **kwargs)
+        super(QemuRunner, self).__init__(['qemu', os.environ.get('ADT_TEST_QEMU')], *args, **kwargs)
 
     def test_tree_norestrictions_nobuild_success(self):
         '''source tree, no build, no restrictions, test success'''
@@ -3321,7 +3321,7 @@ class QemuRunner(AdtTestCase):
 class SchrootClickRunner(AdtTestCase):
     def __init__(self, *args, **kwargs):
         super(SchrootClickRunner, self).__init__(
-            ['schroot', os.environ['ADT_TEST_SCHROOT_CLICK']], *args, **kwargs)
+            ['schroot', os.environ.get('ADT_TEST_SCHROOT_CLICK')], *args, **kwargs)
         self.click = os.path.join(test_dir, 'testclick_0.1_all.click')
         self.click_src = os.path.join(test_dir, 'testclick')
 
@@ -3744,7 +3744,7 @@ class SshRunnerWithScript(AdtTestCase):
     def __init__(self, *args, **kwargs):
         super(SshRunnerWithScript, self).__init__(
             ['ssh', '--debug', '--setup-script', os.path.join(test_dir, 'ssh-setup-lxc'),
-             '--', os.environ['ADT_TEST_LXC'], '-k'],
+             '--', os.environ.get('ADT_TEST_LXC'), '-k'],
             *args, **kwargs)
 
     def test_no_root(self):

@@ -47,6 +47,8 @@ programs =	virt-subproc/adt-virt-chroot \
 pythonfiles =	lib/VirtSubproc.py \
 		lib/adtlog.py \
 		lib/adt_run_args.py \
+		lib/adt_testbed.py \
+		lib/adt_binaries.py \
 		lib/testdesc.py \
 		$(NULL)
 

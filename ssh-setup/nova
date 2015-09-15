@@ -225,13 +225,25 @@ EOF
             --image $IMAGE $EXTRA_OPTS --poll $SRVNAME 2>&1)
         rc=$?
         set -e
+        UUID=$(echo "$OUT" | awk -F'|' '/ id / {gsub(" ", "", $3); print $3}')
         [ $rc -ne 0 ] || break
         error "nova boot failed (attempt #$retry):"
         error "$OUT"
+        # clean up, in case this did create an instance
+        [ -z "$UUID" ] || nova delete "$UUID" || true
         [ $retry -lt 3 ] || { rm $userdata; exit 1; }
         sleep 300
     done
-    debug "Nova boot succeeded"
+
+    # use UUID from now on, to avoid naming conflicts
+    if [ -z "$UUID" ]; then
+        error "Failed to parse UUID:"
+        error "$OUT"
+        nova delete "$SRVNAME" || true
+        exit 1
+    fi
+    debug "Nova boot succeeded (instance: $SRVNAME, UUID: $UUID)"
+    SRVNAME="$UUID"
     rm $userdata
 
     if [ -n "$ASSOCIATE_IP" ]; then

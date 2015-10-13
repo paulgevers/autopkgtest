@@ -1681,6 +1681,8 @@ deb http://bar.debian.org/ fluffy extras
 deb-src http://bar.debian.org/ fluffy extras
 # third-party repo
 deb http://something.else.net/ fluffy addons
+# options
+deb [trusted=yes arch=6510] http://foo.ubuntu.com/ fluffy main 6510
 ''')
 
         (code, out, err) = self.adt_run(['-B', '-d', '--unbuilt-tree=' + p,
@@ -1696,6 +1698,7 @@ deb http://something.else.net/ fluffy addons
 deb-src http://foo.ubuntu.com/ fluffy-proposed main non-free
 deb http://bar.debian.org/ fluffy-proposed extras
 deb-src http://bar.debian.org/ fluffy-proposed extras
+deb [trusted=yes arch=6510] http://foo.ubuntu.com/ fluffy-proposed main 6510
 ''')
 
     def test_isolation(self):

@@ -38,6 +38,9 @@ from glob import glob
 test_dir = os.path.dirname(os.path.abspath(__file__))
 root_dir = os.path.dirname(test_dir)
 
+sys.path.insert(1, test_dir)
+import testarchive
+
 # backwards compat shim for Python 3.1
 if not hasattr(unittest.TestCase, 'assertRegex'):
     unittest.TestCase.assertRegex = unittest.TestCase.assertRegexpMatches
@@ -2411,6 +2414,37 @@ class SchrootRunner(AdtTestCase):
         self.assertIn('BROKEN POSTINST', out)
         self.assertRegex(out, 'blame: .*/testpkg', out)
         self.assertRegex(out, 'badpkg: .*failed.*apt-get', out)
+
+    def test_apt_pocket_all(self):
+        '''--apt-pocket with all packages from -proposed'''
+
+        ar = testarchive.Archive(series='testy', component='main')
+        ar.create_deb('libflavor0', '1')
+        ar.create_deb('vanilla', '1', dependencies={'Depends': 'libflavor0'})
+        ar.create_deb('chocolate', '1', dependencies={'Depends': 'libflavor0'})
+
+        ap = testarchive.Archive(path=ar.path, pooldir='pool-proposed',
+                                 series='testy-proposed', component='main')
+        ap.create_deb('libflavor0', '2')
+        ap.create_deb('vanilla', '2', dependencies={'Depends': 'libflavor0 (>= 2)'})
+        ar.create_deb('chocolate', '2', dependencies={'Depends': 'libflavor0'})
+
+        p = self.build_src('Tests: t\nDepends: vanilla, chocolate\nRestrictions: allow-stderr',
+                           {'t': '''#!/bin/sh -ex\nV=$(dpkg-query --show --showformat='${Version}' vanilla); '''
+                                 '''C=$(dpkg-query --show --showformat='${Version}' chocolate); '''
+                                 '''L=$(dpkg-query --show --showformat='${Version}' libflavor0); '''
+                                 '''[ "$V" = 2 ]; [ "$C" = 2 ]; [ "$L" = 2 ]'''})
+
+        apt_sources = os.path.join(self.workdir, 'sources.list')
+        with open(apt_sources, 'w') as f:
+            f.write('deb [trusted=yes] file:///tmp/adttestarchive/ testy main\n')
+
+        (code, out, err) = self.adt_run(['--copy', '%s:/tmp/adttestarchive' % ar.path,
+                                         '--copy', '%s:/etc/apt/sources.list' % apt_sources,
+                                         '--apt-pocket=proposed',
+                                         '--apt-upgrade',
+                                         '--debug', '-B', '--unbuilt-tree=' + p])
+        self.assertEqual(code, 0, err)
 
 
 @unittest.skipUnless('ADT_TEST_LXC' in os.environ,

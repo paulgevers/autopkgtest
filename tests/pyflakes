@@ -16,7 +16,7 @@ if ! type pyflakes3 >/dev/null 2>&1; then
 fi
 
 pyflakes3 $rootdir/lib $rootdir/runner/adt-run $testdir/adt-run \
-    $testdir/testdesc $testdir/run_args \
+    $testdir/testdesc $testdir/run_args $testdir/*.py \
     $rootdir/tools/adt-buildvm-ubuntu-cloud
 
 for v in chroot null schroot lxc qemu ssh; do

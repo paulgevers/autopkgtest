@@ -31,6 +31,9 @@ import testdesc
 
 have_autodep8 = subprocess.call(['which', 'autodep8'], stdout=subprocess.PIPE,
                                 stderr=subprocess.PIPE) == 0
+dpkg_deps_ver = subprocess.check_output(['perl', '-MDpkg::Deps', '-e', 'print $Dpkg::Deps::VERSION'],
+                                        universal_newlines=True)
+have_dpkg_build_profiles = (dpkg_deps_ver >= '1.04')
 
 
 class Rfc822(unittest.TestCase):
@@ -325,6 +328,8 @@ class Debian(unittest.TestCase):
                                          'bdi1', 'bdi2', 'build-essential', 'foo (>= 7)'])
         self.assertFalse(skipped)
 
+    @unittest.skipUnless(have_dpkg_build_profiles,
+                         'dpkg version does not yet support build profiles')
     def test_builddeps_profiles(self):
         '''@builddeps@ expansion with build profiles'''
 

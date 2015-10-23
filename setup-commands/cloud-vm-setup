@@ -13,13 +13,12 @@ echo "Acquire::Languages \"none\";" > /etc/apt/apt.conf.d/90nolanguages
 echo 'force-unsafe-io' > /etc/dpkg/dpkg.cfg.d/autopkgtest
 
 # some tests use a lot of /dev/random, avoid hangs
-EXTRA_PKGS="haveged"
+apt-get install -y eatmydata haveged
 
 # provides kmods like scsi_debug or mac80211_hwsim on Ubuntu
 if grep -q buntu /etc/os-release /etc/lsb-release; then
-    EXTRA_PKGS="$EXTRA_PKGS linux-generic"
+    eatmydata apt-get install -y linux-generic
 fi
-apt-get install -y $EXTRA_PKGS
 
 # clean up some unnecessary packages
 for p in accountsservice apt-xapian-index cryptsetup landscape-client \
@@ -27,7 +26,7 @@ for p in accountsservice apt-xapian-index cryptsetup landscape-client \
     command-not-found-data manpages ntfs-3g sosreport \
     ubuntu-release-upgrader-core cloud-init libcpan-changes-perl git \
     cgmanager lxd-client; do
-    apt-get --auto-remove -y purge $p || true
+    eatmydata apt-get --auto-remove -y purge $p || true
 done
 
 # bump vmalloc on i386, necessary for tests like udisks2

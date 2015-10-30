@@ -221,7 +221,7 @@ EOF
     while true; do
         retry=$((retry+1))
         set +e
-        OUT=$(nova boot --flavor $FLAVOR --key_name $KEYNAME --user-data $userdata \
+        OUT=$(nova --debug boot --flavor $FLAVOR --key_name $KEYNAME --user-data $userdata \
             --image $IMAGE $EXTRA_OPTS --poll $SRVNAME 2>&1)
         rc=$?
         set -e

@@ -348,6 +348,14 @@ revert() {
     open
 }
 
+wait_reboot() {
+    if [ -z "$SRVNAME" ]; then
+        echo "Needs to be called with -n <server name>" >&2
+        exit 1
+    fi
+    nova reboot --poll "$SRVNAME"
+}
+
 # ########################################
 # Main procedure
 #
@@ -367,7 +375,7 @@ case $cmd in
     revert)
         revert;;
     wait-reboot)
-        exit 1;;  # use default implementation
+        wait_reboot;;
     '')
         echo "Needs to be called with command as first argument" >&2
         exit 1

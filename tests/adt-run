@@ -2465,7 +2465,7 @@ class SchrootRunner(AdtTestCase):
         self.assertRegex(out, 'blame: .*/testpkg', out)
         self.assertRegex(out, 'badpkg: .*failed.*apt-get', out)
 
-    def do_apt_pocket_test(self, adt_pocket_args, ver_checks):
+    def do_apt_pocket_test(self, adt_pocket_args, ver_checks, add_deb_src=False):
         '''Common test code for --apt-pocket test'''
 
         '''--apt-pocket with selected packages from -proposed'''
@@ -2476,6 +2476,7 @@ class SchrootRunner(AdtTestCase):
         ar.create_deb('chocolate', '1', dependencies={'Depends': 'libflavor0'})
         ar.create_deb('mint', '1')
         ar.create_deb('honey', '1')
+        ar.add_sources('flavor', ['libflavor0', 'mint'], '1')
 
         ap = testarchive.Archive(path=ar.path, pooldir='pool-proposed',
                                  series='testy-proposed', component='main')
@@ -2484,6 +2485,7 @@ class SchrootRunner(AdtTestCase):
         ap.create_deb('chocolate', '2', dependencies={'Depends': 'libflavor0'})
         ap.create_deb('mint', '2')
         ap.create_deb('honey', '2')
+        ap.add_sources('flavor', ['libflavor0', 'mint'], '2')
 
         p = self.build_src('Tests: t\nDepends: vanilla, chocolate, mint, honey\nRestrictions: allow-stderr',
                            {'t': '''#!/bin/sh -ex\nV=$(dpkg-query --show --showformat='${Version}' vanilla); '''
@@ -2497,6 +2499,8 @@ class SchrootRunner(AdtTestCase):
         apt_sources = os.path.join(self.workdir, 'sources.list')
         with open(apt_sources, 'w') as f:
             f.write('deb [trusted=yes] file:///tmp/adttestarchive/ testy main\n')
+            if add_deb_src:
+                f.write('deb-src [trusted=yes] file:///tmp/adttestarchive/ testy main\n')
 
         (code, out, err) = self.adt_run(['--copy', '%s:/tmp/adttestarchive' % ar.path,
                                          '--copy', '%s:/etc/apt/sources.list' % apt_sources] +
@@ -2524,6 +2528,13 @@ class SchrootRunner(AdtTestCase):
 
         self.do_apt_pocket_test(['--apt-pocket=proposed=chocolate,mint'],
                                 '[ "$V" = 1 ]; [ "$C" = 2 ]; [ "$M" = 2 ]; [ "$H" = 1 ]; [ "$L" = 1 ]')
+
+    def test_apt_pocket_src(self):
+        '''--apt-pocket selecting all binaries from a source'''
+
+        self.do_apt_pocket_test(['--apt-pocket=proposed=src:flavor'],
+                                '[ "$V" = 1 ]; [ "$C" = 1 ]; [ "$M" = 2 ]; [ "$H" = 1 ]; [ "$L" = 2 ]',
+                                add_deb_src=True)
 
     def test_apt_pocket_pkg_with_proposed_dep(self):
         '''--apt-pocket selecting package from -proposed with dep from -proposed'''

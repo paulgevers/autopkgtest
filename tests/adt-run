@@ -1243,6 +1243,7 @@ class ChrootRunner(AdtTestCase):
         install_elf('/bin/uname')
         install_elf('/usr/bin/test')
         install_elf('/usr/bin/awk')
+        install_elf('/usr/bin/head')
         install_elf('/usr/bin/env')
         install_elf('/usr/bin/tee')
         install_elf('/usr/bin/touch')
@@ -1702,6 +1703,55 @@ deb-src http://foo.ubuntu.com/ fluffy-proposed main non-free
 deb http://bar.debian.org/ fluffy-proposed extras
 deb-src http://bar.debian.org/ fluffy-proposed extras
 deb [trusted=yes arch=6510] http://foo.ubuntu.com/ fluffy-proposed main 6510
+''')
+        # should not have any apt pinning
+        self.assertFalse(os.path.exists(os.path.join(apt_dir, 'preferences.d')))
+
+    def test_apt_pocket_selected(self):
+        '''--apt-pocket with package list'''
+
+        p = self.build_src('Tests: pass\nDepends:\nRestrictions: needs-root\n',
+                           {'pass': '#!/bin/sh -e\ntest -e /etc/apt/sources.list.d/proposed.list'})
+
+        apt_dir = os.path.join(self.chroot, 'etc', 'apt')
+        with open(os.path.join(apt_dir, 'sources.list'), 'w') as f:
+            f.write('''# comment
+deb http://foo.ubuntu.com/ fluffy-updates main non-free
+deb-src http://foo.ubuntu.com/ fluffy-updates main non-free
+deb http://foo.ubuntu.com/ fluffy main non-free
+deb-src http://foo.ubuntu.com/ fluffy main non-free
+deb [trusted=yes arch=6510] http://foo.ubuntu.com/ fluffy main 6510
+''')
+
+        (code, out, err) = self.adt_run(['-B', '-d', '--unbuilt-tree=' + p,
+                                         '--apt-pocket', 'proposed=foo,bar'])
+
+        # test should succeed
+        self.assertEqual(code, 0, err)
+        self.assertRegex(out, 'pass\s+PASS', out)
+
+        # verify proposed.list
+        with open(os.path.join(apt_dir, 'sources.list.d', 'proposed.list')) as f:
+            self.assertEqual(f.read(), '''deb http://foo.ubuntu.com/ fluffy-proposed main non-free
+deb-src http://foo.ubuntu.com/ fluffy-proposed main non-free
+deb [trusted=yes arch=6510] http://foo.ubuntu.com/ fluffy-proposed main 6510
+''')
+
+        # should set up apt pinning
+        self.assertEqual(os.listdir(os.path.join(apt_dir, 'preferences.d')),
+                         ['autopkgtest-fluffy-proposed'])
+        with open(os.path.join(apt_dir, 'preferences.d', 'autopkgtest-fluffy-proposed')) as f:
+            self.assertEqual(f.read(), '''Package: foo bar
+Pin: release a=fluffy-proposed
+Pin-Priority: 900
+
+Package: *
+Pin: release a=fluffy
+Pin-Priority: 900
+
+Package: *
+Pin: release a=fluffy-proposed
+Pin-Priority: 100
 ''')
 
     def test_isolation(self):
@@ -2415,36 +2465,76 @@ class SchrootRunner(AdtTestCase):
         self.assertRegex(out, 'blame: .*/testpkg', out)
         self.assertRegex(out, 'badpkg: .*failed.*apt-get', out)
 
-    def test_apt_pocket_all(self):
-        '''--apt-pocket with all packages from -proposed'''
+    def do_apt_pocket_test(self, adt_pocket_args, ver_checks):
+        '''Common test code for --apt-pocket test'''
+
+        '''--apt-pocket with selected packages from -proposed'''
 
         ar = testarchive.Archive(series='testy', component='main')
         ar.create_deb('libflavor0', '1')
         ar.create_deb('vanilla', '1', dependencies={'Depends': 'libflavor0'})
         ar.create_deb('chocolate', '1', dependencies={'Depends': 'libflavor0'})
+        ar.create_deb('mint', '1')
+        ar.create_deb('honey', '1')
 
         ap = testarchive.Archive(path=ar.path, pooldir='pool-proposed',
                                  series='testy-proposed', component='main')
         ap.create_deb('libflavor0', '2')
         ap.create_deb('vanilla', '2', dependencies={'Depends': 'libflavor0 (>= 2)'})
-        ar.create_deb('chocolate', '2', dependencies={'Depends': 'libflavor0'})
+        ap.create_deb('chocolate', '2', dependencies={'Depends': 'libflavor0'})
+        ap.create_deb('mint', '2')
+        ap.create_deb('honey', '2')
 
-        p = self.build_src('Tests: t\nDepends: vanilla, chocolate\nRestrictions: allow-stderr',
+        p = self.build_src('Tests: t\nDepends: vanilla, chocolate, mint, honey\nRestrictions: allow-stderr',
                            {'t': '''#!/bin/sh -ex\nV=$(dpkg-query --show --showformat='${Version}' vanilla); '''
                                  '''C=$(dpkg-query --show --showformat='${Version}' chocolate); '''
+                                 '''M=$(dpkg-query --show --showformat='${Version}' mint); '''
+                                 '''H=$(dpkg-query --show --showformat='${Version}' honey); '''
                                  '''L=$(dpkg-query --show --showformat='${Version}' libflavor0); '''
-                                 '''[ "$V" = 2 ]; [ "$C" = 2 ]; [ "$L" = 2 ]'''})
+                                 '''apt-cache policy vanilla chocolate mint honey libflavor0; ''' +
+                                 ver_checks})
 
         apt_sources = os.path.join(self.workdir, 'sources.list')
         with open(apt_sources, 'w') as f:
             f.write('deb [trusted=yes] file:///tmp/adttestarchive/ testy main\n')
 
         (code, out, err) = self.adt_run(['--copy', '%s:/tmp/adttestarchive' % ar.path,
-                                         '--copy', '%s:/etc/apt/sources.list' % apt_sources,
-                                         '--apt-pocket=proposed',
-                                         '--apt-upgrade',
+                                         '--copy', '%s:/etc/apt/sources.list' % apt_sources] +
+                                        adt_pocket_args +
+                                        ['--apt-upgrade',
                                          '--debug', '-B', '--unbuilt-tree=' + p])
         self.assertEqual(code, 0, err)
+        return (code, out, err)
+
+    def test_apt_pocket_all(self):
+        '''--apt-pocket with all packages from -proposed'''
+
+        self.do_apt_pocket_test(['--apt-pocket=proposed'],
+                                '[ "$V" = 2 ]; [ "$C" = 2 ]; [ "$M" = 2 ]; [ "$H" = 2 ]; [ "$L" = 2 ]; '
+                                '[ ! -e /etc/apt/preferences.d/* ]')
+
+    def test_apt_pocket_lib(self):
+        '''--apt-pocket selecting library dep from -proposed'''
+
+        self.do_apt_pocket_test(['--apt-pocket=proposed=libflavor0'],
+                                '[ "$V" = 1 ]; [ "$C" = 1 ]; [ "$M" = 1 ]; [ "$H" = 1 ]; [ "$L" = 2 ]')
+
+    def test_apt_pocket_selected(self):
+        '''--apt-pocket selecting two packages from -proposed'''
+
+        self.do_apt_pocket_test(['--apt-pocket=proposed=chocolate,mint'],
+                                '[ "$V" = 1 ]; [ "$C" = 2 ]; [ "$M" = 2 ]; [ "$H" = 1 ]; [ "$L" = 1 ]')
+
+    def test_apt_pocket_pkg_with_proposed_dep(self):
+        '''--apt-pocket selecting package from -proposed with dep from -proposed'''
+
+        (code, out, err) = self.do_apt_pocket_test(
+            ['--apt-pocket=proposed=vanilla'],
+            # FIXME: we really want this:
+            # '[ "$V" = 2 ]; [ "$C" = 1 ]; [ "$M" = 1 ]; [ "$H" = 1 ]; [ "$L" = 2 ]')
+            # but there is currently no apt pinning to achieve this, so we fall back to entire -proposed
+            '[ "$V" = 2 ]; [ "$C" = 2 ]; [ "$M" = 2 ]; [ "$H" = 2 ]; [ "$L" = 2 ]')
+        self.assertIn('WARNING: Packages vanilla are not installable with per-package pinning in proposed', err)
 
 
 @unittest.skipUnless('ADT_TEST_LXC' in os.environ,

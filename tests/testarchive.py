@@ -42,6 +42,7 @@ class Archive:
         arch = subprocess.check_output(['dpkg', '--print-architecture'],
                                        universal_newlines=True).strip()
         self.series = series
+        self.component = component
         if series:
             assert component, 'must specify both series and component'
             self.index_dir = os.path.join(
@@ -87,6 +88,9 @@ Section: devel
 Architecture: %s
 ''' % (name, version, architecture))
 
+            if srcpkg:
+                f.write('Source: %s\n' % srcpkg)
+
             for k, v in dependencies.items():
                 f.write('%s: %s\n' % (k, v))
 
@@ -131,6 +135,34 @@ Architecture: %s
 
         return debpath
 
+    def add_sources(self, name, binaries, version='1'):
+        '''Add source package entry to the Sources index'''
+
+        if self.index_dir:
+            srcindex_dir = os.path.join(self.path,
+                                        os.path.dirname(self.index_dir),
+                                        'source')
+        else:
+            srcindex_dir = self.index_dir
+        if not os.path.isdir(srcindex_dir):
+            os.makedirs(srcindex_dir)
+
+        if name.startswith('lib'):
+            prefix = name[:4]
+        else:
+            prefix = name[0]
+
+        with open(os.path.join(srcindex_dir, 'Sources'), 'a') as f:
+            f.write('''Package: %s
+Binary: %s
+Version: %s
+Priority: optional
+Architecture: any
+Format: 1.0
+Directory: %s
+
+''' % (name, ', '.join(binaries), version, os.path.join(self.pooldir, self.component, prefix, name)))
+
     def update_index(self):
         '''Update the Packages index and Release file.
 
@@ -154,15 +186,20 @@ Architecture: %s
         finally:
             os.chdir(old_cwd)
 
-# r = Archive(series='testy', component='main')
-# r.create_deb('vanilla')
-# r.create_deb('chocolate', dependencies={'Depends': 'vanilla'})
-# print(r.apt_source)
-#
-# p = Archive(path=r.path, pooldir='pool-proposed', series='testy-proposed',
-#             component='main')
-# p.create_deb('vanilla', '2')
-# p.create_deb('chocolate', '2', dependencies={'Depends': 'vanilla (>= 2)'})
-# print(p.apt_source)
-#
-# subprocess.call(['bash', '-i'], cwd=r.path)
+if __name__ == '__main__':
+    r = Archive(series='testy', component='main')
+    r.create_deb('vanilla')
+    r.create_deb('libvanilla0', srcpkg='vanilla')
+    r.create_deb('chocolate', dependencies={'Depends': 'vanilla'})
+    print(r.apt_source)
+    r.add_sources('vanilla', ['vanilla', 'libvanilla0'])
+
+    p = Archive(path=r.path, pooldir='pool-proposed', series='testy-proposed',
+                component='main')
+    p.create_deb('vanilla', '2')
+    r.create_deb('libvanilla0', '2', srcpkg='vanilla')
+    p.create_deb('chocolate', '2', dependencies={'Depends': 'vanilla (>= 2)'})
+    print(p.apt_source)
+    p.add_sources('vanilla', ['vanilla', 'libvanilla0'], '2')
+
+    subprocess.call(['bash', '-i'], cwd=r.path)

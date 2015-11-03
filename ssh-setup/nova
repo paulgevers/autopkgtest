@@ -5,7 +5,6 @@
 #
 # This script sets up a nova instance to use as an autopkgtest testbed. It
 # assumes that the host system is already prepared to run nova commands.
-# WARNING: This is mostly a proof of concept and not very robust.
 
 # Options:
 #

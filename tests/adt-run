@@ -2529,7 +2529,7 @@ class SchrootRunner(AdtTestCase):
     def test_apt_pocket_selected(self):
         '''--apt-pocket selecting two packages from -proposed'''
 
-        self.do_apt_pocket_test(['--apt-pocket=proposed=chocolate,mint'],
+        self.do_apt_pocket_test(['--apt-pocket=proposed=chocolate,mint,foo-udeb'],
                                 '[ "$V" = 1 ]; [ "$C" = 2 ]; [ "$M" = 2 ]; [ "$H" = 1 ]; [ "$L" = 1 ]')
 
     def test_apt_pocket_src(self):

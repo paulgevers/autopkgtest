@@ -1746,7 +1746,7 @@ deb [trusted=yes arch=6510] http://foo.ubuntu.com/ fluffy-proposed main 6510
         with open(os.path.join(apt_dir, 'preferences.d', 'autopkgtest-fluffy-proposed')) as f:
             self.assertEqual(f.read(), '''Package: foo bar
 Pin: release a=fluffy-proposed
-Pin-Priority: 900
+Pin-Priority: 990
 
 Package: *
 Pin: release a=fluffy
@@ -1754,7 +1754,7 @@ Pin-Priority: 900
 
 Package: *
 Pin: release a=fluffy-proposed
-Pin-Priority: 100
+Pin-Priority: 800
 ''')
 
     def test_isolation(self):

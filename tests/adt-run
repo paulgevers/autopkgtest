@@ -1753,6 +1753,10 @@ Pin: release a=fluffy
 Pin-Priority: 900
 
 Package: *
+Pin: release a=fluffy-updates
+Pin-Priority: 900
+
+Package: *
 Pin: release a=fluffy-proposed
 Pin-Priority: 800
 ''')

@@ -2544,11 +2544,11 @@ class SchrootRunner(AdtTestCase):
 
         (code, out, err) = self.do_apt_pocket_test(
             ['--apt-pocket=proposed=vanilla'],
-            # FIXME: we really want this:
-            # '[ "$V" = 2 ]; [ "$C" = 1 ]; [ "$M" = 1 ]; [ "$H" = 1 ]; [ "$L" = 2 ]')
-            # but there is currently no apt pinning to achieve this, so we fall back to entire -proposed
-            '[ "$V" = 2 ]; [ "$C" = 2 ]; [ "$M" = 2 ]; [ "$H" = 2 ]; [ "$L" = 2 ]')
-        self.assertIn('WARNING: Packages vanilla are not installable with per-package pinning in proposed', err)
+            '[ "$V" = 2 ]; [ "$C" = 1 ]; [ "$M" = 1 ]; [ "$H" = 1 ]; [ "$L" = 2 ]')
+        # FIXME: our current apt pinning does not resolve this properly, so
+        # this will re-try with the entirety of -proposed
+        self.assertIn('WARNING: Test dependencies are unsatisfiable with using apt pinning.', err)
+        self.assertIn('Retrying with using all packages from proposed\n', err)
 
 
 @unittest.skipUnless('ADT_TEST_LXC' in os.environ,

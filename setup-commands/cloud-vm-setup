@@ -39,3 +39,6 @@ if [ $(dpkg --print-architecture) = i386 ]; then
     fi
     update-grub
 fi
+
+# avoid cron interference with apt-get update
+rm -f /etc/cron.daily/apt

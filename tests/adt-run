@@ -2453,7 +2453,7 @@ class SchrootRunner(AdtTestCase):
 
         (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p])
         self.assertEqual(code, 12, err)
-        self.assertRegex(err, '[dD]epends.*unknown', err)
+        self.assertRegex(out, '[dD]epends.*unknown', err)
         self.assertRegex(err, 'Test dependencies are unsatisfiable', err)
         self.assertRegex(out, 'blame: .*/testpkg', out)
         self.assertRegex(out, 'Test dependencies are unsatisfiable', out)

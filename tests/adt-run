@@ -2472,7 +2472,9 @@ class SchrootRunner(AdtTestCase):
         self.assertRegex(out, 'blame: .*/testpkg', out)
         self.assertRegex(out, 'badpkg: .*failed.*apt-get', out)
 
-    def do_apt_pocket_test(self, adt_pocket_args, ver_checks, add_deb_src=False):
+    def do_apt_pocket_test(self, adt_pocket_args, ver_checks,
+                           add_deb_src=False, expect_success=True,
+                           extra_control=''):
         '''Common test code for --apt-pocket test'''
 
         '''--apt-pocket with selected packages from -proposed'''
@@ -2494,7 +2496,7 @@ class SchrootRunner(AdtTestCase):
         ap.create_deb('honey', '2')
         ap.add_sources('flavor', ['libflavor0', 'mint'], '2')
 
-        p = self.build_src('Tests: t\nDepends: vanilla, chocolate, mint, honey\nRestrictions: allow-stderr',
+        p = self.build_src('Tests: t\nDepends: vanilla, chocolate, mint, honey\nRestrictions: allow-stderr\n\n' + extra_control,
                            {'t': '''#!/bin/sh -ex\nV=$(dpkg-query --show --showformat='${Version}' vanilla); '''
                                  '''C=$(dpkg-query --show --showformat='${Version}' chocolate); '''
                                  '''M=$(dpkg-query --show --showformat='${Version}' mint); '''
@@ -2514,7 +2516,8 @@ class SchrootRunner(AdtTestCase):
                                         adt_pocket_args +
                                         ['--apt-upgrade',
                                          '--debug', '-B', '--unbuilt-tree=' + p])
-        self.assertEqual(code, 0, err)
+        if expect_success:
+            self.assertEqual(code, 0, err)
         return (code, out, err)
 
     def test_apt_pocket_all(self):
@@ -2553,6 +2556,28 @@ class SchrootRunner(AdtTestCase):
         # this will re-try with the entirety of -proposed
         self.assertIn('WARNING: Test dependencies are unsatisfiable with using apt pinning.', err)
         self.assertIn('Retrying with using all packages from proposed\n', err)
+
+    def test_apt_pocket_multi_nonexisting_dep(self):
+        '''--apt-pocket with multiple tests and a nonexisting dependency'''
+
+        # include resets of the testbed here to ensure that the setup and
+        # error handling work several times in a row in good and bad cases
+        (code, out, err) = self.do_apt_pocket_test(
+            ['--apt-pocket=proposed=vanilla'],
+            '[ "$V" = 2 ]; [ "$C" = 1 ]; [ "$M" = 1 ]; [ "$H" = 1 ]; [ "$L" = 2 ]',
+            expect_success=False,
+            extra_control='''Test-Command: dpkg-query --show chocolate | grep 1; dpkg-query --show vanilla | grep 2
+Depends: vanilla, chocolate
+
+Test-Command: echo "not me" >&2; false
+Depends: nonexisting'''
+        )
+        self.assertEqual(code, 12, err)
+        self.assertRegex(out, 't\s+PASS', out)
+        self.assertRegex(out, 'command1\s+PASS', out)
+        self.assertNotIn(out, 'command2')
+        self.assertIn('WARNING: Test dependencies are unsatisfiable with using apt pinning.', err)
+        self.assertIn('ERROR: erroneous package: Test dependencies are unsatisfiable', err)
 
 
 @unittest.skipUnless('ADT_TEST_LXC' in os.environ,

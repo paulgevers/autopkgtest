@@ -352,6 +352,15 @@ class Debian(unittest.TestCase):
                                          'bd3:native (>= 4) | bd4 [armhf megacpu]'])
         self.assertFalse(skipped)
 
+    def test_deps_negative_arch(self):
+        '''test dependencies with negative architecture'''
+
+        (ts, skipped) = self.call_parse(
+            'Tests: t\nDepends: foo-notc64 [!c64]\n',
+            'Source: nums\n\nPackage: one\nArchitecture: any')
+        self.assertEqual(ts[0].depends, ['foo-notc64 [!c64]'])
+        self.assertFalse(skipped)
+
     def test_invalid_test_deps(self):
         '''invalid test dependencies'''
 

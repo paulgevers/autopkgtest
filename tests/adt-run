@@ -1906,7 +1906,7 @@ class SchrootRunner(AdtTestCase):
 
         # also test some fancy dependencies
         p = self.build_src('Tests: p1 p2\n'
-                           'Depends: coreutils, aspell-doc [linux-any], apt-doc:native, unknown [nosucharch]\n'
+                           'Depends: coreutils, aspell-doc [linux-any], apt-doc:native, unknown [nosucharch], bash-doc [!c64], bogus [!linux-any]\n'
                            'Restrictions: needs-root\n',
                            {'p1': '#!/bin/sh -e\nif dpkg -s adt-satdep 2>/dev/null; then exit 1; fi; '
                             'apt-get --purge -y autoremove; '
@@ -1924,7 +1924,9 @@ class SchrootRunner(AdtTestCase):
         self.assertIn('processing dependency coreutils', err)
         self.assertIn('Unpacking aspell-doc', out)
         self.assertIn('Unpacking apt-doc', out)
+        self.assertIn('Unpacking bash-doc', out)
         self.assertNotIn('unknown', out)
+        self.assertNotIn('bogus', out)
         self.assertNotIn('Removing aspell-doc', out)
 
         # should show test stdout

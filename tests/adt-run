@@ -927,8 +927,7 @@ bad                  FAIL non-zero exit status 1
 
         (code, out, err) = self.adt_run(['no.such-package'])
 
-        # test should succeed
-        self.assertEqual(code, 12, err)
+        self.assertEqual(code, 16, err)
         self.assertRegex(err, 'no.such-package')
         self.assertNotIn('PASS', out)
         self.assertNotIn('[----', out)

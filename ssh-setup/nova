@@ -69,6 +69,7 @@ FLAVOR=""
 IMAGE=""
 KEYNAME=""
 SRVNAME=""
+SRVUUID=""
 NET_ID=""
 ASSOCIATE_IP=""
 FLOATING_IP=""
@@ -95,7 +96,7 @@ parse_args() {
     # Parse command line argument and populate environment
 
     SHORTOPTS="f:,i:,k:,N:,l:,n:,s:,a,d,e:"
-    LONGOPTS="flavor:,image:,keyname:,net-id:,login:,name:,security-groups:,associate-ip,floating-ip:,debug,env:,mirror:"
+    LONGOPTS="flavor:,image:,keyname:,net-id:,login:,name:,uuid:,security-groups:,associate-ip,floating-ip:,debug,env:,mirror:"
 
     TEMP=$(getopt -o $SHORTOPTS --long $LONGOPTS -- "$@")
     eval set -- "$TEMP"
@@ -119,6 +120,9 @@ parse_args() {
                 shift 2;;
             -n|--name)
                 SRVNAME=$2
+                shift 2;;
+            --uuid)
+                SRVUUID=$2
                 shift 2;;
             -s|--security-groups)
                 SECURITY_GROUPS="$2"
@@ -217,25 +221,25 @@ EOF
             --image $IMAGE $EXTRA_OPTS --poll $SRVNAME 2>&1)
         rc=$?
         set -e
-        UUID=$(echo "$OUT" | awk -F'|' '/ id / {gsub(" ", "", $3); print $3}')
+        uuid=$(echo "$OUT" | awk -F'|' '/ id / {gsub(" ", "", $3); print $3}')
         [ $rc -ne 0 ] || break
         error "nova boot failed (attempt #$retry):"
         error "$OUT"
         # clean up, in case this did create an instance
-        [ -z "$UUID" ] || nova delete "$UUID" || true
+        [ -z "$uuid" ] || nova delete "$uuid" || true
         [ $retry -lt 3 ] || { rm $userdata; exit 1; }
         sleep 300
     done
 
     # use UUID from now on, to avoid naming conflicts
-    if [ -z "$UUID" ]; then
+    if [ -z "$uuid" ]; then
         error "Failed to parse UUID:"
         error "$OUT"
         nova delete "$SRVNAME" || true
         exit 1
     fi
-    debug "Nova boot succeeded (instance: $SRVNAME, UUID: $UUID)"
-    SRVNAME="$UUID"
+    SRVUUID="$uuid"
+    debug "Nova boot succeeded (instance: $SRVNAME, UUID: $SRVUUID)"
     rm $userdata
 
     if [ -n "$ASSOCIATE_IP" ]; then
@@ -246,7 +250,7 @@ EOF
         ipaddr="$FLOATING_IP"
         debug "got IP: $ipaddr"
 
-        nova floating-ip-associate $SRVNAME $ipaddr || {
+        nova floating-ip-associate $SRVUUID $ipaddr || {
             error "failed to associate IP, deleting instance"
             cleanup
             exit 1
@@ -257,7 +261,7 @@ EOF
         ipaddr=""
         retry=6
         while [ -z "$ipaddr" ]; do
-            OUT=$(nova show --minimal $SRVNAME)
+            OUT=$(nova show --minimal $SRVUUID)
             ipaddr=$(echo "$OUT" | awk 'BEGIN {FS="|"} $2 ~ /network/ {n=split($3,i,/,\s*/); gsub(" ", "", i[n]); print i[n]}')
             retry=$(( retry - 1 ))
             if [ $retry -le 0 ]; then
@@ -279,7 +283,7 @@ EOF
 login=$SSH_USER
 hostname=$ipaddr
 capabilities=$CAPABILITIES
-extraopts=-n $SRVNAME $EXTRAOPTS
+extraopts=--uuid $SRVUUID $EXTRAOPTS
 EOF
     if [ -n "$SUDO_PASSWORD" ]; then
         echo "password=$SUDO_PASSWORD"
@@ -307,19 +311,19 @@ EOF
 }
 
 cleanup() {
-    if [ -z "$SRVNAME" ]; then
-        error "Cannot determine server name. Instance won't be deleted!"
+    if [ -z "$SRVUUID" ]; then
+        error "No UUID given. Instance won't be deleted!"
         exit 0
     fi
 
-    nova delete $SRVNAME || true
+    nova delete $SRVUUID || true
 
     # wait until it gets deleted, to avoid name collisions and quota overflow
     retry=60
-    while nova show $SRVNAME >/dev/null 2>&1; do
+    while nova show $SRVUUID >/dev/null 2>&1; do
         retry=$(( retry - 1 ))
         if [ $retry -le 0 ]; then
-            error "Timed out waiting for $SRVNAME to get deleted."
+            error "Timed out waiting for $SRVUUID to get deleted."
         fi
         sleep 5
     done
@@ -328,12 +332,12 @@ cleanup() {
     if [ -n "$FLOATING_IP" ]; then
         nova floating-ip-delete $FLOATING_IP
     fi
-    SRVNAME=""
+    SRVUUID=""
 }
 
 revert() {
-    if [ -z "$SRVNAME" ]; then
-        echo "Needs to be called with -n <server name>" >&2
+    if [ -z "$SRVUUID" ]; then
+        echo "Needs to be called with --uuid <server UUID>" >&2
         exit 1
     fi
     cleanup
@@ -341,11 +345,11 @@ revert() {
 }
 
 wait_reboot() {
-    if [ -z "$SRVNAME" ]; then
-        echo "Needs to be called with -n <server name>" >&2
+    if [ -z "$SRVUUID" ]; then
+        echo "Needs to be called with --uuid <server UUID>" >&2
         exit 1
     fi
-    nova reboot --poll "$SRVNAME"
+    nova reboot --poll "$SRVUUID"
 }
 
 # ########################################

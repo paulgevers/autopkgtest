@@ -160,8 +160,11 @@ Priority: optional
 Architecture: any
 Format: 1.0
 Directory: %s
-
+Package-List:
 ''' % (name, ', '.join(binaries), version, os.path.join(self.pooldir, self.component, prefix, name)))
+            for b in binaries:
+                f.write(' %s deb admin optional\n' % b)
+            f.write('\n')
 
     def update_index(self):
         '''Update the Packages index and Release file.

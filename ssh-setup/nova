@@ -11,7 +11,7 @@
 # -f flavor | --flavor=flavor
 #        Name or ID of flavor (see 'nova flavor-list'), mandatory
 # -i image | --image=image
-#        Name or ID of image (see 'nova image-list'), mandatory
+#        UUID or regex pattern of image (see 'nova image-list'), mandatory
 # -k keyname | --keyname=keyname
 #        Key name of keypair that should be created earlier with  the  command
 #        'nova keypair-add'; if not given, default to the first key in
@@ -176,9 +176,17 @@ open() {
         debug "Using nova key $KEYNAME"
     fi
 
+    # check available images that match the given name, use the latest match
+    images=$(nova image-list|sed -n '2 d; /^|/ {s/^| *//; s/ *|$//; s/ *| *\+/\t/g; p}')
+    image=$(echo "$images" | grep "$IMAGE" |sort -k2 | tail -n1 | cut -f2)
+    if [ -z "$image" ]; then
+        error "No nova image available that matches $IMAGE"
+        exit 1
+    fi
+
     # Boot a nova instance and returns its connection parameters
     [ -n "$SRVNAME" ] || SRVNAME=`mktemp -u adt-nova-XXXXXX`
-    echo "Creating nova instance $SRVNAME ..."
+    echo "Creating nova instance $SRVNAME from image ${image}..." >&2
 
     # generate cloud-init user data; mostly for manage_etc_hosts, but also get
     # rid of some unnecessary stuff in the VM; also fix /etc/hosts to work
@@ -218,7 +226,7 @@ EOF
         retry=$((retry+1))
         set +e
         OUT=$(nova --debug boot --flavor $FLAVOR --key_name $KEYNAME --user-data $userdata \
-            --image $IMAGE $EXTRA_OPTS --poll $SRVNAME 2>&1)
+            --image "$image" $EXTRA_OPTS --poll $SRVNAME 2>&1)
         rc=$?
         set -e
         uuid=$(echo "$OUT" | awk -F'|' '/ id / {gsub(" ", "", $3); print $3}')

@@ -56,6 +56,13 @@ wait_reboot() {
     exit 1  # not implemented
 }
 
+# Called when the setup script fails with nonzero or on timeouts waiting for
+# ssh or reboot. If available, this should output some debugging information,
+# such as the boot log from the serial console. Implementing this is optional.
+debug_failure() {
+    exit 1  # not implemented
+}
+
 case "$1" in
     open)
         open $@;;
@@ -65,6 +72,8 @@ case "$1" in
         revert $@;;
     wait-reboot)
         wait_reboot $@;;
+    debug-failure)
+        debug_failure $@;;
     '')
         echo "Needs to be called with command as first argument" >&2
         exit 1

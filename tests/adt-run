@@ -1069,11 +1069,17 @@ if ($pid) { # parent
 
         p = self.build_src('Tests: foo\nDepends: foo bar baz\n', {'foo': '#!/bin/sh -e\nfalse'})
 
-        (code, out, err) = self.adt_run(['-B', p + '//'])
+        outdir = os.path.join(p, 'out')
+        (code, out, err) = self.adt_run(['-B', p + '//', '--output-dir=' + outdir])
         self.assertEqual(code, 12, err)
         self.assertRegex(out, 'blame: .*/testpkg//', out)
         self.assertRegex(out, 'badpkg:.*test foo.*Depends field contains an invalid dependency.*foo bar baz')
         self.assertRegex(err, 'erroneous package:.*test foo.*Depends field contains an invalid dependency.*foo bar baz')
+
+        with open(os.path.join(outdir, 'testinfo.json')) as f:
+            info = json.load(f)
+        self.assertIn(os.uname().sysname, info['kernel_version'])
+        self.assertEqual(info['virt_server'], 'adt-virt-null')
 
     def test_env_passing(self):
         '''Pass environment variable to test'''

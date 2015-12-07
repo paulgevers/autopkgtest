@@ -41,4 +41,4 @@ if [ $(dpkg --print-architecture) = i386 ]; then
 fi
 
 # avoid cron interference with apt-get update
-rm -f /etc/cron.daily/apt
+echo 'APT::Periodic::Enable "0";' > /etc/apt/apt.conf.d/02periodic

@@ -360,6 +360,14 @@ wait_reboot() {
     nova reboot --poll "$SRVUUID"
 }
 
+debug_failure() {
+    if [ -n "$SRVUUID" ]; then
+        echo "------- nova console-log $SRVUUID ($SRVNAME) ------"
+        nova console-log $SRVUUID || true
+        echo "---------------------------------------------------"
+    fi
+}
+
 # ########################################
 # Main procedure
 #
@@ -380,6 +388,8 @@ case $cmd in
         revert;;
     wait-reboot)
         wait_reboot;;
+    debug-failure)
+        debug_failure;;
     '')
         echo "Needs to be called with command as first argument" >&2
         exit 1

@@ -2477,7 +2477,7 @@ class SchrootRunner(AdtTestCase):
         self.assertEqual(code, 12, err)
         self.assertIn('BROKEN POSTINST', out)
         self.assertRegex(out, 'blame: .*/testpkg', out)
-        self.assertRegex(out, 'badpkg: .*failed.*apt-get', out)
+        self.assertRegex(out, 'badpkg: Test dependencies are unsatisfiable', out)
 
     def do_apt_pocket_test(self, adt_pocket_args, ver_checks,
                            add_deb_src=False, expect_success=True,

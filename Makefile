@@ -38,6 +38,7 @@ programs =	virt-subproc/adt-virt-chroot \
 		virt-subproc/adt-virt-null \
 		virt-subproc/adt-virt-schroot \
 		virt-subproc/adt-virt-lxc \
+		virt-subproc/adt-virt-lxd \
 		virt-subproc/adt-virt-qemu \
 		virt-subproc/adt-virt-ssh \
 		tools/adt-buildvm-ubuntu-cloud \

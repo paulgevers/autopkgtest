@@ -2587,19 +2587,8 @@ Depends: nonexisting'''
         self.assertIn('ERROR: erroneous package: Test dependencies are unsatisfiable', err)
 
 
-@unittest.skipUnless('ADT_TEST_LXC' in os.environ,
-                     'Set $ADT_TEST_LXC to an existing container')
-class LxcRunner(AdtTestCase):
-    def __init__(self, *args, **kwargs):
-        self.container_name = os.environ.get('ADT_TEST_LXC')
-        vargs = ['lxc', '--ephemeral', self.container_name]
-        # check for unprivileged containers
-        if os.getuid() > 0 and subprocess.call(
-                ['lxc-info', '-n', self.container_name],
-                stdout=subprocess.PIPE, stderr=subprocess.STDOUT) != 0:
-            vargs.insert(1, '--sudo')
-
-        super(LxcRunner, self).__init__(vargs, *args, **kwargs)
+class AdtContainerTests(AdtTestCase):
+    '''Tests for LXC and LXD'''
 
     def test_tree_norestrictions_nobuild_success(self):
         '''source tree, no build, no restrictions, test success'''
@@ -2754,25 +2743,6 @@ class LxcRunner(AdtTestCase):
         self.assertRegex(out, '(^|\n)GOOD\n', out)
         # should not have any test stderr
         self.assertNotIn(' stderr ', err)
-
-    def test_tree_clone(self):
-        '''source tree, no --ephemeral option (using clone)'''
-
-        p = self.build_src('Tests: senz\nDepends:\n',
-                           {'senz': '#!/bin/sh\necho hello\necho I am sick >&2\nexit 7\n'})
-
-        virt_args = [a for a in self.virt_args if a != '--ephemeral']
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--built-tree=' + p],
-                                        virt_args=virt_args)
-        # test should fail
-        self.assertEqual(code, 4, err)
-        self.assertRegex(out, 'senz\s+FAIL non-zero exit status 7')
-
-        # should show test stdout inline
-        self.assertRegex(out, '^hello\n')
-
-        # should show test stderr separately
-        self.assertRegex(err, 'stderr [ -]+\nI am sick\n')
 
     def test_breaks_testbed(self):
         '''breaks-testbed restriction'''
@@ -3034,6 +3004,48 @@ class LxcRunner(AdtTestCase):
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'bg\s+PASS', out)
         self.assertIn('TEST DONE\n', out)
+
+
+@unittest.skipUnless('ADT_TEST_LXC' in os.environ,
+                     'Set $ADT_TEST_LXC to an existing container')
+class LxcRunner(AdtContainerTests):
+    def __init__(self, *args, **kwargs):
+        self.container_name = os.environ.get('ADT_TEST_LXC')
+        vargs = ['lxc', '--ephemeral', self.container_name]
+        # check for unprivileged containers
+        if os.getuid() > 0 and subprocess.call(
+                ['lxc-info', '-n', self.container_name],
+                stdout=subprocess.PIPE, stderr=subprocess.STDOUT) != 0:
+            vargs.insert(1, '--sudo')
+
+        super().__init__(vargs, *args, **kwargs)
+
+    def test_tree_clone(self):
+        '''source tree, no --ephemeral option (using clone)'''
+
+        p = self.build_src('Tests: senz\nDepends:\n',
+                           {'senz': '#!/bin/sh\necho hello\necho I am sick >&2\nexit 7\n'})
+
+        virt_args = [a for a in self.virt_args if a != '--ephemeral']
+        (code, out, err) = self.adt_run(['--no-built-binaries', '--built-tree=' + p],
+                                        virt_args=virt_args)
+        # test should fail
+        self.assertEqual(code, 4, err)
+        self.assertRegex(out, 'senz\s+FAIL non-zero exit status 7')
+
+        # should show test stdout inline
+        self.assertRegex(out, '^hello\n')
+
+        # should show test stderr separately
+        self.assertRegex(err, 'stderr [ -]+\nI am sick\n')
+
+
+@unittest.skipUnless('ADT_TEST_LXD' in os.environ,
+                     'Set $ADT_TEST_LXD to an existing LXD image')
+class LxdRunner(AdtContainerTests):
+    def __init__(self, *args, **kwargs):
+        vargs = ['lxd', os.environ.get('ADT_TEST_LXD')]
+        super().__init__(vargs, *args, **kwargs)
 
 
 @unittest.skipUnless('ADT_TEST_QEMU' in os.environ,

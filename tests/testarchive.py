@@ -181,11 +181,16 @@ Package-List:
                                        self.pooldir], stdout=f)
             if self.series:
                 rp = os.path.join(self.path, 'dists', self.series, 'Release')
+                try:
+                    os.unlink(rp)
+                except OSError:
+                    pass
+                release = subprocess.check_output(
+                    ['apt-ftparchive', 'release', '-o',
+                     'APT::FTPArchive::Release::Suite=' + self.series,
+                     os.path.dirname(rp)])
                 with open(rp, 'wb') as f:
-                    subprocess.check_call(
-                        ['apt-ftparchive', 'release', '-o',
-                         'APT::FTPArchive::Release::Suite=' + self.series,
-                         os.path.dirname(rp)], stdout=f)
+                    f.write(release)
         finally:
             os.chdir(old_cwd)
 

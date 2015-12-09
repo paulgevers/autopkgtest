@@ -2487,21 +2487,21 @@ class SchrootRunner(AdtTestCase):
         '''--apt-pocket with selected packages from -proposed'''
 
         ar = testarchive.Archive(series='testy', component='main')
+        ar.add_sources('flavor', ['libflavor0', 'mint'], '1')
         ar.create_deb('libflavor0', '1')
         ar.create_deb('vanilla', '1', dependencies={'Depends': 'libflavor0'})
         ar.create_deb('chocolate', '1', dependencies={'Depends': 'libflavor0'})
         ar.create_deb('mint', '1')
         ar.create_deb('honey', '1')
-        ar.add_sources('flavor', ['libflavor0', 'mint'], '1')
 
         ap = testarchive.Archive(path=ar.path, pooldir='pool-proposed',
                                  series='testy-proposed', component='main')
+        ap.add_sources('flavor', ['libflavor0', 'mint'], '2')
         ap.create_deb('libflavor0', '2')
         ap.create_deb('vanilla', '2', dependencies={'Depends': 'libflavor0 (>= 2)'})
         ap.create_deb('chocolate', '2', dependencies={'Depends': 'libflavor0'})
         ap.create_deb('mint', '2')
         ap.create_deb('honey', '2')
-        ap.add_sources('flavor', ['libflavor0', 'mint'], '2')
 
         p = self.build_src('Tests: t\nDepends: vanilla, chocolate, mint, honey\nRestrictions: allow-stderr\n\n' + extra_control,
                            {'t': '''#!/bin/sh -ex\nV=$(dpkg-query --show --showformat='${Version}' vanilla); '''

@@ -67,7 +67,6 @@ install:
 		$(INSTALL_PROG) $$f $(bindir); \
 		test ! -f $$f.1 || $(INSTALL_DATA) $$f.1 $(man1dir); \
 		done
-	$(INSTALL_PROG) tools/adt-setup-vm $(share)/$(pkgname)
 	$(INSTALL_DATA) $(pythonfiles) $(pythondir)
 	$(INSTALL_DATA) CREDITS $(docdir)
 	$(INSTALL_DATA) $(rstfiles) $(htmlfiles) $(docdir)

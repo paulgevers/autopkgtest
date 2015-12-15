@@ -53,7 +53,7 @@ EOF
     chroot "$root" update-rc.d autopkgtest defaults
 fi
 
-# set up serial console on upstart systems
+# serial console for upstart
 if [ -e "$root/etc/init/tty2.conf" -a ! -e "$root/etc/init/ttyS0.conf" ]; then
     sed 's/tty2/ttyS0/g; s! *exec.*$!exec /sbin/getty -L ttyS0 115200 vt102!' \
         "$root/etc/init/tty2.conf" > "$root/etc/init/ttyS0.conf"
@@ -161,29 +161,34 @@ if [ -z "${ADT_IS_SETUP_COMMAND:-}" ]; then
 fi
 
 # install some necessary packages
-# some tests use a lot of /dev/random, avoid hangs
+# some tests use a lot of /dev/random, avoid hangs; eatmydata for fast dpkg, a
+# lot of tests expect a logind session
 chroot "$root" apt-get install -y haveged eatmydata dbus
 if [ ! -e "$root/usr/share/doc/libpam-systemd" ] && chroot "$root" apt-cache show libpam-systemd >/dev/null 2>&1; then
     chroot "$root" apt-get install -y libpam-systemd
 fi
 
-# clean up some unnecessary packages
-for p in accountsservice apt-xapian-index cryptsetup landscape-client \
-    landscape-common open-vm-tools w3m vim-runtime aptitude-common \
-    command-not-found-data manpages ntfs-3g sosreport \
-    ubuntu-release-upgrader-core libcpan-changes-perl git \
-    cgmanager lxd-client open-iscsi mdadm dmeventd lvm2; do
-    if [ -d "$root/usr/share/doc/$p" ]; then
-        chroot "$root" eatmydata apt-get --auto-remove -y purge $p || true
-    fi
-done
-if [ -n "${ADT_IS_SETUP_COMMAND:-}" ] && [ -e "$root/usr/share/doc/cloud-init" ]; then
-    chroot "$root" eatmydata apt-get --auto-remove -y purge cloud-init || true
-fi
-
-# upgrade, unless this is a --setup-commands
+# upgrade and trim image (not for --setup-command)
 if [ -z "${ADT_IS_SETUP_COMMAND:-}" ]; then
+    # clean up bloat from Ubuntu cloud images when building an image
+    for p in accountsservice apt-xapian-index cryptsetup landscape-client \
+             landscape-common open-vm-tools w3m vim-runtime aptitude-common \
+             command-not-found-data manpages ntfs-3g sosreport \
+             ubuntu-release-upgrader-core libcpan-changes-perl git \
+             cgmanager lxd-client open-iscsi mdadm dmeventd lvm2 \
+             unattended-upgrades update-notifier-common ureadahead debootstrap \
+             lxcfs perl perl-modules ppp pppconfig pppoeconf python2.7-minimal \
+             thermald xdg-user-dirs xkb-data zerofree xml-core; do
+        chroot "$root" eatmydata apt-get --auto-remove -y purge $p || true
+    done
+
     [ "${ADT_SETUP_VM_UPGRADE:-}" = false ] || DEBIAN_FRONTEND=noninteractive chroot "$root" eatmydata apt-get -y dist-upgrade
+else
+    # we want to keep cloud-init on autopkgtest images for instantiating, but not
+    # on test instances themselves as it often gets in the way
+    if [ -e "$root/usr/share/doc/cloud-init" ]; then
+        chroot "$root" eatmydata apt-get --auto-remove -y purge cloud-init || true
+    fi
 fi
 
 if [ -s "$root/boot" ] && grep -q buntu "$root/etc/os-release" "$root/etc/lsb-release"; then

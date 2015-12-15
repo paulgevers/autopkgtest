@@ -56,6 +56,7 @@ have_ubuntu_device_flash = subprocess.call(['which', 'ubuntu-device-flash'],
                                            stderr=subprocess.PIPE) == 0
 
 have_autodep8 = subprocess.call(['which', 'autodep8'], stdout=subprocess.PIPE) == 0
+have_git = subprocess.call(['which', 'git'], stdout=subprocess.PIPE) == 0
 
 
 class AdtTestCase(unittest.TestCase):
@@ -1098,6 +1099,58 @@ if ($pid) { # parent
         self.assertRegex(out, '(^|\n)Hey Joe! favourite color: blue.\n')
         # should not have any test stderr
         self.assertNotIn(' stderr ', err)
+
+    @unittest.skipUnless(have_git, 'git not installed')
+    def test_git_source(self):
+        '''Check out source from git (default branch)'''
+
+        p = self.build_src('Tests: pass\nDepends:\n',
+                           {'pass': '#!/bin/sh\necho I am fine\n'})
+
+        subprocess.check_call(['git', 'config', '--global', 'user.email', 'autopkgtest@example.com'])
+        subprocess.check_call(['git', 'config', '--global', 'user.name', 'Autopkgtest'])
+        subprocess.check_call(['git', 'init', '--quiet'], cwd=p)
+        subprocess.check_call(['git', 'add', '.'], cwd=p)
+        subprocess.check_call(['git', 'commit', '--quiet', '-mfirst'], cwd=p)
+
+        (code, out, err) = self.adt_run(['-B', '--git-source', 'file://' + p])
+        # test should succeed
+        self.assertEqual(code, 0, err)
+        self.assertRegex(out, 'pass\s+PASS', out)
+
+        # should show test stdout
+        self.assertRegex(out, '(^|\n)I am fine\n')
+        # should show summary
+        self.assertRegex(err, '@@@ summary\npass\s+PASS')
+
+    @unittest.skipUnless(have_git, 'git not installed')
+    def test_git_source_branch(self):
+        '''Check out source from git (specified branch)'''
+
+        p = self.build_src('Tests: pass\nDepends:\n',
+                           {'pass': '#!/bin/sh -e\nls -l branch.txt; echo I am fine\n'})
+        subprocess.check_call(['git', 'config', '--global', 'user.email', 'autopkgtest@example.com'])
+        subprocess.check_call(['git', 'config', '--global', 'user.name', 'Autopkgtest'])
+        subprocess.check_call(['git', 'init', '--quiet'], cwd=p)
+        subprocess.check_call(['git', 'add', '.'], cwd=p)
+        subprocess.check_call(['git', 'commit', '--quiet', '-mfirst'], cwd=p)
+        subprocess.check_call(['git', 'branch', 'wip'], cwd=p)
+        subprocess.check_call(['git', 'checkout', '--quiet', 'wip'], cwd=p)
+        with open(os.path.join(p, 'branch.txt'), 'w') as f:
+            f.write('hello')
+        subprocess.check_call(['git', 'add', 'branch.txt'], cwd=p)
+        subprocess.check_call(['git', 'commit', '--quiet', '-mdobranch'], cwd=p)
+        subprocess.check_call(['git', 'checkout', '--quiet', 'master'], cwd=p)
+
+        (code, out, err) = self.adt_run(['-B', '--git-source', 'file://%s wip' % p])
+        # test should succeed
+        self.assertEqual(code, 0, err)
+        self.assertRegex(out, 'pass\s+PASS', out)
+
+        # should show test stdout
+        self.assertRegex(out, '(^|\n)I am fine\n')
+        # should show summary
+        self.assertRegex(err, '@@@ summary\npass\s+PASS')
 
 
 @unittest.skipIf(os.getuid() > 0,
@@ -2585,6 +2638,16 @@ Depends: nonexisting'''
         self.assertNotIn(out, 'command2')
         self.assertIn('WARNING: Test dependencies are unsatisfiable with using apt pinning.', err)
         self.assertIn('ERROR: erroneous package: Test dependencies are unsatisfiable', err)
+
+    def test_git_source_build(self):
+        '''Check out and build source from git'''
+
+        (code, out, err) = self.adt_run(
+            ['--env=DEB_BUILD_OPTIONS=nocheck',
+             '--git-source', 'git://anonscm.debian.org/autopkgtest/autopkgtest.git'])
+        # test should succeed
+        self.assertEqual(code, 0, err)
+        self.assertRegex(err, '@@@ summary\nadt-run\s+PASS')
 
 
 class AdtContainerTests:

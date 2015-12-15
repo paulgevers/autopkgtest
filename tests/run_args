@@ -84,6 +84,13 @@ class T(unittest.TestCase):
         acts = self.parse(['mypkg'])[1]
         self.assertEqual(acts, [('apt-source', 'mypkg', False)])
 
+    def test_git_source(self):
+        acts = self.parse(['--git-source', 'git://dev.org/proj1.git',
+                           '--no-built-binaries',
+                           '--git-source=http://dev.org/proj2.git stable'])[1]
+        self.assertEqual(acts, [('git-source', 'git://dev.org/proj1.git', True),
+                                ('git-source', 'http://dev.org/proj2.git stable', False)])
+
     def test_implicit_click_source(self):
         os.makedirs('mypkg/click')
         acts = self.parse(['mypkg'])[1]

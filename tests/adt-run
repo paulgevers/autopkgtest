@@ -2660,7 +2660,9 @@ class AdtContainerTests:
                            {'pass': '#!/bin/sh\necho I am fine; echo "SOMEVAR: >$SOMEVAR<"; echo "PATH: $PATH"\n'
                                     '[ -n "$XDG_SESSION_ID" ] || { echo "no XDG_SESSION_ID" >&2; exit 1; }'})
 
-        (code, out, err) = self.adt_run(['--no-built-binaries', '--unbuilt-tree=' + p],
+        # container might not have libpam-systemd, so run setup-testbed first
+        (code, out, err) = self.adt_run(['--setup-commands', os.path.join(root_dir, 'setup-commands', 'setup-testbed'),
+                                         '--no-built-binaries', '--unbuilt-tree=' + p],
                                         env={'SOMEVAR': 'junk',
                                              'HOME': os.environ['HOME'],
                                              'PATH': '/something/broken:' + os.environ.get('PATH', '')})

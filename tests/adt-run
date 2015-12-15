@@ -2587,7 +2587,7 @@ Depends: nonexisting'''
         self.assertIn('ERROR: erroneous package: Test dependencies are unsatisfiable', err)
 
 
-class AdtContainerTests(AdtTestCase):
+class AdtContainerTests:
     '''Tests for LXC and LXD'''
 
     def test_tree_norestrictions_nobuild_success(self):
@@ -3008,15 +3008,18 @@ class AdtContainerTests(AdtTestCase):
 
 @unittest.skipUnless('ADT_TEST_LXC' in os.environ,
                      'Set $ADT_TEST_LXC to an existing container')
-class LxcRunner(AdtContainerTests):
+class LxcRunner(AdtTestCase, AdtContainerTests):
     def __init__(self, *args, **kwargs):
         self.container_name = os.environ.get('ADT_TEST_LXC')
-        vargs = ['lxc', '--ephemeral', self.container_name]
-        # check for unprivileged containers
-        if os.getuid() > 0 and subprocess.call(
-                ['lxc-info', '-n', self.container_name],
-                stdout=subprocess.PIPE, stderr=subprocess.STDOUT) != 0:
-            vargs.insert(1, '--sudo')
+        if self.container_name:
+            vargs = ['lxc', '--ephemeral', self.container_name]
+            # check for unprivileged containers
+            if os.getuid() > 0 and subprocess.call(
+                    ['lxc-info', '-n', self.container_name],
+                    stdout=subprocess.PIPE, stderr=subprocess.STDOUT) != 0:
+                vargs.insert(1, '--sudo')
+        else:
+            vargs = []  # tests will be skipped anyway, but we still must be instantiable
 
         super().__init__(vargs, *args, **kwargs)
 
@@ -3042,7 +3045,7 @@ class LxcRunner(AdtContainerTests):
 
 @unittest.skipUnless('ADT_TEST_LXD' in os.environ,
                      'Set $ADT_TEST_LXD to an existing LXD image')
-class LxdRunner(AdtContainerTests):
+class LxdRunner(AdtTestCase, AdtContainerTests):
     def __init__(self, *args, **kwargs):
         vargs = ['lxd', os.environ.get('ADT_TEST_LXD')]
         super().__init__(vargs, *args, **kwargs)

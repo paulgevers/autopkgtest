@@ -2623,10 +2623,10 @@ class SchrootRunner(AdtTestCase):
         # include resets of the testbed here to ensure that the setup and
         # error handling work several times in a row in good and bad cases
         (code, out, err) = self.do_apt_pocket_test(
-            ['--apt-pocket=proposed=vanilla'],
-            '[ "$V" = 2 ]; [ "$C" = 1 ]; [ "$M" = 1 ]; [ "$H" = 1 ]; [ "$L" = 2 ]',
+            ['--apt-pocket=proposed=chocolate'],
+            '[ "$V" = 1 ]; [ "$C" = 2 ]; [ "$M" = 1 ]; [ "$H" = 1 ]; [ "$L" = 1 ]',
             expect_success=False,
-            extra_control='''Test-Command: dpkg-query --show chocolate | grep 1; dpkg-query --show vanilla | grep 2
+            extra_control='''Test-Command: dpkg-query --show chocolate | grep 2; dpkg-query --show vanilla | grep 1
 Depends: vanilla, chocolate
 
 Test-Command: echo "not me" >&2; false

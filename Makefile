@@ -43,6 +43,7 @@ programs =	virt-subproc/adt-virt-chroot \
 		virt-subproc/adt-virt-ssh \
 		tools/adt-buildvm-ubuntu-cloud \
 		tools/adt-build-lxc \
+		tools/adt-build-lxd \
 		runner/adt-run
 
 pythonfiles =	lib/VirtSubproc.py \

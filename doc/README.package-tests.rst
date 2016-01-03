@@ -71,6 +71,11 @@ Test-Command: shell command
     field to specify the shell command directly. It will be run under
     ``bash -e``. This is mutually exclusive with the ``Tests:`` field.
 
+    This is also useful for running the same script under different
+    interpreters and/or with different dependencies, such as
+    ``Test-Command: python debian/tests/mytest.py`` and
+    ``Test-Command: python3 debian/tests/mytest.py``.
+
 Restrictions: restriction-name [, another-restriction-name ...]
     Declares some restrictions or problems with the tests defined in
     this stanza. Depending on the test environment capabilities, user

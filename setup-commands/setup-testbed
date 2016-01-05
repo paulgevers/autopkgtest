@@ -184,7 +184,10 @@ if [ -z "${ADT_IS_SETUP_COMMAND:-}" ]; then
         fi
     done
 
-    [ "${ADT_SETUP_VM_UPGRADE:-}" = false ] || DEBIAN_FRONTEND=noninteractive chroot "$root" eatmydata apt-get -y dist-upgrade
+    if [ "${ADT_SETUP_VM_UPGRADE:-}" != "false" ]; then
+        DEBIAN_FRONTEND=noninteractive chroot "$root" eatmydata apt-get -y dist-upgrade
+        DEBIAN_FRONTEND=noninteractive chroot "$root" eatmydata apt-get -y --purge autoremove
+    fi
 else
     # we want to keep cloud-init on autopkgtest images for instantiating, but not
     # on test instances themselves as it often gets in the way

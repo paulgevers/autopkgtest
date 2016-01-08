@@ -196,9 +196,13 @@ else
     fi
 fi
 
-if [ -s "$root/boot" ] && grep -q buntu "$root/etc/os-release" "$root/etc/lsb-release"; then
-    # provides kmods like scsi_debug or mac80211_hwsim on Ubuntu
-    chroot "$root" eatmydata apt-get install -y linux-generic
+if grep -q buntu "$root/etc/os-release" "$root/etc/lsb-release"; then
+    if [ -n "$(ls -l $root/boot/vmlinu*)" ]; then
+        # provides kmods like scsi_debug or mac80211_hwsim on Ubuntu
+        chroot "$root" eatmydata apt-get install -y linux-generic
+    else
+        chroot "$root" eatmydata apt-get install -y linux-headers-generic
+    fi
 fi
 
 # we need Python to run the auxverb helper

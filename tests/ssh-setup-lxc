@@ -38,7 +38,9 @@ open() {
     [ -n "$CONTAINER" ] || CONTAINER=`mktemp -u adt-testsuite-XXX`
 
     if [ -n "$CLONE" ]; then
-        $PREFIX lxc-clone -n $CONTAINER -o $TEMPLATE >/dev/null
+        # lxc-clone should pick -B by itself (LP: #1532125)
+        $PREFIX lxc-clone -n $CONTAINER -o $TEMPLATE -B btrfs >/dev/null 2>&1 || \
+            $PREFIX lxc-clone -n $CONTAINER -o $TEMPLATE >/dev/null
         $PREFIX lxc-start -n $CONTAINER -d
         while ! OUT=`$PREFIX lxc-info -n $CONTAINER | grep '^IP:'`; do
             sleep 1

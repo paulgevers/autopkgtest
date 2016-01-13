@@ -71,7 +71,7 @@ install:
 	$(INSTALL_DATA) $(pythonfiles) $(pythondir)
 	$(INSTALL_DATA) CREDITS $(docdir)
 	$(INSTALL_DATA) $(rstfiles) $(htmlfiles) $(docdir)
-	$(INSTALL_DATA) setup-commands/*[!~] $(datadir)/setup-commands
+	$(INSTALL_PROG) setup-commands/*[!~] $(datadir)/setup-commands
 	$(INSTALL_DATA) ssh-setup/SKELETON $(datadir)/ssh-setup
 	$(INSTALL_PROG) ssh-setup/[a-z]*[!~] $(datadir)/ssh-setup
 

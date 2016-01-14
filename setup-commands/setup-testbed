@@ -131,6 +131,7 @@ if [ -z "${ADT_IS_SETUP_COMMAND:-}" ]; then
         IFACE="eth0"
         if ! [ -e "$root/etc/udev/rules.d/80-net-setup-link.rules" ] ; then
             ln -s /dev/null "$root/etc/udev/rules.d/80-net-setup-link.rules"
+            chroot "$root" update-initramfs -u
         fi
     fi
     if [ -n "$IFACE" ] ; then

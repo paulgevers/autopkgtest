@@ -178,7 +178,7 @@ open() {
 
     # check available images that match the given name, use the latest match
     images=$(nova image-list|sed -n '2 d; /^|/ {s/^| *//; s/ *|$//; s/ *| *\+/\t/g; p}')
-    last=$(echo "$images" | grep "${IMAGE}.*ACTIVE" |sort -k2 | tail -n1)
+    last=$(echo "$images" | grep -E "${IMAGE}.*ACTIVE" |sort -k2 | tail -n1)
     if [ -z "$last" ]; then
         error "No nova image available that matches $IMAGE"
         exit 1

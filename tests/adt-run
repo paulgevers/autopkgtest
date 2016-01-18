@@ -2020,8 +2020,13 @@ class DebTestsVirtFS(DebTestsAll):
     def test_user(self):
         '''Run tests as different user'''
 
-        p = self.build_src('Tests: t\nDepends: aspell-doc\nRestrictions: rw-build-tree\n',
-                           {'t': '''#!/bin/sh -e
+        p = self.build_src('Tests: r\nDepends:\nRestrictions: rw-build-tree, needs-root\n\n'
+                           'Tests: t\nDepends: aspell-doc\nRestrictions: rw-build-tree\n',
+                           {'r': '''#!/bin/sh -e
+                                    mkdir xsrc
+                                    echo r00t > xsrc/root.txt
+                                    ''',
+                            't': '''#!/bin/sh -e
                                     echo world > $ADTTMP/hello.txt
                                     cat $ADTTMP/hello.txt
                                     mkdir -p $ADTTMP/one/subdir
@@ -2029,6 +2034,7 @@ class DebTestsVirtFS(DebTestsAll):
                                     cat $ADTTMP/one/subdir/subdir.txt
                                     rm -r $ADTTMP/one
                                     echo dir_is_rw > rw_flag
+                                    echo user >> xsrc/root.txt
                                     cat rw_flag
                                     echo hello > $ADT_ARTIFACTS/world.txt
                                     chmod 600 $ADT_ARTIFACTS/world.txt

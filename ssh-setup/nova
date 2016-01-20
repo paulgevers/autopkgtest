@@ -177,8 +177,21 @@ open() {
     fi
 
     # check available images that match the given name, use the latest match
-    images=$(nova image-list|sed -n '2 d; /^|/ {s/^| *//; s/ *|$//; s/ *| *\+/\t/g; p}')
-    last=$(echo "$images" | grep -E "${IMAGE}.*ACTIVE" |sort -k2 | tail -n1)
+    last=$(cat <<EOF | python
+import os, re, novaclient.v1_1
+nova = novaclient.v1_1.client.Client(os.environ['NOVA_USERNAME'], os.environ['NOVA_PASSWORD'],
+                                     os.environ['NOVA_PROJECT_ID'], auth_url=os.environ['OS_AUTH_URL'],
+                                     region_name=os.environ['NOVA_REGION'])
+latest = None
+for i in nova.images.list():
+    if i.status == 'ACTIVE' and re.match('${IMAGE}', i.name):
+        if latest is None or i.created > latest.created:
+            latest = i
+if latest:
+    print('%s\t%s' % (latest.id, latest.name))
+EOF
+)
+
     if [ -z "$last" ]; then
         error "No nova image available that matches $IMAGE"
         exit 1

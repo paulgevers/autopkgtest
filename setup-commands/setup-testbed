@@ -198,7 +198,7 @@ else
 fi
 
 if grep -q buntu "$root/etc/os-release" "$root/etc/lsb-release"; then
-    if [ -n "$(ls -l $root/boot/vmlinu*)" ]; then
+    if ls $root/boot/vmlinu* >/dev/null 2>&1; then
         # provides kmods like scsi_debug or mac80211_hwsim on Ubuntu
         chroot "$root" eatmydata apt-get install -y linux-generic
     else

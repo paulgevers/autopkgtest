@@ -310,9 +310,7 @@ EOF
         retry=$(( retry - 1 ))
         if [ $retry -le 0 ]; then
             error "Timed out waiting for ssh. Aborting! Console log:"
-            error "--------------------------------"
-            nova console-log $SRVUUID >&2 || true
-            error "--------------------------------"
+            debug_failure
             cleanup
             exit 1
         fi
@@ -321,9 +319,7 @@ EOF
     debug "Waiting for cloud-init to finish"
     if ! timeout 30m $SSH 'while [ ! -e /var/lib/cloud/instance/boot-finished ]; do sleep 1; done'; then
         error "Timed out waiting for cloud-init to finish. Aborting! Console log:"
-        error "--------------------------------"
-        nova console-log $SRVUUID >&2 || true
-        error "--------------------------------"
+        debug_failure
         cleanup
         exit 1
     fi
@@ -383,9 +379,9 @@ wait_reboot() {
 
 debug_failure() {
     if [ -n "$SRVUUID" ]; then
-        echo "------- nova console-log $SRVUUID ($SRVNAME) ------"
-        nova console-log $SRVUUID || true
-        echo "---------------------------------------------------"
+        echo "------- nova console-log $SRVUUID ($SRVNAME) ------" >&2
+        nova console-log $SRVUUID >&2 || true
+        echo "---------------------------------------------------" >&2
     fi
 }
 

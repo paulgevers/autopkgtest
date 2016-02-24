@@ -178,7 +178,7 @@ if [ -z "${ADT_IS_SETUP_COMMAND:-}" ]; then
              landscape-common open-vm-tools w3m vim-runtime aptitude-common \
              command-not-found-data manpages ntfs-3g sosreport \
              ubuntu-release-upgrader-core libcpan-changes-perl git \
-             cgmanager lxd-client open-iscsi mdadm dmeventd lvm2 \
+             cgmanager lxc lxd lxd-client open-iscsi mdadm dmeventd lvm2 \
              unattended-upgrades update-notifier-common ureadahead debootstrap \
              lxcfs ppp pppconfig pppoeconf \
              thermald xdg-user-dirs xkb-data zerofree xml-core; do

@@ -2412,15 +2412,17 @@ class QemuRunner(AdtTestCase, DebTestsVirtContainer):
     def __init__(self, *args, **kwargs):
         super(QemuRunner, self).__init__(['qemu', os.environ.get('ADT_TEST_QEMU')], *args, **kwargs)
 
-    def test_options(self):
-        '''adt-virt-qemu options'''
+    def test_options_and_baseimage(self):
+        '''adt-virt-qemu options and /dev/baseimage'''
 
         p = self.build_src('Tests: t\nDepends:',
                            {'t': '''echo CPUNUM; grep ^processor /proc/cpuinfo  |wc -l
                                  mkdir -p $ADTTMP/one/subdir
                                  echo deep > $ADTTMP/one/subdir/subdir.txt
                                  cat $ADTTMP/one/subdir/subdir.txt
-                                 whoami'''})
+                                 whoami
+                                 test -L /dev/baseimage || echo "no /dev/baseimage link"
+                                 blkid -p /dev/baseimage'''})
 
         (code, out, err) = self.adt_run(['-B', '-d', p + '//'],
                                         self.virt_args + ['--cpus=2', '--show-boot', '--user=nobody'])

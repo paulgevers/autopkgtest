@@ -2212,8 +2212,11 @@ class DebTestsVirtContainer(DebTestsVirtFS):
         outdir = os.path.join(self.workdir, 'out')
         os.mkdir(outdir)
 
-        # special-case LXC runner, --ephemeral does not support reboot
-        virt_args = [a for a in self.virt_args if a != '--ephemeral']
+        # special-case LXC runner, --ephemeral does not support reboot with LXC 1.x
+        if not shutil.which('lxc-copy'):
+            virt_args = [a for a in self.virt_args if a != '--ephemeral']
+        else:
+            virt_args = self.virt_args
         (code, out, err) = self.adt_run(['--output-dir=' + outdir, '-B', p + '//'],
                                         virt_args=virt_args)
 
@@ -2267,8 +2270,11 @@ class DebTestsVirtContainer(DebTestsVirtFS):
         outdir = os.path.join(self.workdir, 'out')
         os.mkdir(outdir)
 
-        # special-case LXC runner, --ephemeral does not support reboot
-        virt_args = [a for a in self.virt_args if a != '--ephemeral']
+        # special-case LXC runner, --ephemeral does not support reboot with LXC 1.x
+        if not shutil.which('lxc-copy'):
+            virt_args = [a for a in self.virt_args if a != '--ephemeral']
+        else:
+            virt_args = self.virt_args
         (code, out, err) = self.adt_run(['--output-dir=' + outdir, '-B', p +
                                          '//'], virt_args)
 

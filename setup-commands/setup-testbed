@@ -82,6 +82,10 @@ if [ -z "${ADT_IS_SETUP_COMMAND:-}" ] && [ ! -e "$root/etc/default/grub.d/90-aut
             sed -i '/CMDLINE_LINUX_DEFAULT/ s/"$/ console=ttyS0"/' "$root/etc/default/grub"
             changed=1
         fi
+        if ! grep -q GRUB_HIDDEN_TIMEOUT=0 "$root/etc/default/grub" ; then
+            sed -i '/^GRUB_TIMEOUT=/ s/=.*$/=1/' "$root/etc/default/grub"
+            changed=1
+        fi
     fi
     [ -z "${changed:-}" ] || chroot "$root" update-grub || echo "WARNING: update-grub failed!"
 fi

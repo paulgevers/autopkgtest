@@ -442,6 +442,10 @@ class NullRunner(AdtTestCase, DebTestsAll, DebTestsFailureModes):
         self.assertEqual(info['custom_environment'],
                          ['ADT_COLOR=blue', 'ADT_SOMETHING=foo bar'])
         self.assertEqual(info['virt_server'], 'adt-virt-null')
+        self.assertEqual(info['nproc'],
+                         subprocess.check_output(['nproc'], universal_newlines=True).strip())
+        self.assertIn('cpu_model', info)
+        self.assertIn('cpu_flags', info)
 
         # test don't pull in any additional dependencies
         for t in ['sP', 'sF', 'bP']:
@@ -1334,6 +1338,7 @@ class ChrootRunner(AdtTestCase, DebTestsAll, DebTestsFailureModes):
         install_elf('/usr/bin/env')
         install_elf('/usr/bin/tee')
         install_elf('/usr/bin/touch')
+        install_elf('/usr/bin/nproc')
         install_file('/usr/lib/locale/C.UTF-8')
 
         # necessary bind mounts

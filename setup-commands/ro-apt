@@ -1,3 +1,4 @@
+#!/bin/sh
 # This script is is part of autopkgtest
 # Copyright (C) 2006-2014 Canonical Ltd.
 # Author: Martin Pitt <martin.pitt@ubuntu.com>
@@ -7,6 +8,7 @@
 # with locally unpacking test dependencies instead of actually installing them.
 # Use this in schroot, lxc, or QEMU runner.
 
+set -e
 M=$(mktemp --directory /run/ro-apt.XXXXX)
 mount -t tmpfs tmpfs $M
 cp -a /var/lib/dpkg/status /var/lib/dpkg/lock $M

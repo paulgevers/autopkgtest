@@ -1,3 +1,4 @@
+#!/bin/sh
 # This script is is part of autopkgtest
 # Copyright (C) 2015 Canonical Ltd.
 # Author: Martin Pitt <martin.pitt@ubuntu.com>
@@ -7,6 +8,7 @@
 # download/unpack test dependencies on older images whose apt indexes are out
 # of date.
 
+set -e
 mount -o remount,rw /
 apt-get update || (sleep 15; apt-get update)
 mount -o remount,ro /

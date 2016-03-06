@@ -1,3 +1,4 @@
+#!/bin/sh
 # This script is is part of autopkgtest
 # Copyright (C) 2006-2014 Canonical Ltd.
 # Author: Martin Pitt <martin.pitt@ubuntu.com>
@@ -10,6 +11,8 @@
 # Use this in schroot, lxc, or qemu runner. Everything that's required will be
 # installed, but as that's a lot of packages it is advisable to run this on a
 # testbed which has at least ubuntu-sdk-libs already pre-installed.
+
+set -e
 
 # click and the SDK
 apt-get install --assume-yes --no-install-recommends click ubuntu-sdk-libs ubuntu-app-launch-tools

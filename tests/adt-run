@@ -2299,11 +2299,13 @@ class DebTestsVirtContainer(DebTestsVirtFS):
             self.assertEqual(f.read(), 'two\n')
         with open(os.path.join(outdir, 'testinfo.json')) as f:
             info = json.load(f)
-        u = os.uname()
-        self.assertEqual(info['kernel_version'],
-                         '%s %s %s' % (u.sysname, u.release, u.version))
         self.assertEqual(info['test_kernel_versions'],
                          [['r', 'mark2', 'Linux 1.2.3-testy foobar']])
+        # this check only works in LXC where the host kernel is used, not in Qemu
+        if 'Qemu' not in self.__class__.__name__:
+            u = os.uname()
+            self.assertEqual(info['kernel_version'],
+                             '%s %s %s' % (u.sysname, u.release, u.version))
 
     def test_exit_255(self):
         '''test exits with code 255

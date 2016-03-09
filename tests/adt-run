@@ -2966,7 +2966,9 @@ class SchrootClickRunner(AdtTestCase):
         sumfile = os.path.join(self.workdir, 'summary')
 
         (code, out, err) = self.adt_run(
-            ['-d', '-o', outdir, '--summary-file', sumfile, self.click_src, self.click])
+            ['-d', '-o', outdir, '--summary-file', sumfile,
+             '--setup-commands', 'adduser --system clickpkg',
+             self.click_src, self.click])
         self.assertEqual(code, 4, err)
 
         # one test (broken) should fail, the others succeed
@@ -2997,6 +2999,7 @@ simple               PASS
 
         (code, out, err) = self.adt_run(
             ['-d', '--summary-file', sumfile,
+             '--setup-commands', 'adduser --system clickpkg',
              '--click-source', self.click_src, '--click', self.click])
         self.assertEqual(code, 4, err)
 
@@ -3016,8 +3019,9 @@ simple               PASS
         sumfile = os.path.join(self.workdir, 'summary')
 
         (code, out, err) = self.adt_run(
-            ['-d', '--summary-file', sumfile, '--setup-commands',
-             os.path.join(root_dir, 'setup-commands', 'ro-apt'),
+            ['-d', '--summary-file', sumfile,
+             '--setup-commands', 'adduser --system clickpkg',
+             '--setup-commands', os.path.join(root_dir, 'setup-commands', 'ro-apt'),
              self.click_src, self.click])
         self.assertEqual(code, 4, err)
 
@@ -3044,9 +3048,9 @@ simple               PASS
         (code, out, err) = self.adt_run(
             ['-d', '--summary-file', sumfile,
              '--copy', '%s:/root/testclick.click' % self.click,
+             '--setup-commands', 'adduser --system clickpkg',
              '--setup-commands', 'click install --all-users /root/testclick.click',
-             '--setup-commands',
-             os.path.join(root_dir, 'setup-commands', 'ro-apt'),
+             '--setup-commands', os.path.join(root_dir, 'setup-commands', 'ro-apt'),
              self.click_src, '--click', 'testclick'])
         self.assertEqual(code, 4, err)
 
@@ -3068,9 +3072,9 @@ simple               PASS
         (code, out, err) = self.adt_run(
             ['-d', '--summary-file', sumfile,
              '--copy', '%s:/root/testclick.click' % self.click,
+             '--setup-commands', 'adduser --system clickpkg',
              '--setup-commands', 'click install --user $ADT_NORMAL_USER /root/testclick.click',
-             '--setup-commands',
-             os.path.join(root_dir, 'setup-commands', 'ro-apt'),
+             '--setup-commands', os.path.join(root_dir, 'setup-commands', 'ro-apt'),
              self.click_src, '--click', 'testclick'])
         self.assertEqual(code, 4, err)
 
@@ -3097,6 +3101,7 @@ simple               PASS
 
         (code, out, err) = self.adt_run(
             ['--summary-file', sumfile,
+             '--setup-commands', 'adduser --system clickpkg',
              '--override-control', custom_manifest,
              '--click-source', self.click_src, '--click', self.click])
         self.assertEqual(code, 0, err)

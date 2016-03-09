@@ -2968,9 +2968,11 @@ Depends: nonexisting'''
         (code, out, err) = self.adt_run(
             ['--env=DEB_BUILD_OPTIONS=nocheck',
              '--git-source', 'git://anonscm.debian.org/autopkgtest/autopkgtest.git'])
-        # test should succeed
-        self.assertEqual(code, 0, err)
-        self.assertRegex(err, '@@@ summary\nadt-run\s+PASS')
+        # test should succeed, but skip the Lxd test
+        self.assertEqual(code, 2, err)
+        self.assertRegex(err, 'adt-run\s+PASS')
+        self.assertRegex(err, 'installed\s+PASS')
+        self.assertRegex(err, 'command1\s+SKIP')
 
 
 @unittest.skipUnless('ADT_TEST_SCHROOT_CLICK' in os.environ,

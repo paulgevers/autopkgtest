@@ -103,7 +103,7 @@ open() {
             ssh-keygen -q -t ed25519 -f $IDENTITY -N ''
         fi
     fi
-    script=$(mktemp /tmp/$(basename $0).XXXXXX)
+    script=$(mktemp --tmpdir $(basename $0).XXXXXX)
     adb $ADBOPTS push ${IDENTITY}.pub /home/$SSH_USER/.ssh/authorized_keys
     cat>$script <<EOF
 # Set right permissions

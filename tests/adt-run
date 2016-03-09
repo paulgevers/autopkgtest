@@ -49,7 +49,7 @@ if not hasattr(unittest.TestCase, 'assertRegex'):
 # environment, so check if this actually works
 have_apt = subprocess.call(['apt-get', 'download', 'gir1.2-json-1.0'],
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                           cwd='/tmp') == 0
+                           cwd=os.environ.get('TMPDIR', '/tmp')) == 0
 
 have_ubuntu_device_flash = subprocess.call(['which', 'ubuntu-device-flash'],
                                            stdout=subprocess.PIPE,
@@ -841,7 +841,7 @@ bad                  FAIL non-zero exit status 1
             self.assertRegex(out, '(Dynamic|Introspection)Module.*Json.* from .*/usr/lib/.*girepository')
         except ImportError:
             # should use from local unpack dir
-            self.assertRegex(out, '(Dynamic|Introspection)Module.*Json.* from .*/tmp/adt-run.*/deps/usr/lib')
+            self.assertRegex(out, '(Dynamic|Introspection)Module.*Json.* from .*/adt-run.*/deps/usr/lib')
         # no stderr
         self.assertNotIn(' stderr ', err)
 
@@ -1184,6 +1184,22 @@ if ($pid) { # parent
         self.assertRegex(out, '(^|\n)I am fine\n')
         # should show summary
         self.assertRegex(err, '@@@ summary\npass\s+PASS')
+
+    def test_tmpdir_env(self):
+        '''Respects $TMPDIR'''
+
+        p = self.build_src('Tests: p\nDepends:\n',
+                           {'p': '#!/bin/sh\necho $ADTTMP\n[ "${ADTTMP#/var/tmp}" != "$ADTTMP" ]'})
+
+        env = os.environ.copy()
+        env['TMPDIR'] = '/var/tmp'
+        (code, out, err) = self.adt_run(['--no-built-binaries',
+                                         '--unbuilt-tree=' + p],
+                                        env=env)
+
+        # test results
+        self.assertEqual(code, 0, err)
+        self.assertRegex(out, '/var/tmp/adt.*')
 
 
 @unittest.skipIf(os.getuid() > 0,
@@ -1744,7 +1760,7 @@ Pin-Priority: 800
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'g\s+PASS', out)
 
-        self.assertRegex(out, '^/tmp/adt-run.*/real-tree\n'
+        self.assertRegex(out, '/adt-run.*/real-tree\n'
                          'Makefile\ndebian\ntest_static\n')
         # should not have any test stderr
         self.assertNotIn(' stderr ', err)

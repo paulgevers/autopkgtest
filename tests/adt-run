@@ -91,6 +91,12 @@ class AdtTestCase(unittest.TestCase):
             os.makedirs(os.path.dirname(lxc_temp))
             os.symlink(lxc_orig, lxc_temp)
 
+        # keep LXD client certs and config
+        lxc_orig = os.path.join(self.orig_home, '.config', 'lxc')
+        lxc_temp = os.path.join(temp_home, '.config', 'lxc')
+        os.makedirs(os.path.dirname(lxc_temp))
+        os.symlink(lxc_orig, lxc_temp)
+
         os.environ['HOME'] = temp_home
 
     def build_src(self, test_control, test_scripts):

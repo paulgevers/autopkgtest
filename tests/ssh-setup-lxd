@@ -5,7 +5,7 @@
 # Author: Martin Pitt <martin.pitt@ubuntu.com>
 #
 # adt-virt-ssh setup script that configures a container; this is only used for
-# testing autopkgtest itself, adt-virt-lxc is much better for actual test runs
+# testing autopkgtest itself, adt-virt-lxd is much better for actual test runs
 
 set -e
 
@@ -16,12 +16,9 @@ USER=adt_test
 SUDO_PASSWORD=adt_test
 
 CONTAINER=""
-TEMPLATE=""
+IMAGE=""
 INSTALL_KEY=
 ENABLE_SUDO=
-CLONE=
-
-[ `id -u` -eq 0 ] || PREFIX="sudo "
 
 # create a testbed (if necessary), configure ssh, copy ssh key into it,
 # configure sudo, etc.; print a list of "key=value" parameters to stdout on
@@ -29,43 +26,37 @@ CLONE=
 # required: login, hostname, and one of identity or password
 # optional: port, options, capabilities
 open() {
-    [ -z "$2" ] || TEMPLATE="$2"
-    if [ -z "$TEMPLATE}" ]; then
-        echo "ERROR: $0 needs to be called with template container name" >&1
+    [ -z "$2" ] || IMAGE="$2"
+    if [ -z "$IMAGE}" ]; then
+        echo "ERROR: $0 needs to be called with image name" >&1
         exit 1
     fi
 
     [ -n "$CONTAINER" ] || CONTAINER=`mktemp -u adt-testsuite-XXX`
 
-    if [ -n "$CLONE" ]; then
-        # lxc-clone should pick -B by itself (LP: #1532125)
-        $PREFIX lxc-clone -n $CONTAINER -o $TEMPLATE -B btrfs >/dev/null 2>&1 || \
-            $PREFIX lxc-clone -n $CONTAINER -o $TEMPLATE >/dev/null
-        $PREFIX lxc-start -n $CONTAINER -d
-        while ! OUT=`$PREFIX lxc-info -n $CONTAINER | grep '^IP:'`; do
-            sleep 1
-        done
-    else
-        OUT=`$PREFIX lxc-start-ephemeral -n $CONTAINER -o $TEMPLATE -d`
-    fi
-    # parse out IP
+    lxc launch --ephemeral "$IMAGE" "$CONTAINER" >/dev/null
+
+    # wait for and parse IPv4
+    while ! OUT=`lxc info $CONTAINER|grep 'eth0:.*inet[^6]'`; do
+        sleep 1
+    done
     IP=$(echo "$OUT" | grep -o '10\.[0-9]\+\.[0-9]\+\.[0-9]\+')
 
     # create user
     # password: python3 -c 'from crypt import *; print(crypt("adt_test", mksalt(METHOD_CRYPT)))'
-    $PREFIX lxc-attach --name=$CONTAINER -- useradd --password uMBz978HXrv8s --create-home $USER
+    lxc exec $CONTAINER -- useradd --password uMBz978HXrv8s --create-home $USER
 
     # install SSH
-    $PREFIX lxc-attach --name=$CONTAINER -- apt-get install -y openssh-server >/dev/null 2>&1
+    lxc exec $CONTAINER -- eatmydata apt-get install -y openssh-server >/dev/null 2>&1
 
     if [ -n "$INSTALL_KEY" ]; then
         key=`cat $HOME/.ssh/id_rsa.pub`
-        $PREFIX lxc-attach --name=$CONTAINER -- su -c "mkdir ~/.ssh; echo '$key' > ~/.ssh/authorized_keys" $USER
+        lxc exec $CONTAINER -- su -c "mkdir ~/.ssh; echo '$key' > ~/.ssh/authorized_keys" $USER
         echo "identity=$HOME/.ssh/id_rsa"
     fi
 
     if [ -n "$ENABLE_SUDO" ]; then
-        $PREFIX lxc-attach --name=$CONTAINER -- sh -ec "echo '$USER ALL=(ALL) $ENABLE_SUDO' > /etc/sudoers.d/autopkgtest"
+        lxc exec $CONTAINER -- sh -ec "echo '$USER ALL=(ALL) $ENABLE_SUDO' > /etc/sudoers.d/autopkgtest"
     fi
 
     cat<<EOF
@@ -73,7 +64,7 @@ login=$USER
 hostname=$IP
 capabilities=$CAPABILITIES
 password=$SUDO_PASSWORD
-extraopts=-n $CONTAINER -T $TEMPLATE $CLONE
+extraopts=-n $CONTAINER -I $IMAGE
 EOF
 }
 
@@ -91,14 +82,11 @@ cleanup() {
         echo "Needs to be called with -n <container name>" >&2
         exit 1
     fi
-    $PREFIX lxc-stop --kill --name=$CONTAINER || true
-    if [ -n "$CLONE" ]; then
-        $PREFIX lxc-destroy --name=$CONTAINER || true
-    fi
+    lxc delete --force $CONTAINER
 }
 
 # parse options
-eval set -- $(getopt -o "ksSn:T:c" -- "$@")
+eval set -- $(getopt -o "ksSn:I:c" -- "$@")
 while true; do
     case "$1" in
         -k)
@@ -109,10 +97,8 @@ while true; do
             ENABLE_SUDO="NOPASSWD: ALL"; shift ;;
         -n)
             CONTAINER="$2"; shift 2 ;;
-        -T)
-            TEMPLATE="$2"; shift 2 ;;
-        -c)
-            CLONE='-c'; shift ;;
+        -I)
+            IMAGE="$2"; shift 2 ;;
         --)
             shift; break ;;
         *)

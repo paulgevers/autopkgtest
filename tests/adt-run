@@ -3157,27 +3157,24 @@ simple               PASS
         self.assertRegex(out, 't\s+PASS', out)
 
 
-@unittest.skipUnless('ADT_TEST_LXC' in os.environ,
-                     'Set $ADT_TEST_LXC to an existing container')
+@unittest.skipUnless('ADT_TEST_LXD' in os.environ,
+                     'Set $ADT_TEST_LXD to an existing container')
 class SshRunnerNoScript(AdtTestCase):
     def __init__(self, *args, **kwargs):
         super(SshRunnerNoScript, self).__init__(['invalid'], *args, **kwargs)
         self.info = {}
 
-    def start_container(self, install_key=True, sudo=False, sudo_nopwd=False,
-                        clone=False):
+    def start_container(self, install_key=True, sudo=False, sudo_nopwd=False):
         '''Set up container with SSH'''
 
-        cmd = [os.path.join(test_dir, 'ssh-setup-lxc')]
+        cmd = [os.path.join(test_dir, 'ssh-setup-lxd')]
         if install_key:
             cmd.append('-k')
         if sudo_nopwd:
             cmd.append('-S')
         elif sudo:
             cmd.append('-s')
-        if clone:
-            cmd.append('-c')
-        cmd += ['open', os.environ.get('ADT_TEST_LXC')]
+        cmd += ['open', os.environ.get('ADT_TEST_LXD')]
         out = subprocess.check_output(cmd, universal_newlines=True)
         for l in out.splitlines():
             (k, v) = l.split('=', 1)
@@ -3186,7 +3183,7 @@ class SshRunnerNoScript(AdtTestCase):
 
     def tearDown(self):
         if self.info:
-            subprocess.call([os.path.join(test_dir, 'ssh-setup-lxc'), 'cleanup'] +
+            subprocess.call([os.path.join(test_dir, 'ssh-setup-lxd'), 'cleanup'] +
                             self.info['extraopts'].split())
             self.info = {}
 
@@ -3295,7 +3292,7 @@ class SshRunnerNoScript(AdtTestCase):
     def test_reboot(self):
         '''test that reboots'''
 
-        self.start_container(sudo_nopwd=True, clone=True)
+        self.start_container(sudo_nopwd=True)
         p = self.build_src('Tests:r\nDepends:\nRestrictions: needs-root',
                            {'r': '''#!/bin/sh -e
         case "$ADT_REBOOT_MARK" in
@@ -3332,7 +3329,7 @@ class SshRunnerNoScript(AdtTestCase):
     def test_reboot_prepare(self):
         '''test that reboots by itself'''
 
-        self.start_container(sudo_nopwd=True, clone=True)
+        self.start_container(sudo_nopwd=True)
         p = self.build_src('Tests: s r\nDepends:\nRestrictions: needs-root',
                            {'s': '#!/bin/sh\necho simple_done',
                             'r': '''#!/bin/sh -e
@@ -3402,13 +3399,13 @@ class SshRunnerNoScript(AdtTestCase):
         self.assertNotIn('testbed auxverb failed with', err)
 
 
-@unittest.skipUnless('ADT_TEST_LXC' in os.environ,
-                     'Set $ADT_TEST_LXC to an existing container')
+@unittest.skipUnless('ADT_TEST_LXD' in os.environ,
+                     'Set $ADT_TEST_LXD to an existing container')
 class SshRunnerWithScript(AdtTestCase, DebTestsAll):
     def __init__(self, *args, **kwargs):
         super(SshRunnerWithScript, self).__init__(
-            ['ssh', '--debug', '--setup-script', os.path.join(test_dir, 'ssh-setup-lxc'),
-             '--', os.environ.get('ADT_TEST_LXC'), '-k', '-s'],
+            ['ssh', '--debug', '--setup-script', os.path.join(test_dir, 'ssh-setup-lxd'),
+             '--', os.environ.get('ADT_TEST_LXD'), '-k', '-s'],
             *args, **kwargs)
 
     def test_no_root(self):

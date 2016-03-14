@@ -1122,6 +1122,16 @@ if ($pid) { # parent
         self.assertIn(os.uname().sysname, info['kernel_version'])
         self.assertEqual(info['virt_server'], 'adt-virt-null')
 
+    def test_versioned_depends(self):
+        '''Depends: with versions'''
+
+        # ensure that build profile sedding does not affect versioned dependencies
+        p = self.build_src('Test-Command: true\nDepends: base-files, coreutils (<< 99:1), bash (>= 0.1), coreutils (>=0.1~)\n', {})
+
+        (code, out, err) = self.adt_run(['-d', '-B', p + '//'])
+        self.assertEqual(code, 0, err)
+        self.assertIn('install-deps: architecture resolved: base-files, coreutils (<< 99:1), bash (>= 0.1), coreutils (>= 0.1~)', err)
+
     def test_env_passing(self):
         '''Pass environment variable to test'''
 

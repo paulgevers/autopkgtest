@@ -450,8 +450,9 @@ class NullRunner(AdtTestCase, DebTestsAll, DebTestsFailureModes):
         self.assertEqual(info['virt_server'], 'adt-virt-null')
         self.assertEqual(info['nproc'],
                          subprocess.check_output(['nproc'], universal_newlines=True).strip())
-        self.assertIn('cpu_model', info)
-        self.assertIn('cpu_flags', info)
+        if os.uname()[4] in ['x86_64', 'i686', 'armv7l']:
+            self.assertIn('cpu_model', info)
+            self.assertIn('cpu_flags', info)
 
         # test don't pull in any additional dependencies
         for t in ['sP', 'sF', 'bP']:

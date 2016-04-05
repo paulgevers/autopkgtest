@@ -61,7 +61,7 @@ fi
 
 # serial console for systemd
 # bump vmalloc on i386, necessary for tests like udisks2
-if [ -z "${ADT_IS_SETUP_COMMAND:-}" ] && [ ! -e "$root/etc/default/grub.d/90-autopkgtest.cfg" ] && chroot "$root" which update-grub >/dev/null 2>&1; then
+if [ ! -e "$root/etc/default/grub.d/90-autopkgtest.cfg" ] && chroot "$root" which update-grub >/dev/null 2>&1; then
     changed=
     if [ -d "$root/etc/default/grub.d" ]; then
         if [ "$(chroot "$root" dpkg --print-architecture)" = "i386" ]; then

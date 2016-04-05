@@ -187,7 +187,7 @@ if [ -z "${ADT_IS_SETUP_COMMAND:-}" ]; then
              lxcfs ppp pppconfig pppoeconf \
              thermald xdg-user-dirs xkb-data zerofree xml-core; do
         if [ -d "$root/usr/share/doc/$p" ]; then
-            chroot "$root" eatmydata apt-get --auto-remove -y purge $p || true
+            chroot "$root" env DEBIAN_FRONTEND=noninteractive eatmydata apt-get --auto-remove -y purge $p || true
         fi
     done
 

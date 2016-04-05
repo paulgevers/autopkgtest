@@ -185,7 +185,7 @@ if [ -z "${ADT_IS_SETUP_COMMAND:-}" ]; then
              cgmanager lxc-common lxc lxd lxd-client open-iscsi mdadm dmeventd lvm2 \
              unattended-upgrades update-notifier-common ureadahead debootstrap \
              lxcfs ppp pppconfig pppoeconf \
-             thermald xdg-user-dirs xkb-data zerofree xml-core; do
+             thermald xdg-user-dirs zerofree xml-core; do
         if [ -d "$root/usr/share/doc/$p" ]; then
             chroot "$root" env DEBIAN_FRONTEND=noninteractive eatmydata apt-get --auto-remove -y purge $p || true
         fi

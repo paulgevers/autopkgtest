@@ -72,8 +72,8 @@ install:
 	$(INSTALL_DATA) CREDITS $(docdir)
 	$(INSTALL_DATA) $(rstfiles) $(htmlfiles) $(docdir)
 	$(INSTALL_PROG) setup-commands/*[!~] $(datadir)/setup-commands
-	$(INSTALL_DATA) ssh-setup/SKELETON $(datadir)/ssh-setup
 	$(INSTALL_PROG) ssh-setup/[a-z]*[!~] $(datadir)/ssh-setup
+	$(INSTALL_DATA) ssh-setup/SKELETON $(datadir)/ssh-setup
 
 clean:
 	rm -f */*.pyc

@@ -59,26 +59,28 @@ if [ -e "$root/etc/init/tty2.conf" -a ! -e "$root/etc/init/ttyS0.conf" ]; then
         "$root/etc/init/tty2.conf" > "$root/etc/init/ttyS0.conf"
 fi
 
+ARCH="$(chroot "$root" dpkg --print-architecture)"
+
 # serial console for systemd
 # bump vmalloc on i386, necessary for tests like udisks2
 if [ ! -e "$root/etc/default/grub.d/90-autopkgtest.cfg" ] && chroot "$root" which update-grub >/dev/null 2>&1; then
     changed=
     if [ -d "$root/etc/default/grub.d" ]; then
-        if [ "$(chroot "$root" dpkg --print-architecture)" = "i386" ]; then
+        if [ "$ARCH" = "i386" ]; then
             echo 'GRUB_CMDLINE_LINUX_DEFAULT="console=ttyS0 vmalloc=512M"' > \
                 "$root/etc/default/grub.d/90-autopkgtest.cfg"
             changed=1
-        elif [ "$(chroot "$root" dpkg --print-architecture)" = "amd64" ]; then
+        elif [ "$ARCH" = "amd64" ]; then
             echo 'GRUB_CMDLINE_LINUX_DEFAULT="console=ttyS0"' > \
                 "$root/etc/default/grub.d/90-autopkgtest.cfg"
             changed=1
         fi
     else
         # fallback for Ubuntu 12.04
-        if [ "$(chroot "$root" dpkg --print-architecture)" = "i386" ]; then
+        if [ "$ARCH" = "i386" ]; then
             sed -i '/CMDLINE_LINUX_DEFAULT/ s/"$/ console=ttyS0 vmalloc=512M"/' "$root/etc/default/grub"
             changed=1
-        elif [ "$(chroot "$root" dpkg --print-architecture)" = "amd64" ]; then
+        elif [ "$ARCH" = "amd64" ]; then
             sed -i '/CMDLINE_LINUX_DEFAULT/ s/"$/ console=ttyS0"/' "$root/etc/default/grub"
             changed=1
         fi
@@ -211,7 +213,12 @@ if grep -q buntu "$root/etc/os-release" "$root/etc/lsb-release"; then
         # provides kmods like scsi_debug or mac80211_hwsim on Ubuntu
         chroot "$root" eatmydata apt-get install -y linux-generic
     else
-        chroot "$root" eatmydata apt-get install -y linux-headers-generic
+        if [ "$RELEASE" = precise -a "$ARCH" = armhf ]; then
+            # no linux-image-generic in precise/armhf yet
+            chroot "$root" eatmydata apt-get install -y linux-headers-omap
+        else
+            chroot "$root" eatmydata apt-get install -y linux-headers-generic
+        fi
     fi
 fi
 

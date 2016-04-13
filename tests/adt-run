@@ -2449,7 +2449,7 @@ class QemuRunner(AdtTestCase, DebTestsVirtContainer):
         '''adt-virt-qemu options and /dev/baseimage'''
 
         p = self.build_src('Tests: t\nDepends:',
-                           {'t': '''echo CPUNUM; grep ^processor /proc/cpuinfo  |wc -l
+                           {'t': '''echo CPUNUM; nproc
                                  mkdir -p $ADTTMP/one/subdir
                                  echo deep > $ADTTMP/one/subdir/subdir.txt
                                  cat $ADTTMP/one/subdir/subdir.txt

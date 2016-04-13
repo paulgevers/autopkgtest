@@ -1218,6 +1218,25 @@ if ($pid) { # parent
         self.assertEqual(code, 0, err)
         self.assertRegex(out, '/var/tmp/adt.*')
 
+    def test_build_parallel(self):
+        '''--build-parallel option'''
+
+        p = self.build_src('Tests: pass\nDepends:\nRestrictions: build-needed\n',
+                           {'pass': '#!/bin/sh -e\necho DBO=$DEB_BUILD_OPTIONS\n'})
+
+        (code, out, err) = self.adt_run(['--build-parallel=17', '--no-built-binaries', '--unbuilt-tree=' + p])
+        # test should succeed
+        self.assertEqual(code, 0, out + err)
+        self.assertRegex(out, 'pass\s+PASS', out)
+
+        # should build package
+        self.assertIn('dh build', err)
+
+        # should have expected parallel= option
+        self.assertIn('DBO=parallel=17\n', out)
+        # should not have any test stderr
+        self.assertNotIn(' stderr ', err)
+
 
 @unittest.skipIf(os.getuid() > 0,
                  'NullRunnerRoot tests need to run as root')

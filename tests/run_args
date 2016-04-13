@@ -302,6 +302,15 @@ Files:
         self.assertEqual(acts, [('built-tree', './', False)])
         self.assertEqual(virt, ['adt-virt-foo'])
 
+    def test_build_parallel(self):
+        (args, acts, virt) = self.parse(
+            ['--build-parallel=17', './', '---', 'adt-virt-foo'])
+        self.assertEqual(args.build_parallel, '17')
+
+        (args, acts, virt) = self.parse(
+            ['./', '---', 'adt-virt-foo'])
+        self.assertEqual(args.build_parallel, None)
+
     #
     # Errors
     #

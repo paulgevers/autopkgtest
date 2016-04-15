@@ -265,7 +265,7 @@ ssh
 ~~~
 ::
 
-    adt-run ... --- ssh -l joe -h testhost.example.com
+    adt-run ... --- ssh -l joe -H testhost.example.com
 
 This is a generic runner for an externally set up testbed which assumes
 nothing else than a working ssh connection. This can call a "setup

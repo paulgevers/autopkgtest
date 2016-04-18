@@ -3014,6 +3014,7 @@ class SchrootClickRunner(AdtTestCase):
             ['schroot', os.environ.get('ADT_TEST_SCHROOT_CLICK')], *args, **kwargs)
         self.click = os.path.join(test_dir, 'testclick_0.1_all.click')
         self.click_src = os.path.join(test_dir, 'testclick')
+        self.setup_cmd = 'adduser --no-create-home --system clickpkg; chown -R clickpkg:root /opt/click.ubuntu.com'
 
     def test_click_local_source_implicit(self):
         '''click package with local source, implicit arg type'''
@@ -3024,7 +3025,7 @@ class SchrootClickRunner(AdtTestCase):
 
         (code, out, err) = self.adt_run(
             ['-d', '-o', outdir, '--summary-file', sumfile,
-             '--setup-commands', 'adduser --system clickpkg',
+             '--setup-commands', self.setup_cmd,
              self.click_src, self.click])
         self.assertEqual(code, 4, err)
 
@@ -3056,7 +3057,7 @@ simple               PASS
 
         (code, out, err) = self.adt_run(
             ['-d', '--summary-file', sumfile,
-             '--setup-commands', 'adduser --system clickpkg',
+             '--setup-commands', self.setup_cmd,
              '--click-source', self.click_src, '--click', self.click])
         self.assertEqual(code, 4, err)
 
@@ -3077,7 +3078,7 @@ simple               PASS
 
         (code, out, err) = self.adt_run(
             ['-d', '--summary-file', sumfile,
-             '--setup-commands', 'adduser --system clickpkg',
+             '--setup-commands', self.setup_cmd,
              '--setup-commands', os.path.join(root_dir, 'setup-commands', 'ro-apt'),
              self.click_src, self.click])
         self.assertEqual(code, 4, err)
@@ -3105,7 +3106,7 @@ simple               PASS
         (code, out, err) = self.adt_run(
             ['-d', '--summary-file', sumfile,
              '--copy', '%s:/root/testclick.click' % self.click,
-             '--setup-commands', 'adduser --system clickpkg',
+             '--setup-commands', self.setup_cmd,
              '--setup-commands', 'click install --all-users /root/testclick.click',
              '--setup-commands', os.path.join(root_dir, 'setup-commands', 'ro-apt'),
              self.click_src, '--click', 'testclick'])
@@ -3129,7 +3130,7 @@ simple               PASS
         (code, out, err) = self.adt_run(
             ['-d', '--summary-file', sumfile,
              '--copy', '%s:/root/testclick.click' % self.click,
-             '--setup-commands', 'adduser --system clickpkg',
+             '--setup-commands', self.setup_cmd,
              '--setup-commands', 'click install --user $ADT_NORMAL_USER /root/testclick.click',
              '--setup-commands', os.path.join(root_dir, 'setup-commands', 'ro-apt'),
              self.click_src, '--click', 'testclick'])
@@ -3158,7 +3159,7 @@ simple               PASS
 
         (code, out, err) = self.adt_run(
             ['--summary-file', sumfile,
-             '--setup-commands', 'adduser --system clickpkg',
+             '--setup-commands', self.setup_cmd,
              '--override-control', custom_manifest,
              '--click-source', self.click_src, '--click', self.click])
         self.assertEqual(code, 0, err)

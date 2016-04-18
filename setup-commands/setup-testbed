@@ -180,6 +180,7 @@ if [ -z "${ADT_IS_SETUP_COMMAND:-}" ]; then
     [ ! -d "$root/usr/share/doc/cloud-init" ] || have_cloudinit=1
 
     # clean up bloat from Ubuntu cloud images when building an image
+    purge_list=''
     for p in accountsservice apt-xapian-index cryptsetup landscape-client \
              landscape-common open-vm-tools w3m vim-runtime aptitude-common \
              command-not-found-data manpages ntfs-3g sosreport \
@@ -189,9 +190,12 @@ if [ -z "${ADT_IS_SETUP_COMMAND:-}" ]; then
              lxcfs ppp pppconfig pppoeconf snapd \
              thermald xdg-user-dirs zerofree xml-core; do
         if [ -d "$root/usr/share/doc/$p" ]; then
-            chroot "$root" env DEBIAN_FRONTEND=noninteractive eatmydata apt-get --auto-remove -y purge $p || true
+            purge_list="$purge_list $p"
         fi
     done
+    if [ -n "$purge_list" ]; then
+        chroot "$root" env DEBIAN_FRONTEND=noninteractive eatmydata apt-get --auto-remove -y purge $purge_list || true
+    fi
 
     if [ "${ADT_SETUP_VM_UPGRADE:-}" != "false" ]; then
         DEBIAN_FRONTEND=noninteractive chroot "$root" eatmydata apt-get -o Dpkg::Options::="--force-confold" -y dist-upgrade

@@ -648,8 +648,11 @@ bad                  FAIL non-zero exit status 1
     def test_timeout_no_output(self):
         '''handling test timeout for test without any output'''
 
+        # use pid-specific name here to avoid clashes during multiple parallel runs
+        procname = 'adtsleep%i' % os.getpid()
+
         p = self.build_dsc('Tests: totest\nDepends:\n',
-                           {'totest': '#!/bin/bash\nexec -a adtsleep sleep 15\n'})
+                           {'totest': '#!/bin/bash\nexec -a %s sleep 15\n' % procname})
 
         time_start = time.time()
         (code, out, err) = self.adt_run(['--no-built-binaries', '--timeout-test=3', p])
@@ -662,7 +665,7 @@ bad                  FAIL non-zero exit status 1
         self.assertLess(duration, 10, err)
 
         # should not leave test process running
-        self.assertEqual(subprocess.getoutput('pidof adtsleep'), '')
+        self.assertEqual(subprocess.getoutput('pidof ' + procname), '')
 
     def test_timeout_long_test(self):
         '''long-running test with custom timeouts

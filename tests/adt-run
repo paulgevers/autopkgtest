@@ -99,7 +99,7 @@ class AdtTestCase(unittest.TestCase):
 
         os.environ['HOME'] = temp_home
 
-    def build_src(self, test_control, test_scripts):
+    def build_src(self, test_control, test_scripts, pkgname='testpkg'):
         '''Create source package tree with given tests.
 
          @test_control: contents of debian/tests/control
@@ -107,7 +107,7 @@ class AdtTestCase(unittest.TestCase):
 
         Return path to the source tree.
         '''
-        srcdir = os.path.join(self.workdir, 'testpkg')
+        srcdir = os.path.join(self.workdir, pkgname)
         shutil.copytree(os.path.join(test_dir, 'testpkg'), srcdir, symlinks=True)
         if test_control:
             dtdir = os.path.join(srcdir, 'debian', 'tests')
@@ -1234,6 +1234,27 @@ if ($pid) { # parent
 
         # should have expected parallel= option
         self.assertIn('DBO=parallel=17\n', out)
+        # should not have any test stderr
+        self.assertNotIn(' stderr ', err)
+
+    def test_multiple_actions(self):
+        '''multiple actions'''
+
+        p = self.build_src('Tests: p\nDepends:\n',
+                           {'p': '#!/bin/sh\necho I am fine\n'})
+        q = self.build_src('Tests: q\nDepends:\n',
+                           {'q': '#!/bin/sh\necho I am good\n'},
+                           pkgname='testpkg2')
+
+        (code, out, err) = self.adt_run(['-d', p + '/', q + '/'])
+        # tests should succeed
+        self.assertEqual(code, 0, err)
+        self.assertRegex(out, 'p\s+PASS', out)
+        self.assertRegex(out, 'q\s+PASS', out)
+
+        self.assertRegex(out, '(^|\n)I am fine\n')
+        self.assertRegex(out, '(^|\n)I am good\n')
+        self.assertRegex(err, 'testbed running kernel: Linux \d')
         # should not have any test stderr
         self.assertNotIn(' stderr ', err)
 

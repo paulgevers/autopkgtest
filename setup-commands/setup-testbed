@@ -14,8 +14,8 @@
 # See adt-virt-qemu(1) for details how to use this with vmdeboostrap.
 #
 # You can set $ADT_APT_PROXY; if set, it will be configured in apt in
-# /etc/apt/apt.conf.d/01proxy. If apt-cacher-ng is running on localhost, this
-# will be used automatically, unless $ADT_APT_PROXY is set.
+# /etc/apt/apt.conf.d/01proxy. If you have an apt proxy configured on the host,
+# it will be used automatically, unless $ADT_APT_PROXY is set.
 
 set -eu
 
@@ -152,13 +152,15 @@ fi
 echo "Acquire::Languages \"none\";" > "$root"/etc/apt/apt.conf.d/90nolanguages
 echo 'force-unsafe-io' > "$root"/etc/dpkg/dpkg.cfg.d/autopkgtest
 
-# auto-detect apt-cacher-ng on the host (in chroot mode)
+# detect apt proxy on the host (in chroot mode)
 if [ "$root" != "/" ] && [ -z "${ADT_APT_PROXY:-}" ]; then
     RES=`apt-config shell proxy Acquire::http::Proxy`
     if [ -n "$RES" ]; then
         eval $RES
-        if echo "$proxy" | egrep -q '(localhost|127\.0\.0\.[0-9]*):3142'; then
-            ADT_APT_PROXY="http://10.0.2.2:3142"
+        if echo "$proxy" | egrep -q '(localhost|127\.0\.0\.[0-9]*)'; then
+            ADT_APT_PROXY=$(echo "$proxy" | sed -r "s#localhost|127\.0\.0\.[0-9]*#10.0.2.2#")
+        elif [ -n "${proxy:-}" ]; then
+            ADT_APT_PROXY="$proxy"
         fi
     fi
 fi

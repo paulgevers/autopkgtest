@@ -1,3 +1,19 @@
+autopkgtest (4.0) UNRELEASED; urgency=medium
+
+  * Add new "autopkgtest" CLI. This provides a simplified CLI compared to the
+    now deprecated adt-run:
+    - It accepts only exactly one tested source package, and gives a proper
+      error if none or more than one (often unintend) is given
+    - It defaults to the current directory if that is a Debian source package
+    - The order of arguments is not relevant any more
+    - Built vs. unbuilt tree is now automatically detected
+    - The explicit --source, --click-source etc. options are gone, the type of
+      tested source/binary packages is detected automatically
+    The old "adt-run" CLI will still be available for some time.
+    (Closes: #795274, LP: #1453509)
+
+ -- Martin Pitt <mpitt@debian.org>  Sun, 05 Jun 2016 09:01:35 +0200
+
 autopkgtest (3.20.9) unstable; urgency=medium
 
   * Fix "apt-get source" version detection for very old source packages that

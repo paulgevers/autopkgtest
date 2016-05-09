@@ -44,7 +44,7 @@ programs =	virt-subproc/adt-virt-chroot \
 		tools/adt-buildvm-ubuntu-cloud \
 		tools/adt-build-lxc \
 		tools/adt-build-lxd \
-		runner/adt-run
+		runner/autopkgtest
 
 pythonfiles =	lib/VirtSubproc.py \
 		lib/adtlog.py \
@@ -75,6 +75,9 @@ install:
 	$(INSTALL_PROG) setup-commands/*[!~] $(datadir)/setup-commands
 	$(INSTALL_PROG) ssh-setup/[a-z]*[!~] $(datadir)/ssh-setup
 	$(INSTALL_DATA) ssh-setup/SKELETON $(datadir)/ssh-setup
+	# legacy CLI
+	ln -s autopkgtest $(bindir)/adt-run
+	$(INSTALL_DATA) runner/adt-run.1 $(man1dir)
 
 clean:
 	rm -f */*.pyc

@@ -1,8 +1,3 @@
 #!/bin/sh
-# Run adt-run from git checkout/source tree
-set -e
-
-# our root directory
-export AUTOPKGTEST_BASE=$(dirname $(readlink -f $0))
-export PATH="${AUTOPKGTEST_BASE}/runner:${AUTOPKGTEST_BASE}/virt-subproc:$PATH"
-exec adt-run "$@"
+# This wrapper is obsolete, call runner/adt-run directly
+exec $(dirname $(readlink -f $0))/runner/adt-run "$@"

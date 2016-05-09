@@ -64,7 +64,7 @@ class AdtTestCase(unittest.TestCase):
 
     def __init__(self, virt_args, *args, **kwargs):
         super(AdtTestCase, self).__init__(*args, **kwargs)
-        self.adt_run_path = os.path.join(root_dir, 'run-from-checkout')
+        self.adt_run_path = os.path.join(root_dir, 'runner', 'adt-run')
         self.virt_args = virt_args
         self.orig_home = os.path.expanduser('~')
 

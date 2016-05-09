@@ -1492,7 +1492,7 @@ Restrictions: needs-root
         # run this under C locale to test that UTF-8 debian/control is still
         # handled correctly
         (code, out, err) = self.adt_run(['-d', '-B', '--unbuilt-tree=' + p],
-                                        env={'LC_ALL': 'C'})
+                                        env={'LC_ALL': 'C', 'PATH': os.environ['PATH']})
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS')
 

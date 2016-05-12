@@ -41,10 +41,6 @@ root_dir = os.path.dirname(test_dir)
 sys.path.insert(1, test_dir)
 import testarchive
 
-# backwards compat shim for Python 3.1
-if not hasattr(unittest.TestCase, 'assertRegex'):
-    unittest.TestCase.assertRegex = unittest.TestCase.assertRegexpMatches
-
 # in some corner cases apt-get download might not be available in a build
 # environment, so check if this actually works
 have_apt = subprocess.call(['apt-get', 'download', 'gir1.2-json-1.0'],

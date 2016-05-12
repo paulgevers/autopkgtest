@@ -12,8 +12,8 @@ set -e
 # add testbed capabilities here (possibly dynamically), see
 # doc/README.virtualisation-server.rst
 CAPABILITIES='isolation-container revert revert-full-system'
-USER=adt_test
-SUDO_PASSWORD=adt_test
+USER=autopkgtest
+SUDO_PASSWORD=autopkgtest
 
 CONTAINER=""
 IMAGE=""
@@ -32,7 +32,7 @@ open() {
         exit 1
     fi
 
-    [ -n "$CONTAINER" ] || CONTAINER=`mktemp -u adt-testsuite-XXX`
+    [ -n "$CONTAINER" ] || CONTAINER=`mktemp -u autopkgtest-test-XXX`
 
     lxc launch --ephemeral "$IMAGE" "$CONTAINER" >/dev/null
 
@@ -43,8 +43,8 @@ open() {
     IP=$(echo "$OUT" | grep -o '10\.[0-9]\+\.[0-9]\+\.[0-9]\+')
 
     # create user
-    # password: python3 -c 'from crypt import *; print(crypt("adt_test", mksalt(METHOD_CRYPT)))'
-    lxc exec $CONTAINER -- useradd --password uMBz978HXrv8s --create-home $USER
+    # password: python3 -c 'from crypt import *; print(crypt("autopkgtest", mksalt(METHOD_CRYPT)))'
+    lxc exec $CONTAINER -- useradd --password FJfXYBhFnX6xA --create-home $USER
 
     # install SSH
     lxc exec $CONTAINER -- eatmydata apt-get install -y openssh-server >/dev/null 2>&1

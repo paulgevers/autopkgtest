@@ -1,4 +1,4 @@
-Tests: adt-run
+Tests: autopkgtest adt-run
 Depends: autopkgtest,
  autodep8,
  build-essential,

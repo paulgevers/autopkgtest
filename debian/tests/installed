@@ -12,7 +12,7 @@ Test-Command: echo Hello
 Depends:
 EOF
 
-adt-run --summary-file summary -B ./mypkg// --- null 2>&1
+autopkgtest --summary-file summary -B ./mypkg --- null 2>&1
 if ! grep -q '^command1[[:space:]]\+PASS$' summary; then
     echo "ERROR: Invalid summary file:" >&2
     cat summary >&2

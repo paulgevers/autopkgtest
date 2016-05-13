@@ -15,8 +15,8 @@ set +e
 # get sudo password early, to avoid asking for it in background jobs
 [ `id -u` -eq 0 ] || sudo true
 
-(OUT=$($MYDIR/adt-run QemuRunner SshRunnerSnappy 2>&1) || rc=$?; echo "=== $c ==="; echo "$OUT"; exit $rc) &
-(OUT=$($MYDIR/adt-run LxcRunner SshRunnerNoScript SshRunnerWithScript 2>&1) || rc=$?; echo "=== $c ==="; echo "$OUT"; exit $rc) &
-(OUT=$($MYDIR/adt-run NullRunner SchrootRunner SchrootClickRunner LxdRunner 2>&1) || rc=$?; echo "=== $c ==="; echo "$OUT"; exit $rc) &
-(OUT=$(sudo $MYDIR/adt-run NullRunnerRoot ChrootRunner 2>&1) || rc=$?; echo "=== $c ==="; echo "$OUT"; exit $rc) &
+(OUT=$($MYDIR/autopkgtest QemuRunner SshRunnerSnappy 2>&1) || rc=$?; echo "=== $c ==="; echo "$OUT"; exit $rc) &
+(OUT=$($MYDIR/autopkgtest LxcRunner SshRunnerNoScript SshRunnerWithScript 2>&1) || rc=$?; echo "=== $c ==="; echo "$OUT"; exit $rc) &
+(OUT=$($MYDIR/autopkgtest NullRunner SchrootRunner SchrootClickRunner LxdRunner 2>&1) || rc=$?; echo "=== $c ==="; echo "$OUT"; exit $rc) &
+(OUT=$(sudo $MYDIR/autopkgtest NullRunnerRoot ChrootRunner 2>&1) || rc=$?; echo "=== $c ==="; echo "$OUT"; exit $rc) &
 for c in `seq 5`; do wait; done

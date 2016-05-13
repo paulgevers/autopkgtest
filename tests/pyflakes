@@ -15,7 +15,7 @@ if ! type pyflakes3 >/dev/null 2>&1; then
     exit 0
 fi
 
-pyflakes3 $rootdir/lib $rootdir/runner/adt-run $testdir/adt-run \
+pyflakes3 $rootdir/lib $rootdir/runner/autopkgtest $testdir/autopkgtest $testdir/adt-run \
     $testdir/testdesc $testdir/run_args $testdir/*.py \
     $rootdir/tools/adt-buildvm-ubuntu-cloud
 

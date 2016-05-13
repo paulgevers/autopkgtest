@@ -9,4 +9,4 @@ for v in chroot null schroot lxc lxd qemu ssh; do
     pep8 --ignore E501,E402 $rootdir/virt-subproc/adt-virt-$v
 done
 
-pep8 --ignore E501,E402 $rootdir/runner/adt-run $testdir/adt-run $testdir/testdesc $testdir/run_args $testdir/*.py
+pep8 --ignore E501,E402 $rootdir/runner/autopkgtest $testdir/autopkgtest $testdir/adt-run $testdir/testdesc $testdir/run_args $testdir/*.py

@@ -33,5 +33,5 @@ cat <<EOF | su - $ADT_NORMAL_USER
 adt-build-lxd images:ubuntu/xenial/$arch
 export ADT_TEST_LXD=adt/ubuntu/xenial/$arch
 cd $(pwd)
-tests/adt-run LxdRunner
+tests/autopkgtest LxdRunner
 EOF

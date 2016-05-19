@@ -97,7 +97,7 @@ adt-run --setup-commands 'apt-get install -y eatmydata' dir/to/test/ \\
 .RE
 
 Run the tests of the
-.B libpng
+.B gdk-pixbuf
 package on the current Debian sid image from the
 .B images:
 remote on a remote armhf host:
@@ -105,18 +105,18 @@ remote on a remote armhf host:
 .RS
 .EX
 lxc remote add armhf-test http://armhf.testlab.example.com:8443
-adt-run --setup-commands=setup-testbed libpng --- \\
+adt-run --setup-commands=setup-testbed gdk-pixbuf --- \\
    lxd --remote armhf-test images:debian/sid/armhf
 .EE
 .RE
 
 Build a local image with standard setup commands pre-applied from a remote
-standard image, and run libpng test in it:
+standard image, and run gdk-pixbuf test in it:
 
 .RS
 .EX
 adt-build-lxd images:ubuntu/xenial/amd64
-adt-run libpng --- lxd adt/ubuntu/xenial/amd64
+adt-run gdk-pixbuf --- lxd adt/ubuntu/xenial/amd64
 
 .SH SEE ALSO
 \fBadt\-run\fR(1),

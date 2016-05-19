@@ -2079,13 +2079,13 @@ class DebTestsVirtFS(DebTestsAll):
         self.assertIn('@@@@@@ test bed setup', err)
         self.assertNotIn('rebooting testbed', err)
 
-    def test_apt_libpng(self):
-        '''apt source, libpng'''
+    def test_apt_source(self):
+        '''apt source'''
 
-        (code, out, err) = self.runtest(['-d', 'libpng'])
+        (code, out, err) = self.runtest(['-d', 'gdk-pixbuf'])
         # test should succeed
         self.assertEqual(code, 0, err)
-        self.assertRegex(out, 'Unpacking libpng.*-dev')
+        self.assertRegex(out, 'Unpacking libgdk-pixbuf.*-dev')
         self.assertRegex(out, 'build\s+PASS', out)
 
         # should show test stdout
@@ -3544,7 +3544,7 @@ class SshRunnerWithScript(AdtTestCase, DebTestsAll):
     def test_apt_source(self):
         '''apt source'''
 
-        (code, out, err) = self.runtest(['libpng'])
+        (code, out, err) = self.runtest(['gdk-pixbuf'])
         self.assertEqual(code, 0, out + err)
         self.assertRegex(out, 'build\s+PASS', out)
 

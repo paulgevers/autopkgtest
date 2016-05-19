@@ -9,6 +9,8 @@ autopkgtest (4.0) UNRELEASED; urgency=medium
     - Built vs. unbuilt tree is now automatically detected
     - The explicit --source, --click-source etc. options are gone, the type of
       tested source/binary packages is detected automatically
+    - The virtualization server is now separated with a double instead of a
+      tripe dash, as the former is standard Unix syntax.
     The old "adt-run" CLI will still be available for some time.
     (Closes: #795274, LP: #1453509)
 

@@ -175,7 +175,7 @@ def parse_args(arglist=None):
     global actions
     actions = []
 
-    usage = '%(prog)s [options] [testbinary ...] testsrc --- virt-server [options]'
+    usage = '%(prog)s [options] [testbinary ...] testsrc -- virt-server [options]'
     description = '''Test installed binary packages using the tests in testsrc.
 
 testsrc can be one of a:
@@ -188,7 +188,7 @@ testsrc can be one of a:
 
 You can specify local *.deb packages or a single *.click package to test.'''
 
-    epilog = '''The --- argument separates the autopkgtest actions and options
+    epilog = '''The -- argument separates the autopkgtest actions and options
 from the virt-server which provides the testbed. See e. g. man adt-virt-schroot
 for details.'''
 
@@ -315,12 +315,19 @@ for details.'''
 
     # split off virt-server args
     try:
-        sep = arglist.index('---')
+        sep = arglist.index('--')
+    except ValueError:
+        # backwards compatibility: allow three dashes
+        try:
+            sep = arglist.index('---')
+            adtlog.warning('Using --- to separate virt server arguments is deprecated; use -- instead')
+        except ValueError:
+            # still allow --help
+            sep = None
+            virt_args = None
+    if sep is not None:
         virt_args = arglist[sep + 1:]
         arglist = arglist[:sep]
-    except ValueError:
-        # still allow --help
-        virt_args = None
 
     # parse autopkgtest options
     args = parser.parse_args(arglist)
@@ -329,7 +336,7 @@ for details.'''
     adtlog.debug('virt-runner arguments: %s' % virt_args)
 
     if not virt_args:
-        parser.error('You must specify --- <virt-server>...')
+        parser.error('You must specify -- <virt-server>...')
 
     process_package_arguments(parser, args)
 

@@ -102,9 +102,9 @@ from Debian source package names).
 Examples with explicit click source directory:
 
 .RS
-autopkgtest src/myclick_0.1_all.click com.example.myclick src/myclick/ --- [...]
+autopkgtest src/myclick_0.1_all.click com.example.myclick src/myclick/ -- [...]
 .PP
-autopkgtest --installed-click com.example.myclick src/myclick/ --- [...]
+autopkgtest --installed-click com.example.myclick src/myclick/ -- [...]
 .RE
 
 Examples without click source directory; click package needs to have
@@ -112,9 +112,9 @@ Examples without click source directory; click package needs to have
 manifest entry:
 
 .RS
-autopkgtest src/myclick_0.1_all.click --- [...]
+autopkgtest src/myclick_0.1_all.click -- [...]
 .PP
-autopkgtest --installed-click com.example.myclick --- [...]
+autopkgtest --installed-click com.example.myclick -- [...]
 .RE
 
 .SH TEST OPTIONS
@@ -349,7 +349,7 @@ Show command line help and exit.
 .SH VIRTUALIZATION SERVER
 
 .TP
-\fB---\fR \fIvirt-server virt-server-arg\fR...
+\fB--\fR \fIvirt-server virt-server-arg\fR...
 Specifies the virtualisation regime server, as a command and arguments
 to invoke.
 .I virt-server

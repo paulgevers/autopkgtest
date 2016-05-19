@@ -47,9 +47,9 @@ class T(unittest.TestCase):
         adt_testbed.timeouts = self.orig_timeouts
 
     def parse(self, args, default_virt=True):
-        if default_virt and '---' not in args:
+        if default_virt and '--' not in args:
             # append a default virt server for convenience
-            args += ['---', 'null']
+            args += ['--', 'null']
         return autopkgtest_args.parse_args(args)
 
     @patch('argparse.ArgumentParser.error')
@@ -218,7 +218,7 @@ Files:
         (args, acts, virt) = self.parse(
             ['-q', '--shell-fail', '--timeout-copy=5', '--set-lang',
              'en_US.UTF-8', 'mypkg',
-             '---', 'adt-virt-foo', '-d', '-s', '--', '-d'])
+             '--', 'adt-virt-foo', '-d', '-s', '--', '-d'])
         self.assertEqual(args.verbosity, 0)
         self.assertEqual(args.shell_fail, True)
         self.assertEqual(adt_testbed.timeouts['copy'], 5)
@@ -231,7 +231,7 @@ Files:
     def test_timeouts(self):
         (args, acts, virt) = self.parse(
             ['--timeout-short=37', '--timeout-factor=0.5',
-             '--timeout-build=1337', 'mypkg', '---', 'null'])
+             '--timeout-build=1337', 'mypkg', '--', 'null'])
         # explicit, not affected by factor
         self.assertEqual(adt_testbed.timeouts['short'], 37)
         self.assertEqual(adt_testbed.timeouts['build'], 1337)
@@ -272,7 +272,7 @@ Files:
     def test_read_file_with_runner(self):
         argfile = os.path.join(self.workdir.name, 'myopts')
         with open(argfile, 'w') as f:
-            f.write('testsrc_1.dsc\n--timeout-copy=5\n---\nadt-virt-foo\n-d')
+            f.write('testsrc_1.dsc\n--timeout-copy=5\n--\nadt-virt-foo\n-d')
 
         (args, acts, virt) = self.parse(['-q', '@' + argfile, '-x'],
                                         default_virt=False)
@@ -331,10 +331,10 @@ Files:
         # has options
         self.assertIn('--no-built-binaries', out)
         # has virt server
-        self.assertIn('---', out)
+        self.assertIn('--', out)
 
     def test_no_auto_control(self):
-        (args, acts, virt) = self.parse(['--no-auto-control', 'mypkg', '---', 'adt-virt-foo'])
+        (args, acts, virt) = self.parse(['--no-auto-control', 'mypkg', '--', 'adt-virt-foo'])
         self.assertEqual(args.auto_control, False)
         self.assertEqual(acts, [('apt-source', 'mypkg', False)])
         self.assertEqual(virt, ['adt-virt-foo'])
@@ -347,11 +347,17 @@ Files:
         self.assertEqual(args.build_parallel, None)
 
     def test_no_virt_server(self):
-        self.err(['mypkg'], 'must specify.*---.*virt-server', default_virt=False)
+        self.err(['mypkg'], 'must specify.*--.*virt-server', default_virt=False)
 
     def test_empty_virt_server(self):
-        self.err(['mypkg', '---'], 'must specify.*---.*virt-server',
+        self.err(['mypkg', '--'], 'must specify.*--.*virt-server',
                  default_virt=False)
+
+    def test_triple_dash_virt_server(self):
+        (args, acts, virt) = self.parse([self.testdsc, '---', 'foo', '--fooarg'],
+                                       default_virt=False)
+        self.assertEqual(acts, [('source', self.testdsc, True)])
+        self.assertEqual(virt, ['foo', '--fooarg'])
 
 
 if __name__ == '__main__':

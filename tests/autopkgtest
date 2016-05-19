@@ -136,13 +136,13 @@ class AdtTestCase(unittest.TestCase):
         '''Run autopkgtest with given arguments with configured virt runner.
 
          @args: command line args of autopkgtest, excluding the command name
-                itself; "--- adt-virt-XXX" will be appended automatically
+                itself; "-- adt-virt-XXX" will be appended automatically
                 (called from the source tree)
 
         Return a tuple (exit_code, stdout, stderr).
         '''
         p = subprocess.Popen([self.exe] + args +
-                             ['---'] + (virt_args or self.virt_args),
+                             ['--'] + (virt_args or self.virt_args),
                              stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                              env=env)
         (out, err) = p.communicate()

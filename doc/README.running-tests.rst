@@ -43,7 +43,7 @@ these ingredients as arguments, in the following form:
 
 ::
 
-    autopkgtest [options] <source package> [<binary package> ...] --- <virt-server> [<virt-server options>]
+    autopkgtest [options] <source package> [<binary package> ...] -- <virt-server> [<virt-server options>]
 
 Specifying tests and packages
 -----------------------------
@@ -60,13 +60,13 @@ specifying tests and packages, so it is merely abbreviated as
    whichever distribution/release that ``/etc/apt/sources.list``
    configures:
 
-   ``autopkgtest mysrc ---`` *virt-server*
+   ``autopkgtest mysrc --`` *virt-server*
 
 -  Run tests from a local source tree, using the binary packages
    from the distribution. This is useful if you are creating or fixing
    tests, but the actual binary packages are fine:
 
-   ``autopkgtest -B packages/mysrc ---`` *virt-server*
+   ``autopkgtest -B packages/mysrc --`` *virt-server*
 
    If the source tree is already built, then tests which declare the
    ``build-needed`` restriction (see README.package-tests) don't need to
@@ -76,27 +76,27 @@ specifying tests and packages, so it is merely abbreviated as
    against the built binaries. This is useful if you need to fix a bug
    in the actual packages to make the tests succeed:
 
-   ``autopkgtest packages/mysrc ---`` *virt-server*
+   ``autopkgtest packages/mysrc --`` *virt-server*
 
 -  Same as above, but with specifying a built source package instead of
    a source tree:
 
-   ``autopkgtest packages/mysrc_*.dsc ---`` *virt-server*
+   ``autopkgtest packages/mysrc_*.dsc --`` *virt-server*
 
 -  Test new built binaries with a new source and avoid rebuilding them
    in virt-server. This is useful if you e. g. update a package to a new
    version and now want to check whether its tests still succeed:
 
-   ``autopkgtest -B packages/*.deb packages/mysrc_*.dsc ---`` *virt-server*
+   ``autopkgtest -B packages/*.deb packages/mysrc_*.dsc --`` *virt-server*
 
 -  The previous case can be simplified if you have a binary .changes
    from a previous build:
 
-   ``autopkgtest packages/*.changes ---`` *virt-server*
+   ``autopkgtest packages/*.changes --`` *virt-server*
 
 -  Run tests for a locally built click package:
 
-   ``autopkgtest myclickapp/ myclickapp_0.1_all.click ---`` *virt-server*
+   ``autopkgtest myclickapp/ myclickapp_0.1_all.click --`` *virt-server*
 
    Note that for this you need to specify a virt-server which has
    "click" itself and the click app's required framework already
@@ -105,7 +105,7 @@ specifying tests and packages, so it is merely abbreviated as
 
    ::
 
-     autopkgtest ubuntu-calculator-app/ com.ubuntu.calculator_1.3.283_all.click --- ssh -s adb
+     autopkgtest ubuntu-calculator-app/ com.ubuntu.calculator_1.3.283_all.click -- ssh -s adb
 
    (This is using the shipped ``adb`` setup script in
    ``/usr/share/autopkgtest/ssh-setup/``.)
@@ -120,13 +120,13 @@ specifying tests and packages, so it is merely abbreviated as
 
      autopkgtest --setup-commands ubuntu-touch-session \
              --setup-commands ro-apt \
-             myclickapp/ myclickapp_0.1_all.click --- lxc adt-xenial
+             myclickapp/ myclickapp_0.1_all.click -- lxc adt-xenial
 
    See the comments in the setup-commands scripts for details.
 
 - Run tests for an already installed click package:
 
-   ``autopkgtest --installed-click=com.example.myapp ---`` *virt-server*
+   ``autopkgtest --installed-click=com.example.myapp --`` *virt-server*
 
   This will work for click apps which have an ``x-source/vcs-bzr`` entry
   in their manifest. If that's not the case, you will need to explicitly
@@ -164,7 +164,7 @@ schroot
 ~~~~~~~
 ::
 
-    autopkgtest ... --- schroot schroot-name
+    autopkgtest ... -- schroot schroot-name
 
 Run tests in the specified schroot. You can use mk-sbuild(1) to
 conveniently create schroots, and run this as normal user if you
@@ -183,7 +183,7 @@ LXC
 ~~~
 ::
 
-    autopkgtest ... --- lxc container-name
+    autopkgtest ... -- lxc container-name
 
 Run tests in the specified LXC container. Containers provide full
 service and network isolation, but tests or packages cannot change the
@@ -207,7 +207,7 @@ QEMU
 ~~~~
 ::
 
-    autopkgtest ... --- qemu path/to/image
+    autopkgtest ... -- qemu path/to/image
 
 Run tests with QEMU/KVM using the specified image. The image will be run
 with a temporary overlay file system, thus it will never be modified and
@@ -226,7 +226,7 @@ null
 ~~~~
 ::
 
-    autopkgtest ... --- null
+    autopkgtest ... -- null
 
 This does not do any virtualization, but runs tests straight on the
 host. Beware that this will leave some clutter on your system (installed
@@ -238,7 +238,7 @@ chroot
 ~~~~~~
 ::
 
-    autopkgtest ... --- chroot /path/to/chroot
+    autopkgtest ... -- chroot /path/to/chroot
 
 Run tests in the specified chroot. You need to call autopkgtest as root for
 this. There is no automatic cleanup or revert for the chroot, so unless
@@ -248,7 +248,7 @@ ssh
 ~~~
 ::
 
-    autopkgtest ... --- ssh -l joe -H testhost.example.com
+    autopkgtest ... -- ssh -l joe -H testhost.example.com
 
 This is a generic runner for an externally set up testbed which assumes
 nothing else than a working ssh connection. This can call a "setup

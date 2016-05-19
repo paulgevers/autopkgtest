@@ -81,7 +81,7 @@ remote:
 
 .RS
 .EX
-autopkgtest my-package/ --- lxd images:debian/sid/amd64
+autopkgtest my-package/ -- lxd images:debian/sid/amd64
 .EE
 .RE
 
@@ -92,7 +92,7 @@ ensuring that eatmydata is installed:
 .RS
 .EX
 autopkgtest --setup-commands 'apt-get install -y eatmydata' dir/to/test/ \\
-  --- lxd desktop/i386
+  -- lxd desktop/i386
 .EE
 .RE
 
@@ -105,7 +105,7 @@ remote on a remote armhf host:
 .RS
 .EX
 lxc remote add armhf-test http://armhf.testlab.example.com:8443
-autopkgtest --setup-commands=setup-testbed gdk-pixbuf --- \\
+autopkgtest --setup-commands=setup-testbed gdk-pixbuf -- \\
    lxd --remote armhf-test images:debian/sid/armhf
 .EE
 .RE
@@ -116,7 +116,7 @@ standard image, and run gdk-pixbuf test in it:
 .RS
 .EX
 adt-build-lxd images:ubuntu/xenial/amd64
-autopkgtest gdk-pixbuf --- lxd adt/ubuntu/xenial/amd64
+autopkgtest gdk-pixbuf -- lxd adt/ubuntu/xenial/amd64
 
 .SH SEE ALSO
 \fBautopkgtest\fR(1),

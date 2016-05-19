@@ -130,7 +130,7 @@ and then run
 
 .RS
 .EX
-autopkgtest [...] --- adt-virt-ssh @testhost.cfg
+autopkgtest [...] -- adt-virt-ssh @testhost.cfg
 .EE
 .RE
 
@@ -246,7 +246,7 @@ Run the tests of the gdk-pixbuf source package on an existing "mytesthost":
 
 .RS
 .EX
-autopkgtest gdk-pixbuf --- ssh -H mytesthost -l joe -P /tmp/joe_password
+autopkgtest gdk-pixbuf -- ssh -H mytesthost -l joe -P /tmp/joe_password
 .EE
 .RE
 
@@ -257,7 +257,7 @@ pick a particular serial ID:
 .RS
 .EX
 autopkgtest ./ubuntu-calculator-app ./com.ubuntu.calculator_1.3.283_all.click \\
-  --- ssh -s /usr/share/autopkgtest/ssh-setup/adb -- -s 0123456789abcdef
+  -- ssh -s /usr/share/autopkgtest/ssh-setup/adb -- -s 0123456789abcdef
 .EE
 .RE
 

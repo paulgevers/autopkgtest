@@ -15,7 +15,7 @@ provides an autopkgtest virtualisation server using SSH.
 Normally
 .B adt-virt-ssh
 will be invoked by
-.BR adt-run .
+.BR autopkgtest .
 
 .B adt-virt-ssh
 
@@ -130,7 +130,7 @@ and then run
 
 .RS
 .EX
-adt-run [...] --- adt-virt-ssh @testhost.cfg
+autopkgtest [...] --- adt-virt-ssh @testhost.cfg
 .EE
 .RE
 
@@ -148,7 +148,7 @@ specification.
 
 .SH NOTES
 
-\fBadt-run\fR does not run \fBapt-get update\fR at the start of a package
+\fBautopkgtest\fR does not run \fBapt-get update\fR at the start of a package
 build, which can cause a build failure if you are using a development
 series template. You will need to run \fBapt-get update\fR in the template
 yourself (e. g. using \fB\-\-setup\-commands\fR).
@@ -246,7 +246,7 @@ Run the tests of the gdk-pixbuf source package on an existing "mytesthost":
 
 .RS
 .EX
-adt-run gdk-pixbuf --- ssh -H mytesthost -l joe -P /tmp/joe_password
+autopkgtest gdk-pixbuf --- ssh -H mytesthost -l joe -P /tmp/joe_password
 .EE
 .RE
 
@@ -256,13 +256,13 @@ pick a particular serial ID:
 
 .RS
 .EX
-adt-run ./ubuntu-calculator-app ./com.ubuntu.calculator_1.3.283_all.click \\
+autopkgtest ./ubuntu-calculator-app ./com.ubuntu.calculator_1.3.283_all.click \\
   --- ssh -s /usr/share/autopkgtest/ssh-setup/adb -- -s 0123456789abcdef
 .EE
 .RE
 
 .SH SEE ALSO
-.BR adt\-run (1),
+.BR autopkgtest (1),
 .BR /usr/share/doc/autopkgtest/ ,
 .BR /usr/share/autopkgtest/ssh-setup/SKELETON .
 

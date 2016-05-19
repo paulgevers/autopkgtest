@@ -14,7 +14,7 @@ provides an autopkgtest virtualisation server using QEMU.
 Normally
 .B adt-virt-qemu
 will be invoked by
-.BR adt-run .
+.BR autopkgtest .
 
 You always need to specify at least one QEMU VM image. If your VM needs
 more disks, you can specify arbitrarily many additional images which will
@@ -127,7 +127,7 @@ and then run
 
 .RS
 .EX
-adt-run [...] --- adt-virt-qemu @sid-desktop.cfg
+autopkgtest [...] --- adt-virt-qemu @sid-desktop.cfg
 .EE
 .RE
 
@@ -145,7 +145,7 @@ specification.
 
 .SH NOTES
 
-\fBadt-run\fR does not run \fBapt-get update\fR at the start of a package
+\fBautopkgtest\fR does not run \fBapt-get update\fR at the start of a package
 build, which can cause a build failure if you are using a development
 series template. You will need to run \fBapt-get update\fR in the template
 yourself (e. g. using \fB\-\-setup\-commands\fR).
@@ -229,12 +229,12 @@ Run the tests of the gdk-pixbuf source package, using an Ubuntu cloud image:
 
 .RS
 .EX
-adt-run gdk-pixbuf --- adt-virt-qemu adt-trusty-i386-cloud.img
+autopkgtest gdk-pixbuf --- adt-virt-qemu adt-trusty-i386-cloud.img
 .EE
 .RE
 
 .SH SEE ALSO
-\fBadt\-run\fR(1),
+\fBautopkgtest\fR(1),
 \fBadt\-virt-schroot\fR(1),
 \fBadt\-virt-lxc\fR(1),
 \fBadt-buildvm-ubuntu-cloud\fR(1),

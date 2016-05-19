@@ -32,7 +32,7 @@ Description: automatic as-installed testing for Debian packages
  virtualisation or containment system).  The tests are expected to be
  supplied in the corresponding Debian source package.
  .
- See adt-run(1) and /usr/share/doc/autopkgtest.
+ See autopkgtest(1) and /usr/share/doc/autopkgtest.
  Depending on which virtualization server you want to use, you need to
  install additional packages (schroot, lxc, lxd, or qemu-system)
  .

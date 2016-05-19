@@ -18,7 +18,7 @@ tools for use by autopkgtest.
 Normally
 .B adt-virt-lxc
 will be invoked by
-.BR adt-run .
+.BR autopkgtest .
 
 You can conveniently create a suitable container using the
 .BR adt-build-lxc (1)
@@ -51,7 +51,7 @@ work with LXC >= 2.x.
 
 .TP
 .BR \-s " | " \-\-sudo
-Run lxc-* commands through sudo; use this option if you run adt-run as normal
+Run lxc-* commands through sudo; use this option if you run autopkgtest as normal
 user, but need to run the container itself as root (if you use LXC system level
 containers).
 
@@ -80,7 +80,7 @@ specification.
 
 .SH NOTES
 
-\fBadt-run\fR does not run \fBapt-get update\fR at the start of a package
+\fBautopkgtest\fR does not run \fBapt-get update\fR at the start of a package
 build, which can cause a build failure if you are using a development release
 template. You will need to run \fBapt-get update\fR in the template yourself
 (e. g. using \fB\-\-setup\-commands\fR).
@@ -111,12 +111,12 @@ and with an ephemeral overlay for speed:
 
 .RS
 .EX
-adt-run \fIhello_2.8\-4.dsc\fR --- adt-virt-lxc -e \fIadt-sid\fR
+autopkgtest \fIhello_2.8\-4.dsc\fR --- adt-virt-lxc -e \fIadt-sid\fR
 .EE
 .RE
 
 .SH SEE ALSO
-\fBadt\-run\fR(1),
+\fBautopkgtest\fR(1),
 \fBadt\-build-lxc\fR(1),
 \fBlxc\-create\fR(1),
 \fB/usr/share/doc/autopkgtest/\fR.

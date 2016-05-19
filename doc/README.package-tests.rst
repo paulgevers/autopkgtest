@@ -1,9 +1,8 @@
 Autopkgtest - Defining tests for Debian packages
 ================================================
 
-This document describes how the autopkgtest tester core (the program
-``adt-run``) interprets and executes tests found in Debian source
-packages.
+This document describes how autopkgtest interprets and executes tests
+found in Debian source packages.
 
 Overview
 --------
@@ -236,7 +235,7 @@ Automatic test control file for known package types
 There are groups of similarly-structured packages for which the contents
 of ``debian/tests/control`` would be mostly identical, such as Perl or
 Ruby libraries. If ``debian/tests/control`` is absent, the ``autodep8``
-tool can generate an automatic control file. If installed, ``adt-run``
+tool can generate an automatic control file. If installed, ``autopkgtest``
 will automatically use it; this can be disabled with the
 ``--no-auto-control`` option.
 
@@ -263,7 +262,7 @@ The particular steps for a rebooting tests are:
   identifier. ``autopkgtest-reboot`` will cause the test to terminate
   (with ``SIGKILL``).
 
-- ``adt-run`` backs up the current state of the test source tree and
+- autopkgtest backs up the current state of the test source tree and
   any ``$ADT_ARTIFACTS`` that were created so far, reboots the
   testbed, and restores the test source tree and artifacts.
 

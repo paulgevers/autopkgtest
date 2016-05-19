@@ -3,7 +3,7 @@ Autopkgtest - Running tests
 
 This document gives an overview how to run tests with autopkgtest. It
 does not cover each detail, please consult the individual manpages like
-adt-run(1), adt-virt-schroot(1), etc. for all available options.
+autopkgtest(1), adt-virt-schroot(1), etc. for all available options.
 
 Ingredients for Debian packages:
 
@@ -13,8 +13,8 @@ Ingredients for Debian packages:
    There are plenty of existing package tests in Debian/Ubuntu which you
    can use as examples and inspiration, just look for a source package
    with a ``Testsuite: autopkgtest`` header, or the automatic test
-   running services `in Debian <http://ci.debian.net/>`_ and Ubuntu (e.
-   g. for `14.04 LTS <https://jenkins.qa.ubuntu.com/view/Trusty/view/AutoPkgTest/>`_).
+   running services `in Debian <http://ci.debian.net/>`_ and
+   `Ubuntu <http://autopkgtest.ubuntu.com>`_.
 
 -  A location for the source/tests: This can be a local source tree, a
    local .dsc, or "download with apt-get source".
@@ -36,19 +36,19 @@ provide various degrees of isolation, from "run on my local system"
 (fastest, but unsafe) to "run in a temporary virtual machine" (slowest,
 but highest possible isolation). These are described in detail below.
 
-adt-run
--------
-The ``adt-run`` program is the main program to run tests which gets all
+autopkgtest
+-----------
+The ``autopkgtest`` program is the main program to run tests which gets all
 these ingredients as arguments, in the following form:
 
 ::
 
-    adt-run [options] <source package> --- <virt-server> [<virt-server options>]
+    autopkgtest [options] <source package> [<binary package> ...] --- <virt-server> [<virt-server options>]
 
 Specifying tests and packages
 -----------------------------
 
-All possible options are explained in the adt-run(1) manpage. This
+All possible options are explained in the autopkgtest(1) manpage. This
 section shows the most common scenarios, with using "mysrc" as source
 package name. Note that specifying the virtualization server and its
 options is handled in the following section, and it is independent of
@@ -60,60 +60,43 @@ specifying tests and packages, so it is merely abbreviated as
    whichever distribution/release that ``/etc/apt/sources.list``
    configures:
 
-   ``adt-run mysrc ---`` *virt-server*
+   ``autopkgtest mysrc ---`` *virt-server*
 
--  Run tests from a local unbuilt source tree, using the binary packages
+-  Run tests from a local source tree, using the binary packages
    from the distribution. This is useful if you are creating or fixing
    tests, but the actual binary packages are fine:
 
-   ``adt-run -B --unbuilt-tree=packages/mysrc ---`` *virt-server*
+   ``autopkgtest -B packages/mysrc ---`` *virt-server*
 
-   Note that you can abbreviate ``--unbuilt-tree=`` with just the
-   directory with two(!) trailing slashes, i. e.
-
-   ``adt-run -B packages/mysrc// ---`` *virt-server*
-
--  Run tests from a local built source tree, using the binary packages
-   from the distribution:
-
-   ``adt-run -B --built-tree=packages/mysrc ---`` *virt-server*
-
-   Note that you can abbreviate ``--built-tree=`` with just the
-   directory with one(!) trailing slash, i. e.
-
-   ``adt-run -B packages/mysrc/ ---`` *virt-server*
-
-   Built vs. unbuilt only makes a difference for tests which declare the
-   ``build-needed`` restriction (see README.package-tests), in which
-   case ``--built-tree`` avoids having to re-build the source in the
-   virt-server.
+   If the source tree is already built, then tests which declare the
+   ``build-needed`` restriction (see README.package-tests) don't need to
+   re-build the source in the virt-server.
 
 -  Build a local source package in the virt-server, then run its tests
    against the built binaries. This is useful if you need to fix a bug
    in the actual packages to make the tests succeed:
 
-   ``adt-run packages/mysrc// ---`` *virt-server*
+   ``autopkgtest packages/mysrc ---`` *virt-server*
 
 -  Same as above, but with specifying a built source package instead of
    a source tree:
 
-   ``adt-run packages/mysrc_*.dsc ---`` *virt-server*
+   ``autopkgtest packages/mysrc_*.dsc ---`` *virt-server*
 
 -  Test new built binaries with a new source and avoid rebuilding them
    in virt-server. This is useful if you e. g. update a package to a new
    version and now want to check whether its tests still succeed:
 
-   ``adt-run -B packages/*.deb packages/mysrc_*.dsc ---`` *virt-server*
+   ``autopkgtest -B packages/*.deb packages/mysrc_*.dsc ---`` *virt-server*
 
 -  The previous case can be simplified if you have a binary .changes
    from a previous build:
 
-
-   ``adt-run packages/*.changes ---`` *virt-server*
+   ``autopkgtest packages/*.changes ---`` *virt-server*
 
 -  Run tests for a locally built click package:
 
-   ``adt-run myclickapp/ myclickapp_0.1_all.click ---`` *virt-server*
+   ``autopkgtest myclickapp/ myclickapp_0.1_all.click ---`` *virt-server*
 
    Note that for this you need to specify a virt-server which has
    "click" itself and the click app's required framework already
@@ -122,7 +105,7 @@ specifying tests and packages, so it is merely abbreviated as
 
    ::
 
-     adt-run ubuntu-calculator-app/ com.ubuntu.calculator_1.3.283_all.click --- ssh -s adb
+     autopkgtest ubuntu-calculator-app/ com.ubuntu.calculator_1.3.283_all.click --- ssh -s adb
 
    (This is using the shipped ``adb`` setup script in
    ``/usr/share/autopkgtest/ssh-setup/``.)
@@ -135,15 +118,15 @@ specifying tests and packages, so it is merely abbreviated as
 
    ::
 
-     adt-run --setup-commands ubuntu-touch-session \
+     autopkgtest --setup-commands ubuntu-touch-session \
              --setup-commands ro-apt \
-             myclickapp/ myclickapp_0.1_all.click --- lxc adt-utopic
+             myclickapp/ myclickapp_0.1_all.click --- lxc adt-xenial
 
    See the comments in the setup-commands scripts for details.
 
 - Run tests for an already installed click package:
 
-   ``adt-run --click=com.example.myapp ---`` *virt-server*
+   ``autopkgtest --installed-click=com.example.myapp ---`` *virt-server*
 
   This will work for click apps which have an ``x-source/vcs-bzr`` entry
   in their manifest. If that's not the case, you will need to explicitly
@@ -152,10 +135,10 @@ specifying tests and packages, so it is merely abbreviated as
 Output
 ------
 
-Unless you specify some options, adt-run just writes the logging, test
+Unless you specify some options, autopkgtest just writes the logging, test
 outputs, and test results to stdout/stderr and exits with code 0 on
 success, or some non-zero code if there were skipped or failed tests or
-problems with the virt-server. (See adt-run(1) for defined codes).
+problems with the virt-server. (See autopkgtest(1) for defined codes).
 
 For getting output files you have three choices:
 
@@ -163,7 +146,7 @@ For getting output files you have three choices:
 
    ``--summary-file=/path/to/summary.txt``.
 
--  If you want the complete output of adt-run in a file, use
+-  If you want the complete output of autopkgtest in a file, use
 
    ``-l /path/to/test.log`` (or the long option ``--log-file``)
 
@@ -181,7 +164,7 @@ schroot
 ~~~~~~~
 ::
 
-    adt-run ... --- schroot schroot-name
+    autopkgtest ... --- schroot schroot-name
 
 Run tests in the specified schroot. You can use mk-sbuild(1) to
 conveniently create schroots, and run this as normal user if you
@@ -200,7 +183,7 @@ LXC
 ~~~
 ::
 
-    adt-run ... --- lxc container-name
+    autopkgtest ... --- lxc container-name
 
 Run tests in the specified LXC container. Containers provide full
 service and network isolation, but tests or packages cannot change the
@@ -214,7 +197,7 @@ will never be modified and you can run several tests in parallel safely.
 Unless your test or architecture or RAM availability doesn't work with
 overlayfs, using -e is highly recommended for better performance.
 
-If your user can get root privileges with sudo, you can call adt-run as
+If your user can get root privileges with sudo, you can call autopkgtest as
 your normal user and specify ``-s`` (``--sudo``) so that the container
 can be started as root.
 
@@ -224,7 +207,7 @@ QEMU
 ~~~~
 ::
 
-    adt-run ... --- qemu path/to/image
+    autopkgtest ... --- qemu path/to/image
 
 Run tests with QEMU/KVM using the specified image. The image will be run
 with a temporary overlay file system, thus it will never be modified and
@@ -243,7 +226,7 @@ null
 ~~~~
 ::
 
-    adt-run ... --- null
+    autopkgtest ... --- null
 
 This does not do any virtualization, but runs tests straight on the
 host. Beware that this will leave some clutter on your system (installed
@@ -255,9 +238,9 @@ chroot
 ~~~~~~
 ::
 
-    adt-run ... --- chroot /path/to/chroot
+    autopkgtest ... --- chroot /path/to/chroot
 
-Run tests in the specified chroot. You need to call adt-run as root for
+Run tests in the specified chroot. You need to call autopkgtest as root for
 this. There is no automatic cleanup or revert for the chroot, so unless
 you can provide this by some other means, don't use this.
 
@@ -265,7 +248,7 @@ ssh
 ~~~
 ::
 
-    adt-run ... --- ssh -l joe -H testhost.example.com
+    autopkgtest ... --- ssh -l joe -H testhost.example.com
 
 This is a generic runner for an externally set up testbed which assumes
 nothing else than a working ssh connection. This can call a "setup

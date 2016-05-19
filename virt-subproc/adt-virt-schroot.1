@@ -13,7 +13,7 @@ provides an autopkgtest virtualisation server using a schroot.
 Normally
 .B adt\-virt\-schroot
 will be invoked by
-.BR adt\-run .
+.BR autopkgtest .
 
 The schroot name to use must be specified.
 .B Only
@@ -42,7 +42,7 @@ determine whether it can enter the schroot as root user; if so, it sets the
 .B root\-on\-testbed
 capability and you can run tests which require building or running as root. If
 your user is not allowed to do that, you need to run
-.B adt\-run
+.B autopkgtest
 as root instead.
 
 .SH OPTIONS
@@ -63,7 +63,7 @@ is as described by the AutomatedTesting virtualisation regime
 specification.
 
 .SH SEE ALSO
-.BR adt\-run (1),
+.BR autopkgtest (1),
 .BR adt\-virt-null (1),
 .BR schroot (1),
 .BR mk\-sbuild (1).

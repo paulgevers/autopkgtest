@@ -101,7 +101,7 @@ def setup_trace():
         tmp = opts.output_dir
     else:
         assert(tmp is None)
-        tmp = tempfile.mkdtemp(prefix='adt-run.output.')
+        tmp = tempfile.mkdtemp(prefix='autopkgtest.output.')
         os.chmod(tmp, 0o755)
 
     if opts.logfile is None and opts.output_dir is not None:
@@ -225,7 +225,7 @@ def cleanup():
             shutil.rmtree(tmp, ignore_errors=True)
     except:
         print_exception(sys.exc_info(),
-                        '\nadt-run: error cleaning up:\n')
+                        '%s\n: error cleaning up:\n' % os.path.basename(sys.argv[0]))
         sys.exit(20)
 
 

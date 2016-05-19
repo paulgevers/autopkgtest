@@ -30,7 +30,7 @@ VERSION=$(shell dpkg-parsechangelog  | sed -n '/^Version:/ {s/^.*: //; p}')
 override_dh_auto_install:
 	dh_auto_install
 
-	# put our package version into adt-run for logging
+	# put our package version into the code for logging
 	sed -i 's/@version@/$(VERSION)/' debian/autopkgtest/usr/share/autopkgtest/lib/adt_testbed.py
 
 override_dh_auto_test:

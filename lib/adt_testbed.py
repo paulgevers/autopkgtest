@@ -387,7 +387,7 @@ class Testbed:
     def execute(self, argv, xenv=[], stdout=None, stderr=None, kind='short'):
         '''Run command in testbed.
 
-        The commands stdout/err will be piped directly to adt-run and its log
+        The commands stdout/err will be piped directly to autopkgtest and its log
         files, unless redirection happens with the stdout/stderr arguments
         (passed to Popen).
 

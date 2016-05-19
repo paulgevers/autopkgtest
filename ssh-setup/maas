@@ -53,7 +53,7 @@ RELEASE=''
 ACQUIRE_ARGS=''
 DEBUG=""
 
-# This must be unique amongst concurrent adt-runs
+# This must be unique amongst concurrent autopkgtest runs
 APINAME="autopkgtest-$$"
 
 # MaaS substates

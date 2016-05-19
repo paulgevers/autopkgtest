@@ -64,7 +64,7 @@ def parse_args():
                         'errors in some corner cases)')
     parser.add_argument('-s', '--sudo', action='store_true',
                         help='Run lxc-* commands with sudo; use if you run '
-                        'adt-run as normal user')
+                        'autopkgtest as normal user')
     parser.add_argument('--name', help='container name (adt-virt-lxc-XXXXXX by default)')
     parser.add_argument('template', help='LXC container name that will be '
                         'used as a template')

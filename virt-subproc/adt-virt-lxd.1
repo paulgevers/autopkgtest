@@ -16,7 +16,7 @@ containers from the given LXD image name.
 Normally
 .B adt-virt-lxd
 will be invoked by
-.BR adt-run .
+.BR autopkgtest .
 
 .SH REQUIREMENTS
 .B adt-virt-lxd
@@ -81,7 +81,7 @@ remote:
 
 .RS
 .EX
-adt-run my-package/ --- lxd images:debian/sid/amd64
+autopkgtest my-package/ --- lxd images:debian/sid/amd64
 .EE
 .RE
 
@@ -91,7 +91,7 @@ ensuring that eatmydata is installed:
 
 .RS
 .EX
-adt-run --setup-commands 'apt-get install -y eatmydata' dir/to/test/ \\
+autopkgtest --setup-commands 'apt-get install -y eatmydata' dir/to/test/ \\
   --- lxd desktop/i386
 .EE
 .RE
@@ -105,7 +105,7 @@ remote on a remote armhf host:
 .RS
 .EX
 lxc remote add armhf-test http://armhf.testlab.example.com:8443
-adt-run --setup-commands=setup-testbed gdk-pixbuf --- \\
+autopkgtest --setup-commands=setup-testbed gdk-pixbuf --- \\
    lxd --remote armhf-test images:debian/sid/armhf
 .EE
 .RE
@@ -116,10 +116,10 @@ standard image, and run gdk-pixbuf test in it:
 .RS
 .EX
 adt-build-lxd images:ubuntu/xenial/amd64
-adt-run gdk-pixbuf --- lxd adt/ubuntu/xenial/amd64
+autopkgtest gdk-pixbuf --- lxd adt/ubuntu/xenial/amd64
 
 .SH SEE ALSO
-\fBadt\-run\fR(1),
+\fBautopkgtest\fR(1),
 \fBadt\-build-lxd\fR(1),
 \fB/usr/share/doc/autopkgtest/\fR.
 

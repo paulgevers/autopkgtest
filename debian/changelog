@@ -3,6 +3,9 @@ autopkgtest (3.20.7) UNRELEASED; urgency=medium
   * Use "gdk-pixbuf" as example package in tests and documentation instead of
     libpng. The latter recently got renamed.
   * setup-commands/setup-testbed: Don't install haveged into containers.
+  * tests/adt-run: Make SchrootClickRunner tests work with a standard schroot
+    (i. e.  no click and SDK preinstalled), by installing the packages via
+    --setup-command.
 
  -- Martin Pitt <mpitt@debian.org>  Thu, 19 May 2016 23:22:20 +0200
 

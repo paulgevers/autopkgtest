@@ -3033,7 +3033,7 @@ class SchrootClickRunner(AdtTestCase):
             ['schroot', os.environ.get('ADT_TEST_SCHROOT_CLICK')], *args, **kwargs)
         self.click = os.path.join(test_dir, 'testclick_0.1_all.click')
         self.click_src = os.path.join(test_dir, 'testclick')
-        self.setup_cmd = 'adduser --no-create-home --system clickpkg; chown -R clickpkg:root /opt/click.ubuntu.com'
+        self.setup_cmd = 'apt-get install -y --no-install-recommends click ubuntu-sdk-libs; adduser --no-create-home --system clickpkg; chown -R clickpkg:root /opt/click.ubuntu.com'
 
     def test_click_local_source_implicit(self):
         '''click package with local source, implicit arg type'''

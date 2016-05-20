@@ -172,7 +172,10 @@ fi
 # install some necessary packages
 # some tests use a lot of /dev/random, avoid hangs; eatmydata for fast dpkg, a
 # lot of tests expect a logind session
-chroot "$root" apt-get install -y haveged eatmydata dbus
+chroot "$root" apt-get install -y eatmydata dbus
+if ! systemd-detect-virt --quiet --container; then
+    chroot "$root" apt-get install -y haveged
+fi
 if [ ! -e "$root/usr/share/doc/libpam-systemd" ] && chroot "$root" apt-cache show libpam-systemd >/dev/null 2>&1; then
     chroot "$root" apt-get install -y libpam-systemd
 fi

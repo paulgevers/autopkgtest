@@ -10,6 +10,8 @@ autopkgtest (3.20.7) UNRELEASED; urgency=medium
     Ubuntu 16.10.
   * Exit with 12 ("bad package") instead of 16 ("temporary testbed failure")
     when --apt-source package does not exist.
+  * Move installed python modules from /usr/share/autopkgtest/python to
+    ../lib, to use the same name as in the source tree.
 
  -- Martin Pitt <mpitt@debian.org>  Thu, 19 May 2016 23:22:20 +0200
 

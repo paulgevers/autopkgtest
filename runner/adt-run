@@ -42,7 +42,7 @@ if os.path.isdir(os.path.join(our_base, 'virt-subproc')):
     sys.path.insert(0, os.path.join(our_base, 'lib'))
     os.environ['PATH'] = os.path.join(our_base, 'virt-subproc') + ':' + os.environ.get('PATH', '')
 else:
-    sys.path.insert(0, '/usr/share/autopkgtest/python')
+    sys.path.insert(0, '/usr/share/autopkgtest/lib')
 
 import adtlog
 import testdesc

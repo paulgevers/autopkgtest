@@ -17,13 +17,7 @@ except ImportError:
     from mock import patch
 
 test_dir = os.path.dirname(os.path.abspath(__file__))
-root_dir = os.path.dirname(test_dir)
-
-if os.path.exists(os.path.join(root_dir, 'lib', 'testdesc.py')):
-    our_base = os.path.join(root_dir, 'lib')
-else:
-    our_base = '/usr/share/autopkgtest/python'
-sys.path.insert(1, our_base)
+sys.path.insert(1, os.path.join(os.path.dirname(test_dir), 'lib'))
 
 import adtlog
 import testdesc

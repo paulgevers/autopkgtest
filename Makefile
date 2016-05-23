@@ -27,7 +27,7 @@ man1dir =	$(share)/man/man1
 pkgname =	autopkgtest
 docdir =	$(share)/doc/$(pkgname)
 datadir =	$(share)/$(pkgname)
-pythondir = 	$(datadir)/python
+pythondir = 	$(datadir)/lib
 
 INSTALL =	install
 INSTALL_DIRS =	$(INSTALL) -d

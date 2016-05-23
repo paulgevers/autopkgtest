@@ -136,7 +136,7 @@ class AdtTestCase(unittest.TestCase):
         '''Run autopkgtest with given arguments with configured virt runner.
 
          @args: command line args of autopkgtest, excluding the command name
-                itself; "-- adt-virt-XXX" will be appended automatically
+                itself; "-- virt" will be appended automatically
                 (called from the source tree)
 
         Return a tuple (exit_code, stdout, stderr).
@@ -441,7 +441,7 @@ class NullRunner(AdtTestCase, DebTestsAll, DebTestsFailureModes):
         self.assertNotIn('test_kernel_versions', info)
         self.assertEqual(info['custom_environment'],
                          ['ADT_COLOR=blue', 'ADT_SOMETHING=foo bar'])
-        self.assertEqual(info['virt_server'], 'adt-virt-null')
+        self.assertEqual(info['virt_server'], 'null')
         self.assertEqual(info['nproc'],
                          subprocess.check_output(['nproc'], universal_newlines=True).strip())
         if os.uname()[4] in ['x86_64', 'i686', 'armv7l']:
@@ -1105,7 +1105,7 @@ if ($pid) { # parent
         with open(os.path.join(outdir, 'testinfo.json')) as f:
             info = json.load(f)
         self.assertIn(os.uname().sysname, info['kernel_version'])
-        self.assertEqual(info['virt_server'], 'adt-virt-null')
+        self.assertEqual(info['virt_server'], 'null')
 
     def test_versioned_depends(self):
         '''Depends: with versions'''
@@ -1863,7 +1863,7 @@ Pin-Priority: 800
         self.assertRegex(out, 'pass\s+PASS', out)
 
         # should have debug messages
-        self.assertIn('adt-virt-chroot: DBG:', err)
+        self.assertIn('chroot: DBG:', err)
 
     def test_no_dpkg_query(self):
         '''testbed does not have dpkg-query'''
@@ -2446,7 +2446,7 @@ class QemuRunner(AdtTestCase, DebTestsVirtContainer):
         super(QemuRunner, self).__init__(['qemu', os.environ.get('ADT_TEST_QEMU')], *args, **kwargs)
 
     def test_options_and_baseimage(self):
-        '''adt-virt-qemu options and /dev/baseimage'''
+        '''autopkgtest-qemu options and /dev/baseimage'''
 
         p = self.build_src('Tests: t\nDepends:',
                            {'t': '''echo CPUNUM; nproc
@@ -2717,7 +2717,7 @@ class SchrootRunner(AdtTestCase, DebTestsVirtFS, DebTestsFailureModes):
         self.assertEqual(info['kernel_version'],
                          '%s %s %s' % (u.sysname, u.release, u.version))
         self.assertNotIn('test_kernel_versions', info)
-        self.assertEqual(info['virt_server'], 'adt-virt-schroot ' + self.virt_args[1])
+        self.assertEqual(info['virt_server'], 'schroot ' + self.virt_args[1])
 
         # check for cruft in outdir
         self.assertEqual(set(os.listdir(outdir)),

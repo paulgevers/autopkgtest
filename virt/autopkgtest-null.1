@@ -1,23 +1,23 @@
-.TH adt\-virt\-null 1 2007 autopkgtest "Linux Programmer's Manual"
+.TH autopkgtest-null 1 2007 autopkgtest "Linux Programmer's Manual"
 .SH NAME
-adt\-virt\-null \- autopkgtest null virtualisation server
+autopkgtest-null \- autopkgtest null virtualisation server
 .SH SYNOPSIS
-.B adt\-virt\-null
+.BI "autopkgtest " "[...] " "-- null"
 .RI [ options ]
 .br
 .SH DESCRIPTION
-.B adt\-virt\-null
+.B autopkgtest-null
 provides a dummy autopkgtest virtualisation server which does not
 actually offer any kind of separation between host and testbed.
 
 Normally
-.B adt-virt-null
+.B autopkgtest-null
 will be invoked by
 .BR autopkgtest .
 
 There is of course no locking; nothing prevents multiple simultaneous
 programs from invoking
-.B adt-virt-null
+.B autopkgtest-null
 so as to reuse the same system as a testbed.
 .SH OPTIONS
 .TP
@@ -26,7 +26,7 @@ Enables debugging output.  Probably not hugely interesting.
 
 .SH INPUT, OUTPUT AND EXIT STATUS
 The behaviour of
-.B adt-virt-null
+.B autopkgtest-null
 is as described by the AutomatedTesting virtualisation regime
 specification.
 

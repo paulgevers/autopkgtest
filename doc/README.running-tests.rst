@@ -3,7 +3,7 @@ Autopkgtest - Running tests
 
 This document gives an overview how to run tests with autopkgtest. It
 does not cover each detail, please consult the individual manpages like
-autopkgtest(1), adt-virt-schroot(1), etc. for all available options.
+autopkgtest(1), autopkgtest-schroot(1), etc. for all available options.
 
 Ingredients for Debian packages:
 
@@ -177,7 +177,7 @@ which are already open at the host. If your test does not need to do
 these things this is the recommended server, as schroots are also useful
 for other tasks like building packages with sbuild.
 
-See adt-virt-schroot(1) manpage.
+See autopkgtest-schroot(1) manpage.
 
 LXC
 ~~~
@@ -201,7 +201,7 @@ If your user can get root privileges with sudo, you can call autopkgtest as
 your normal user and specify ``-s`` (``--sudo``) so that the container
 can be started as root.
 
-See adt-virt-lxc(1) manpage. This also explains how to build containers.
+See autopkgtest-lxc(1) manpage. This also explains how to build containers.
 
 QEMU
 ~~~~
@@ -219,7 +219,7 @@ and breaks-testbed capabilities. But it is also the one with the biggest
 overhead and only works well on architectures with KVM acceleration (i.
 e. mostly x86).
 
-See adt-virt-qemu(1) manpage. This also explains how to build suitable
+See autopkgtest-qemu(1) manpage. This also explains how to build suitable
 images, and the requirements of the guest.
 
 null
@@ -232,7 +232,7 @@ This does not do any virtualization, but runs tests straight on the
 host. Beware that this will leave some clutter on your system (installed
 test or build dependency packages, configuration changes that the tests
 might make, etc.). It is not able to run tests with the "breaks-testbed"
-restriction. See adt-virt-null(1) manpage.
+restriction. See autopkgtest-null(1) manpage.
 
 chroot
 ~~~~~~

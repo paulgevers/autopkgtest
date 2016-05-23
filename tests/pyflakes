@@ -20,5 +20,5 @@ pyflakes3 $rootdir/lib $rootdir/runner/autopkgtest $testdir/autopkgtest $testdir
     $rootdir/tools/adt-buildvm-ubuntu-cloud
 
 for v in chroot null schroot lxc lxd qemu ssh; do
-    pyflakes3 $rootdir/virt-subproc/adt-virt-$v
+    pyflakes3 $rootdir/virt/$v
 done

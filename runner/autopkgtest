@@ -37,11 +37,12 @@ from debian import deb822
 
 # support running out of git and from packaged install
 our_base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-if os.path.isdir(os.path.join(our_base, 'virt-subproc')):
+if os.path.isdir(os.path.join(our_base, 'virt')):
     sys.path.insert(0, os.path.join(our_base, 'lib'))
-    os.environ['PATH'] = os.path.join(our_base, 'virt-subproc') + ':' + os.environ.get('PATH', '')
+    vserver_dir = os.path.join(our_base, 'virt')
 else:
     sys.path.insert(0, '/usr/share/autopkgtest/lib')
+    vserver_dir = '/usr/share/autopkgtest/virt'
 
 import adtlog
 import testdesc
@@ -646,9 +647,11 @@ def main():
         # meaning for that already
         sys.exit(20)
 
-    # vserver can be given without "adt-virt-" prefix
-    if '/' not in vserver_args[0] and not vserver_args[0].startswith('adt-virt-'):
-        vserver_args[0] = 'adt-virt-' + vserver_args[0]
+    # add default path to virt server; copy so that the original value is
+    # retained for testinfo.json
+    vargs = list(vserver_args)
+    if '/' not in vargs[0]:
+        vargs[0] = os.path.join(vserver_dir, vargs[0])
 
     # ensure proper cleanup on signals
     signal.signal(signal.SIGTERM, signal_handler)
@@ -656,7 +659,7 @@ def main():
 
     try:
         setup_trace()
-        testbed = adt_testbed.Testbed(vserver_argv=vserver_args,
+        testbed = adt_testbed.Testbed(vserver_argv=vargs,
                                       output_dir=tmp,
                                       user=opts.user,
                                       setup_commands=opts.setup_commands,

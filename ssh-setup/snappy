@@ -1,6 +1,6 @@
 #!/bin/sh
-# adt-virt-ssh setup script that builds and uses an Ubuntu Snappy testbed in
-# QEMU. See "man adt-virt-ssh" for details, and http://www.ubuntu.com/snappy
+# autopkgtest-ssh setup script that builds and uses an Ubuntu Snappy testbed in
+# QEMU. See "man autopkgtest-ssh" for details, and http://www.ubuntu.com/snappy
 # for information about Snappy.
 #
 # Options:

@@ -1,18 +1,18 @@
-.TH adt\-virt-qemu 1 2014 "Linux Programmer's Manual"
+.TH autopkgtest-qemu 1 2014 "Linux Programmer's Manual"
 .SH NAME
-adt\-virt\-qemu \- autopkgtest virtualisation server using QEMU
+autopkgtest-qemu \- autopkgtest virtualisation server using QEMU
 
 .SH SYNOPSIS
-.B adt\-virt\-qemu
+.BI "autopkgtest " "[...] " "-- qemu"
 .RI [ options ]
 .I image \fR[\fIro-image\fR ...]
 
 .SH DESCRIPTION
-.B adt-virt-qemu
+.B autopkgtest-qemu
 provides an autopkgtest virtualisation server using QEMU.
 
 Normally
-.B adt-virt-qemu
+.B autopkgtest-qemu
 will be invoked by
 .BR autopkgtest .
 
@@ -20,7 +20,7 @@ You always need to specify at least one QEMU VM image. If your VM needs
 more disks, you can specify arbitrarily many additional images which will
 be added in order.
 
-.B adt-virt-qemu
+.B autopkgtest-qemu
 does
 .B not modify
 the given images, but will instead create a temporary overlay for the
@@ -37,7 +37,7 @@ will not be accessible between calling
 and the next boot, thus make sure to stop accessing it before.
 
 .SH REQUIREMENTS
-.B adt-virt-qemu
+.B autopkgtest-qemu
 assumes that you have already prepared a suitable Debian based QEMU image (see
 .B BUILDING IMAGES
 below for how to create them). But you can use any VM which has
@@ -127,7 +127,7 @@ and then run
 
 .RS
 .EX
-autopkgtest [...] -- adt-virt-qemu @sid-desktop.cfg
+autopkgtest [...] -- qemu @sid-desktop.cfg
 .EE
 .RE
 
@@ -139,7 +139,7 @@ argument value.
 
 .SH INPUT, OUTPUT AND EXIT STATUS
 The behaviour of
-.B adt-virt-qemu
+.B autopkgtest-qemu
 is as described by the AutomatedTesting virtualisation regime
 specification.
 
@@ -154,7 +154,7 @@ If the
 .B --qemu-command
 option has not been specified and no custom CPU type was selected in
 .BR --qemu-options ,
-.B adt-virt-qemu
+.B autopkgtest-qemu
 will try to enable nested KVM support by default on x86_64 platforms
 if the hardware supports this. To fully enable this, one needs to
 additionally set some module parameters on the host, by creating a file
@@ -184,11 +184,11 @@ vmdebootstrap --verbose --serial-console --distribution=sid \\
 .br
    --customize=/usr/share/autopkgtest/setup-commands/setup-testbed \\
 .br
-   --user=adt/adt --size=10000000000 --grub --image=adt-sid.raw
+   --user=adt/adt --size=10000000000 --grub --image=autopkgtest-sid.raw
 .br
-qemu-img convert -O qcow2 adt-sid.raw  adt-sid.img
+qemu-img convert -O qcow2 autopkgtest-sid.raw  autopkgtest-sid.img
 .br
-rm adt-sid.raw
+rm autopkgtest-sid.raw
 .EE
 .RE
 
@@ -229,20 +229,20 @@ Run the tests of the gdk-pixbuf source package, using an Ubuntu cloud image:
 
 .RS
 .EX
-autopkgtest gdk-pixbuf -- adt-virt-qemu adt-trusty-i386-cloud.img
+autopkgtest gdk-pixbuf -- qemu adt-trusty-i386-cloud.img
 .EE
 .RE
 
 .SH SEE ALSO
 \fBautopkgtest\fR(1),
-\fBadt\-virt-schroot\fR(1),
-\fBadt\-virt-lxc\fR(1),
+\fBautopkgtest-schroot\fR(1),
+\fBautopkgtest-lxc\fR(1),
 \fBadt-buildvm-ubuntu-cloud\fR(1),
 \fBvmdebootstrap\fR(8),
 \fB/usr/share/doc/autopkgtest/\fR.
 
 .SH AUTHORS AND COPYRIGHT
-.B adt-virt-qemu
+.B autopkgtest-qemu
 was written by Martin Pitt <martin.pitt@ubuntu.com>
 
 This manpage is part of autopkgtest, a tool for testing Debian binary

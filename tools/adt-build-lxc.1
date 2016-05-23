@@ -1,6 +1,6 @@
 .TH adt-build-lxc 1 2014 "Linux Programmer's Manual"
 .SH NAME
-adt-build-lxc \- Create or update autopkgtest container for adt\-virt-lxc
+adt-build-lxc \- Create or update autopkgtest container for autopkgtest-lxc
 
 .SH SYNOPSIS
 .B adt-build-lxc
@@ -10,7 +10,7 @@ adt-build-lxc \- Create or update autopkgtest container for adt\-virt-lxc
 .SH DESCRIPTION
 .B adt-build-lxc
 creates or updates an LXC container \fBadt-\fIrelease\fR which is suitable for
-autopkgtest's LXC runner \fBadt-virt-lxc\fR(1).
+autopkgtest's LXC runner \fBautopkgtest-lxc\fR(1).
 
 It calls
 .B lxc-create
@@ -37,7 +37,7 @@ containers with ephemeral overlays (i. e. using the
 .B --ephemeral
 option), but it does work in general. This update process does not interfere at
 all if you use
-.B adt-virt-lxc
+.B autopkgtest-lxc
 with cloning.
 
 Note that you need to call this as root, unless you set up LXC to allow
@@ -58,7 +58,7 @@ the container will automatically use this, otherwise there is no default.
 $ sudo adt-build-lxc ubuntu trusty i386
 
 .SH SEE ALSO
-\fBadt\-virt-lxc\fR(1),
+\fBautopkgtest-lxc\fR(1),
 \fBautopkgtest\fR(1),
 \fBlxc-create\fR(1),
 \fB/usr/share/doc/autopkgtest/\fR.

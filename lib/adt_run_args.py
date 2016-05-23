@@ -230,7 +230,7 @@ what happens with package arguments:
 ''' % action_parser.format_help().split('\n', 1)[1]
 
     epilog = '''The --- argument separates the adt-run actions and options from the
-virt-server which provides the testbed. See e. g. man adt-virt-schroot for
+virt-server which provides the testbed. See e. g. man autopkgtest-schroot for
 details.'''
 
     parser = argparse.ArgumentParser(
@@ -360,6 +360,10 @@ details.'''
     if not virt_args:
         parser.error('You must specify --- <virt-server>...')
 
+    # for backwards compat, vserver can be given with "adt-virt-" prefix
+    if virt_args and '/' not in virt_args[0] and virt_args[0].startswith('adt-virt-'):
+        virt_args[0] = virt_args[0][9:]
+
     action_parser.parse_args(action_args)
 
     # verify --env validity
@@ -378,7 +382,7 @@ details.'''
         else:
             adt_testbed.timeouts[k] = v
 
-    # this timeout is for adt-virt-*, so pass it down via environment
+    # this timeout is for the virt server, so pass it down via environment
     os.environ['ADT_VIRT_COPY_TIMEOUT'] = str(adt_testbed.timeouts['copy'])
 
     if not actions:

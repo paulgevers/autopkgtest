@@ -1,6 +1,6 @@
 #!/bin/sh
-# Skeleton for an adt-virt-ssh setup script that configures a testbed.
-# See man adt-virt-ssh for details.
+# Skeleton for an autopkgtest-ssh setup script that configures a testbed.
+# See man autopkgtest-ssh for details.
 
 set -e
 
@@ -15,7 +15,7 @@ SUDO_PASSWORD=''
 # success
 # required: login, hostname
 # optional: identity, password, port, options, capabilities, extraopts
-# see adt-virt-ssh(1) for details
+# see autopkgtest-ssh(1) for details
 open() {
     cat<<EOF
 login=<username>

@@ -1,25 +1,25 @@
-.TH adt\-virt-lxd 1 2013 "Linux Programmer's Manual"
+.TH autopkgtest-lxd 1 2013 "Linux Programmer's Manual"
 .SH NAME
-adt\-virt\-lxd \- autopkgtest virtualisation server using LXD
+autopkgtest-lxd \- autopkgtest virtualisation server using LXD
 
 .SH SYNOPSIS
-.B adt\-virt\-lxd
+.BI "autopkgtest " "[...] " "-- lxd"
 .RI [ options ]
 .I image
 .RI [ "-- extra lxc launch args..." ]
 
 .SH DESCRIPTION
-.B adt-virt-lxd
+.B autopkgtest-lxd
 provides an autopkgtest virtualisation server using LXD. It creates temporary
 containers from the given LXD image name.
 
 Normally
-.B adt-virt-lxd
+.B autopkgtest-lxd
 will be invoked by
 .BR autopkgtest .
 
 .SH REQUIREMENTS
-.B adt-virt-lxd
+.B autopkgtest-lxd
 makes no strict assumptions about the image. However, it is highly
 recommended that the image has eatmydata installed, or at least that gets
 installed via setup commands.
@@ -58,7 +58,7 @@ gets appended verbatim to
 
 .SH INPUT, OUTPUT AND EXIT STATUS
 The behaviour of
-.B adt-virt-lxd
+.B autopkgtest-lxd
 is as described by the AutomatedTesting virtualisation regime
 specification.
 
@@ -124,7 +124,7 @@ autopkgtest gdk-pixbuf -- lxd adt/ubuntu/xenial/amd64
 \fB/usr/share/doc/autopkgtest/\fR.
 
 .SH AUTHORS AND COPYRIGHT
-.B adt-virt-lxd
+.B autopkgtest-lxd
 was written by Martin Pitt <martin.pitt@ubuntu.com>.
 
 This manpage is part of autopkgtest, a tool for testing Debian binary

@@ -6,7 +6,7 @@ rootdir="$(dirname $testdir)"
 pep8 --ignore E402,E501 $rootdir/lib/*.py $rootdir/tools/adt-buildvm-ubuntu-cloud
 
 for v in chroot null schroot lxc lxd qemu ssh; do
-    pep8 --ignore E501,E402 $rootdir/virt-subproc/adt-virt-$v
+    pep8 --ignore E501,E402 $rootdir/virt/$v
 done
 
 pep8 --ignore E501,E402 $rootdir/runner/autopkgtest $testdir/autopkgtest $testdir/adt-run $testdir/testdesc $testdir/run_args $testdir/*.py

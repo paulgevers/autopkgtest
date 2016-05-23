@@ -28,23 +28,27 @@ pkgname =	autopkgtest
 docdir =	$(share)/doc/$(pkgname)
 datadir =	$(share)/$(pkgname)
 pythondir = 	$(datadir)/lib
+virtdir = 	$(datadir)/virt
 
 INSTALL =	install
 INSTALL_DIRS =	$(INSTALL) -d
 INSTALL_PROG =	$(INSTALL) -m 0755
 INSTALL_DATA =	$(INSTALL) -m 0644
 
-programs =	virt-subproc/adt-virt-chroot \
-		virt-subproc/adt-virt-null \
-		virt-subproc/adt-virt-schroot \
-		virt-subproc/adt-virt-lxc \
-		virt-subproc/adt-virt-lxd \
-		virt-subproc/adt-virt-qemu \
-		virt-subproc/adt-virt-ssh \
-		tools/adt-buildvm-ubuntu-cloud \
+virts =		virt/chroot \
+		virt/lxc \
+		virt/lxd \
+		virt/null \
+		virt/qemu \
+		virt/schroot \
+		virt/ssh \
+		$(NULL)
+
+programs =	tools/adt-buildvm-ubuntu-cloud \
 		tools/adt-build-lxc \
 		tools/adt-build-lxd \
-		runner/autopkgtest
+		runner/autopkgtest \
+		$(NULL)
 
 pythonfiles =	lib/VirtSubproc.py \
 		lib/adtlog.py \
@@ -64,10 +68,15 @@ htmlfiles =	$(patsubst %.rst,%.html,$(rstfiles))
 all: $(htmlfiles)
 
 install:
-	$(INSTALL_DIRS) $(bindir) $(docdir) $(man1dir) $(pythondir) $(datadir)/setup-commands $(datadir)/ssh-setup
+	$(INSTALL_DIRS) $(bindir) $(docdir) $(man1dir) $(pythondir) $(virtdir) $(datadir)/setup-commands $(datadir)/ssh-setup
 	set -e; for f in $(programs); do \
 		$(INSTALL_PROG) $$f $(bindir); \
 		test ! -f $$f.1 || $(INSTALL_DATA) $$f.1 $(man1dir); \
+		done
+	set -e; for f in $(virts); do \
+		$(INSTALL_PROG) $$f $(virtdir); \
+		man=$$(dirname $$f)/autopkgtest-$$(basename $$f).1; \
+		test ! -f $$man || $(INSTALL_DATA) $$man $(man1dir); \
 		done
 	$(INSTALL_DATA) $(pythonfiles) $(pythondir)
 	$(INSTALL_DATA) CREDITS $(docdir)

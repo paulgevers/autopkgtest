@@ -189,7 +189,7 @@ testsrc can be one of a:
 You can specify local *.deb packages or a single *.click package to test.'''
 
     epilog = '''The -- argument separates the autopkgtest actions and options
-from the virt-server which provides the testbed. See e. g. man adt-virt-schroot
+from the virt-server which provides the testbed. See e. g. man autopkgtest-schroot
 for details.'''
 
     parser = argparse.ArgumentParser(
@@ -356,7 +356,7 @@ for details.'''
         else:
             adt_testbed.timeouts[k] = v
 
-    # this timeout is for adt-virt-*, so pass it down via environment
+    # this timeout is for the virt server, so pass it down via environment
     os.environ['ADT_VIRT_COPY_TIMEOUT'] = str(adt_testbed.timeouts['copy'])
 
     # if we have --setup-commands and it points to a file, read its contents

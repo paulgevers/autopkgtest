@@ -1,17 +1,17 @@
-.TH adt\-virt\-schroot 1 2013 autopkgtest "Linux Programmer's Manual"
+.TH autopkgtest-schroot 1 2013 autopkgtest "Linux Programmer's Manual"
 
 .SH NAME
-adt\-virt\-schroot \- autopkgtest virtualisation server using a schroot
+autopkgtest-schroot \- autopkgtest virtualisation server using a schroot
 .SH SYNOPSIS
-.B adt\-virt\-schroot
+.BI "autopkgtest " "[...] " "-- schroot"
 .RI [ options ]
 .I schroot\-name
 
 .SH DESCRIPTION
-.B adt\-virt\-schroot
+.B autopkgtest-schroot
 provides an autopkgtest virtualisation server using a schroot.
 Normally
-.B adt\-virt\-schroot
+.B autopkgtest-schroot
 will be invoked by
 .BR autopkgtest .
 
@@ -23,7 +23,7 @@ or
 .B type=directory
 and a configured
 .BR union\-type .
-.B adt\-virt\-schroot
+.B autopkgtest-schroot
 will refuse to work with a static "directory" type schroot.
 
 You can use
@@ -34,9 +34,9 @@ to conveniently create schroots.
 If you can access the schroot as
 your user (according to the schroot's \fBusers\fR/\fBgroups\fR configuration),
 you should run
-.B adt\-virt\-schroot (and \fBadt\-test\fR) as normal user, too.
+.B autopkgtest-schroot (and \fBautopkgtest itself\fR) as normal user, too.
 
-.B adt\-virt\-schroot
+.B autopkgtest-schroot
 reads the schroot configuration (\fBroot-users\fR/\fBroot-groups\fR) to
 determine whether it can enter the schroot as root user; if so, it sets the
 .B root\-on\-testbed
@@ -58,13 +58,13 @@ Enables debugging output.
 
 .SH INPUT, OUTPUT AND EXIT STATUS
 The behaviour of
-.B adt-virt-schroot
+.B autopkgtest-schroot
 is as described by the AutomatedTesting virtualisation regime
 specification.
 
 .SH SEE ALSO
 .BR autopkgtest (1),
-.BR adt\-virt-null (1),
+.BR autopkgtest-null (1),
 .BR schroot (1),
 .BR mk\-sbuild (1).
 

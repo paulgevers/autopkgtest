@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# adt-virt-ssh is part of autopkgtest
+# autopkgtest-ssh is part of autopkgtest
 # autopkgtest is a tool for testing Debian binary packages
 #
 # autopkgtest is Copyright (C) 2006-2015 Canonical Ltd.
@@ -36,7 +36,6 @@ import time
 import subprocess
 import socket
 
-sys.path.insert(0, '/usr/share/autopkgtest/lib')
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))), 'lib'))
 
@@ -229,7 +228,7 @@ def host_setup(command):
 
     try:
         if workdir is None:
-            workdir = tempfile.mkdtemp(prefix='adt-virt-ssh.')
+            workdir = tempfile.mkdtemp(prefix='autopkgtest-ssh.')
             os.chmod(workdir, 0o755)
         execute_setup_script(command)
         build_sshcmd()

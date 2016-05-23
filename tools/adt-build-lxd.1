@@ -1,6 +1,6 @@
 .TH adt-build-lxd 1 2015 "Linux Programmer's Manual"
 .SH NAME
-adt-build-lxd \- Create or update autopkgtest container for adt\-virt-lxd
+adt-build-lxd \- Create or update autopkgtest container for autopkgtest-lxd
 
 .SH SYNOPSIS
 .B adt-build-lxd
@@ -9,7 +9,7 @@ adt-build-lxd \- Create or update autopkgtest container for adt\-virt-lxd
 .SH DESCRIPTION
 .B adt-build-lxd
 creates or updates an LXD image which is optimized for autopkgtest's LXD runner
-.BR adt-virt-lxd (1).
+.BR autopkgtest-lxd (1).
 
 It builds a temporary container from an existing given image, runs
 autopkgtest's standard
@@ -32,7 +32,7 @@ remote:
 $ adt-build-lxd images:debian/sid/i386
 
 .SH SEE ALSO
-\fBadt\-virt-lxd\fR(1),
+\fBautopkgtest-lxd\fR(1),
 \fBautopkgtest\fR(1),
 \fBlxc\fR(1),
 \fB/usr/share/doc/autopkgtest/\fR.

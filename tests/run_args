@@ -158,7 +158,7 @@ Files:
         (args, acts, virt) = self.parse(
             ['-q', '--shell-fail', '--timeout-copy=5', '--set-lang',
              'en_US.UTF-8', './',
-             '---', 'adt-virt-foo', '-d', '-s', '--', '-d'])
+             '---', 'foo', '-d', '-s', '--', '-d'])
         self.assertEqual(args.verbosity, 0)
         self.assertEqual(args.shell_fail, True)
         self.assertEqual(adt_testbed.timeouts['copy'], 5)
@@ -166,7 +166,7 @@ Files:
         self.assertEqual(args.auto_control, True)
 
         self.assertEqual(acts, [('built-tree', './', False)])
-        self.assertEqual(virt, ['adt-virt-foo', '-d', '-s', '--', '-d'])
+        self.assertEqual(virt, ['foo', '-d', '-s', '--', '-d'])
 
     def test_mix_opts_actions(self):
         (args, acts, virt) = self.parse(
@@ -229,7 +229,7 @@ Files:
     def test_read_file_with_runner(self):
         argfile = os.path.join(self.workdir.name, 'myopts')
         with open(argfile, 'w') as f:
-            f.write('--source=mysrc_1.dsc\n--timeout-copy=5\n---\nadt-virt-foo\n-d')
+            f.write('--source=mysrc_1.dsc\n--timeout-copy=5\n---\nfoo\n-d')
 
         (args, acts, virt) = self.parse(['-q', '@' + argfile, '-x'],
                                         default_virt=False)
@@ -238,7 +238,7 @@ Files:
         self.assertEqual(args.timeout_copy, 5)
 
         self.assertEqual(acts, [('source', 'mysrc_1.dsc', True)])
-        self.assertEqual(virt, ['adt-virt-foo', '-d', '-x'])
+        self.assertEqual(virt, ['foo', '-d', '-x'])
 
     def test_setup_commands(self):
         cmd = os.path.join(self.workdir.name, 'cmd')
@@ -292,19 +292,25 @@ Files:
 
     def test_no_auto_control(self):
         (args, acts, virt) = self.parse(
-            ['--no-auto-control', './', '---', 'adt-virt-foo'])
+            ['--no-auto-control', './', '---', 'foo'])
         self.assertEqual(args.auto_control, False)
         self.assertEqual(acts, [('built-tree', './', False)])
-        self.assertEqual(virt, ['adt-virt-foo'])
+        self.assertEqual(virt, ['foo'])
 
     def test_build_parallel(self):
         (args, acts, virt) = self.parse(
-            ['--build-parallel=17', './', '---', 'adt-virt-foo'])
+            ['--build-parallel=17', './', '---', 'foo'])
         self.assertEqual(args.build_parallel, '17')
 
         (args, acts, virt) = self.parse(
-            ['./', '---', 'adt-virt-foo'])
+            ['./', '---', 'foo'])
         self.assertEqual(args.build_parallel, None)
+
+    def test_adt_virt_prefix(self):
+        (args, acts, virt) = self.parse(
+            ['./', '---', 'adt-virt-foo'])
+        (args, acts, virt) = self.parse(
+            ['./', '---', 'foo'])
 
     #
     # Errors

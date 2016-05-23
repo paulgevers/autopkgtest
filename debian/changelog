@@ -11,6 +11,8 @@ autopkgtest (4.0) UNRELEASED; urgency=medium
       tested source/binary packages is detected automatically
     - The virtualization server is now separated with a double instead of a
       tripe dash, as the former is standard Unix syntax.
+    - The virtualization server must be specified with its "short" name only,
+      e. g. "ssh" instead of "adt-virt-ssh".
     The old "adt-run" CLI will still be available for some time.
     (Closes: #795274, LP: #1453509)
 

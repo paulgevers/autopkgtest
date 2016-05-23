@@ -4,8 +4,8 @@
 # autopkgtest is Copyright (C) 2006-2014 Canonical Ltd.
 # Author: Martin Pitt <martin.pitt@ubuntu.com>
 #
-# adt-virt-ssh setup script that configures a container; this is only used for
-# testing autopkgtest itself, adt-virt-lxd is much better for actual test runs
+# autopkgtest-ssh setup script that configures a container; this is only used for
+# testing autopkgtest itself, autopkgtest-lxd is much better for actual test runs
 
 set -e
 

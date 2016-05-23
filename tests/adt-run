@@ -961,12 +961,12 @@ bad                  FAIL non-zero exit status 1
         with open(os.path.join(outdir, 'artifacts', 'world.txt')) as f:
             self.assertEqual(f.read(), 'hello\n')
 
-    def test_apt_source_error(self):
+    def test_apt_source_nonexisting(self):
         '''apt-source for nonexisting package'''
 
         (code, out, err) = self.runtest(['no.such-package'])
 
-        self.assertEqual(code, 16, err)
+        self.assertEqual(code, 12, err)
         self.assertRegex(err, 'no.such-package')
         self.assertNotIn('PASS', out)
         self.assertNotIn('[----', out)
@@ -1430,6 +1430,8 @@ class ChrootRunner(AdtTestCase, DebTestsAll, DebTestsFailureModes):
                 f.write('echo "fake-%s: $@"\n' % cmd)
                 if cmd == 'apt-get':
                     f.write('if [ "$1" = source ]; then cp -r /aptget-src $4-1; fi\n')
+                if cmd == 'apt-cache':
+                    f.write('if [ "$1" = showsrc ]; then printf "Package-List:\\n $2 deb utils optional arch=any\\nFormat: 1.0\\n"; fi\n')
             os.chmod(p, 0o755)
         with open(os.path.join(self.chroot, 'bin', 'su'), 'w') as f:
             f.write('#!/bin/sh\nshift 4\nexec bash -c "$@"\n')
@@ -1617,7 +1619,7 @@ Restrictions: needs-root
         # copy that into the chroot where fake apt-get source can find it
         shutil.copytree(p, os.path.join(self.chroot, 'aptget-src'))
 
-        (code, out, err) = self.runtest(['testpkg'])
+        (code, out, err) = self.runtest(['-d', 'testpkg'])
         # test should succeed
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS', out)

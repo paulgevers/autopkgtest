@@ -8,6 +8,8 @@ autopkgtest (3.20.7) UNRELEASED; urgency=medium
     --setup-command.
   * tools/adt-buildvm-ubuntu-cloud: Adjust to new cloud image names from
     Ubuntu 16.10.
+  * Exit with 12 ("bad package") instead of 16 ("temporary testbed failure")
+    when --apt-source package does not exist.
 
  -- Martin Pitt <mpitt@debian.org>  Thu, 19 May 2016 23:22:20 +0200
 

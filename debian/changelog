@@ -6,6 +6,8 @@ autopkgtest (3.20.7) UNRELEASED; urgency=medium
   * tests/adt-run: Make SchrootClickRunner tests work with a standard schroot
     (i. e.  no click and SDK preinstalled), by installing the packages via
     --setup-command.
+  * tools/adt-buildvm-ubuntu-cloud: Adjust to new cloud image names from
+    Ubuntu 16.10.
 
  -- Martin Pitt <mpitt@debian.org>  Thu, 19 May 2016 23:22:20 +0200
 

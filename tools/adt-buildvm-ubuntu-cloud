@@ -149,7 +149,11 @@ def parse_args():
 
 
 def download_image(cloud_img_url, release, arch):
-    diskname = '%s-server-cloudimg-%s-disk1.img' % (release, arch)
+    if release in ['precise', 'trusty', 'wily', 'xenial']:
+        diskname = '%s-server-cloudimg-%s-disk1.img' % (release, arch)
+    else:
+        # images were renamed in Ubuntu 16.10
+        diskname = '%s-server-cloudimg-%s.img' % (release, arch)
     image_url = '%s/%s/current/%s' % (cloud_img_url, release, diskname)
     local_image = os.path.join(workdir, diskname)
 

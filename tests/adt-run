@@ -3013,6 +3013,33 @@ Depends: nonexisting'''
         self.assertIn('WARNING: Test dependencies are unsatisfiable with using apt pinning.', err)
         self.assertIn('ERROR: erroneous package: Test dependencies are unsatisfiable', err)
 
+    def test_apt_pocket_nbs(self):
+        '''--apt-pocket with only NBS binaries in unstable'''
+
+        ar = testarchive.Archive(series='testy', component='main')
+        ar.add_sources('vanilla', ['vanilla'], '1')
+        ar.create_deb('vanilla', '1', dependencies={'Depends': 'libflavor0'})
+
+        ap = testarchive.Archive(path=ar.path, pooldir='pool-proposed',
+                                 series='testy-proposed', component='main')
+        # version 3 source which is FTBFS (no binaries)
+        ap.add_sources('flavor', ['libflavor0', 'mint'], '3')
+        # version 2 binaries still stick around
+        ap.create_deb('libflavor0', '2', srcpkg='flavor')
+        ap.create_deb('mint', '2', srcpkg='flavor')
+
+        apt_sources = os.path.join(self.workdir, 'sources.list')
+        with open(apt_sources, 'w') as f:
+            f.write('deb [trusted=yes] file:///tmp/testarchive/ testy main\n')
+            f.write('deb-src [trusted=yes] file:///tmp/testarchive/ testy main\n')
+
+        (code, out, err) = self.runtest(['--copy', '%s:/tmp/testarchive' % ar.path,
+                                         '--copy', '%s:/etc/apt/sources.list' % apt_sources,
+                                         '--apt-pocket=proposed',
+                                         '--apt-upgrade',
+                                         '--debug', 'flavor'])
+        self.assertEqual(code, 12, err)
+
     def test_git_source_build(self):
         '''Check out and build source from git'''
 

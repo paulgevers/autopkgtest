@@ -369,7 +369,8 @@ def build_source(kind, arg, built_binaries):
                           '  dpkg --compare-versions "$ver" lt "$maxver" || maxver="$ver";'
                           'done;'
                           '[ -z "$maxver" ] || maxver="=$maxver";'
-                          'OUT=$(apt-get source -q --only-source %(src)s$maxver);'
+                          'OUT=$(apt-get source -q --only-source %(src)s$maxver 2>&1) || RC=$?;'
+                          'if [ -n "$RC" ]; then if echo "$OUT" | grep -q "Unable to find a source package"; then exit 1; else exit $RC; fi; fi;'
                           'echo "$OUT" | grep ^Get: || true' % {'src': arg})
     elif kind == 'git-source':
         fields = arg.split()

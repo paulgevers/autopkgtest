@@ -1,3 +1,10 @@
+autopkgtest (3.20.8) UNRELEASED; urgency=medium
+
+  * adt-build-lxd: Fix "ADT_APT_PROXY: parameter not set" failure if host's
+    apt proxy is not on localhost.
+
+ -- Martin Pitt <mpitt@debian.org>  Thu, 26 May 2016 21:20:16 +0200
+
 autopkgtest (3.20.7) unstable; urgency=medium
 
   * Use "gdk-pixbuf" as example package in tests and documentation instead of

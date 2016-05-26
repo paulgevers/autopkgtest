@@ -49,8 +49,8 @@ proxy_detect() {
                 echo "Detected local apt proxy, using $ADT_APT_PROXY as container proxy"
             fi
         elif [ -n "${proxy:-}" ]; then
-            echo "Using $ADT_APT_PROXY as container proxy"
             ADT_APT_PROXY="$proxy"
+            echo "Using $ADT_APT_PROXY as container proxy"
         fi
     fi
 }

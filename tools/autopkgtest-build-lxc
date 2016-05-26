@@ -1,5 +1,5 @@
 #!/bin/sh
-# adt-build-lxc is part of autopkgtest
+# autopkgtest-build-lxc is part of autopkgtest
 # autopkgtest is a tool for testing Debian binary packages
 #
 # autopkgtest is Copyright (C) 2006-2014 Canonical Ltd.
@@ -41,7 +41,12 @@ EOF
 fi
 
 ARCH=${3:-}
-NAME="adt-${RELEASE}${ARCH:+-$ARCH}"
+if [ "${0%adt-build-lxc}" != "$0" ]; then
+    echo "WARNING: Deprecated command, please call this as autopkgtest-build-lxc" >&2
+    NAME="adt-${RELEASE}${ARCH:+-$ARCH}"
+else
+    NAME="autopkgtest-${RELEASE}${ARCH:+-$ARCH}"
+fi
 
 # fall back for older LXC option name
 LXCDIR=`lxc-config lxc.lxcpath` || LXCDIR=`lxc-config lxcpath` || LXCDIR=/var/lib/lxc
@@ -56,7 +61,9 @@ fi
 
 # detect apt proxy
 proxy_detect() {
-    if [ -z "$ADT_APT_PROXY" ]; then
+    # support backwards compatible env var too
+    AUTOPKGTEST_APT_PROXY=${AUTOPKGTEST_APT_PROXY:-${ADT_APT_PROXY:-}}
+    if [ -z "$AUTOPKGTEST_APT_PROXY" ]; then
         RES=`apt-config shell proxy Acquire::http::Proxy`
         eval $RES
         if echo "${proxy:-}" | egrep -q '(localhost|127\.0\.0\.[0-9]*)'; then
@@ -69,15 +76,15 @@ proxy_detect() {
             if [ -n "$bridge_interface" ]; then
                 local bridge_ip=$(ip -4 a show dev "$bridge_interface" | awk '/ inet / {sub(/\/.*$/, "", $2); print $2}') || true
                 if [ -n "$bridge_ip" ]; then
-                    ADT_APT_PROXY=$(echo "$proxy" | sed -r "s#localhost|127\.0\.0\.[0-9]*#$bridge_ip#")
+                    AUTOPKGTEST_APT_PROXY=$(echo "$proxy" | sed -r "s#localhost|127\.0\.0\.[0-9]*#$bridge_ip#")
                 fi
             fi
-            if [ -n "$ADT_APT_PROXY" ]; then
-                echo "Detected local apt proxy, using $ADT_APT_PROXY as container proxy"
+            if [ -n "$AUTOPKGTEST_APT_PROXY" ]; then
+                echo "Detected local apt proxy, using $AUTOPKGTEST_APT_PROXY as container proxy"
             fi
         elif [ -n "${proxy:-}" ]; then
-            ADT_APT_PROXY="$proxy"
-            echo "Using $ADT_APT_PROXY as container proxy"
+            AUTOPKGTEST_APT_PROXY="$proxy"
+            echo "Using $AUTOPKGTEST_APT_PROXY as container proxy"
             # set http_proxy for the initial debootstrap
             export http_proxy="$proxy"
         fi
@@ -94,8 +101,8 @@ setup() {
     fi
 
     # set up apt proxy for the container
-    if [ -n "$ADT_APT_PROXY" ]; then
-        echo "Acquire::http { Proxy \"$ADT_APT_PROXY\"; };" > $LXCDIR/$1/rootfs/etc/apt/apt.conf.d/01proxy
+    if [ -n "$AUTOPKGTEST_APT_PROXY" ]; then
+        echo "Acquire::http { Proxy \"$AUTOPKGTEST_APT_PROXY\"; };" > $LXCDIR/$1/rootfs/etc/apt/apt.conf.d/01proxy
     fi
 
     lxc-start --daemon --name=$1

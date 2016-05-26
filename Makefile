@@ -45,7 +45,7 @@ virts =		virt/chroot \
 		$(NULL)
 
 programs =	tools/adt-buildvm-ubuntu-cloud \
-		tools/adt-build-lxc \
+		tools/autopkgtest-build-lxc \
 		tools/autopkgtest-build-lxd \
 		runner/autopkgtest \
 		$(NULL)
@@ -86,6 +86,7 @@ install:
 	$(INSTALL_DATA) ssh-setup/SKELETON $(datadir)/ssh-setup
 	# legacy CLI
 	ln -s autopkgtest $(bindir)/adt-run
+	ln -s autopkgtest-build-lxc $(bindir)/adt-build-lxc
 	ln -s autopkgtest-build-lxd $(bindir)/adt-build-lxd
 	$(INSTALL_DATA) runner/adt-run.1 $(man1dir)
 

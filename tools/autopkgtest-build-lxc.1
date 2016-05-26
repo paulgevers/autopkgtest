@@ -1,15 +1,15 @@
-.TH adt-build-lxc 1 2014 "Linux Programmer's Manual"
+.TH autopkgtest-build-lxc 1 2014 "Linux Programmer's Manual"
 .SH NAME
-adt-build-lxc \- Create or update autopkgtest container for autopkgtest-lxc
+autopkgtest-build-lxc \- Create or update autopkgtest container for autopkgtest-lxc
 
 .SH SYNOPSIS
-.B adt-build-lxc
+.B autopkgtest-build-lxc
 .I distribution release
 .RI [ architecture ]
 
 .SH DESCRIPTION
-.B adt-build-lxc
-creates or updates an LXC container \fBadt-\fIrelease\fR which is suitable for
+.B autopkgtest-build-lxc
+creates or updates an LXC container \fBautopkgtest-\fIrelease\fR which is suitable for
 autopkgtest's LXC runner \fBautopkgtest-lxc\fR(1).
 
 It calls
@@ -30,8 +30,8 @@ It defaults to the native architecture, but you can specify a different one as
 third parameter.
 
 If the container already exists, it updates it as unintrusively as possible by
-first creating a new temporary container \fBadt-\fIrelease\fB.new\fR, and then
-rsyncing its root file system back to the existing \fBadt-\fIrelease\fR. Note
+first creating a new temporary container \fBautopkgtest-\fIrelease\fB.new\fR, and then
+rsyncing its root file system back to the existing \fBautopkgtest-\fIrelease\fR. Note
 that this could cause some side-effects and breakage if you have running
 containers with ephemeral overlays (i. e. using the
 .B --ephemeral
@@ -45,17 +45,17 @@ per-user containers. But user containers will not work with many or even most
 autopkgtests.
 
 You can specify an apt proxy to use in the container in the
-.B $ADT_APT_PROXY
+.B $AUTOPKGTEST_APT_PROXY
 environment variable. If you have an apt proxy configured on the host,
 the container will automatically use this, otherwise there is no default.
 
 
 .SH EXAMPLES
 
-# adt-build-lxc debian sid
+# autopkgtest-build-lxc debian sid
 
 .PP
-$ sudo adt-build-lxc ubuntu trusty i386
+$ sudo autopkgtest-build-lxc ubuntu trusty i386
 
 .SH SEE ALSO
 \fBautopkgtest-lxc\fR(1),
@@ -64,7 +64,7 @@ $ sudo adt-build-lxc ubuntu trusty i386
 \fB/usr/share/doc/autopkgtest/\fR.
 
 .SH AUTHORS AND COPYRIGHT
-.B adt-build-lxc
+.B autopkgtest-build-lxc
 was written by Martin Pitt <martin.pitt@ubuntu.com>
 
 This manpage is part of autopkgtest, a tool for testing Debian binary

@@ -12,6 +12,8 @@ autopkgtest (3.20.7) UNRELEASED; urgency=medium
     when --apt-source package does not exist.
   * Move installed python modules from /usr/share/autopkgtest/python to
     ../lib, to use the same name as in the source tree.
+  * setup-commands/setup-testbed: Call all apt-get commands with /dev/null
+    stdin, to avoid them seizing stdin. Fixes adt-build-lxc for Ubuntu trusty.
 
  -- Martin Pitt <mpitt@debian.org>  Thu, 19 May 2016 23:22:20 +0200
 

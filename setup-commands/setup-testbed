@@ -172,12 +172,12 @@ fi
 # install some necessary packages
 # some tests use a lot of /dev/random, avoid hangs; eatmydata for fast dpkg, a
 # lot of tests expect a logind session
-chroot "$root" apt-get install -y eatmydata dbus
+chroot "$root" apt-get install -y eatmydata dbus < /dev/null
 if ! systemd-detect-virt --quiet --container; then
-    chroot "$root" apt-get install -y haveged
+    chroot "$root" apt-get install -y haveged </dev/null
 fi
 if [ ! -e "$root/usr/share/doc/libpam-systemd" ] && chroot "$root" apt-cache show libpam-systemd >/dev/null 2>&1; then
-    chroot "$root" apt-get install -y libpam-systemd
+    chroot "$root" apt-get install -y libpam-systemd </dev/null
 fi
 
 # upgrade and trim image (not for --setup-command)
@@ -203,12 +203,12 @@ if [ -z "${ADT_IS_SETUP_COMMAND:-}" ]; then
     fi
 
     if [ "${ADT_SETUP_VM_UPGRADE:-}" != "false" ]; then
-        DEBIAN_FRONTEND=noninteractive chroot "$root" eatmydata apt-get -o Dpkg::Options::="--force-confold" -y dist-upgrade
-        DEBIAN_FRONTEND=noninteractive chroot "$root" eatmydata apt-get -o Dpkg::Options::="--force-confold" -y --purge autoremove
+        DEBIAN_FRONTEND=noninteractive chroot "$root" eatmydata apt-get -o Dpkg::Options::="--force-confold" -y dist-upgrade </dev/null
+        DEBIAN_FRONTEND=noninteractive chroot "$root" eatmydata apt-get -o Dpkg::Options::="--force-confold" -y --purge autoremove </dev/null
     fi
 
     # ensure cloud-init is still installed
-    [ -z "${have_cloudinit:-}" ] || chroot "$root" eatmydata apt-get install -y cloud-init
+    [ -z "${have_cloudinit:-}" ] || chroot "$root" eatmydata apt-get install -y cloud-init </dev/null
 else
     # we want to keep cloud-init on autopkgtest images for instantiating, but not
     # on test instances themselves as it often gets in the way
@@ -220,20 +220,20 @@ fi
 if grep -q buntu "$root/etc/os-release" "$root/etc/lsb-release"; then
     if ls $root/boot/vmlinu* >/dev/null 2>&1; then
         # provides kmods like scsi_debug or mac80211_hwsim on Ubuntu
-        chroot "$root" eatmydata apt-get install -y linux-generic
+        chroot "$root" eatmydata apt-get install -y linux-generic < /dev/null
     else
         if [ "$RELEASE" = precise -a "$ARCH" = armhf ]; then
             # no linux-image-generic in precise/armhf yet
-            chroot "$root" eatmydata apt-get install -y linux-headers-omap
+            chroot "$root" eatmydata apt-get install -y linux-headers-omap < /dev/null
         else
-            chroot "$root" eatmydata apt-get install -y linux-headers-generic
+            chroot "$root" eatmydata apt-get install -y linux-headers-generic < /dev/null
         fi
     fi
 fi
 
 # we need Python to run the auxverb helper
 if ! chroot "$root" sh -c 'type python3 >/dev/null 2>&1 || type python >/dev/null 2>&1'; then
-    chroot "$root" eatmydata apt-get install -y --no-install-recommends python3-minimal
+    chroot "$root" eatmydata apt-get install -y --no-install-recommends python3-minimal < /dev/null
 fi
 
 # run post-install commands

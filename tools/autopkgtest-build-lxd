@@ -1,5 +1,5 @@
 #!/bin/sh
-# adt-build-lxd is part of autopkgtest
+# autopkgtest-build-lxd is part of autopkgtest
 # autopkgtest is a tool for testing Debian binary packages
 #
 # autopkgtest is Copyright (C) 2006-2015 Canonical Ltd.
@@ -28,14 +28,16 @@ set -eu
 # generate temporary container name
 generate_container_name() {
     while true; do
-        CONTAINER=$(mktemp adt-prepare-XXX -u)
+        CONTAINER=$(mktemp autopkgtest-prepare-XXX -u)
         lxc info "$CONTAINER" >/dev/null 2>&1 || break
     done
 }
 
 # detect apt proxy
 proxy_detect() {
-    if [ -z "${ADT_APT_PROXY:-}" ]; then
+    # support backwards compatible env var too
+    AUTOPKGTEST_APT_PROXY=${AUTOPKGTEST_APT_PROXY:-${ADT_APT_PROXY:-}}
+    if [ -z "$AUTOPKGTEST_APT_PROXY" ]; then
         RES=`apt-config shell proxy Acquire::http::Proxy`
         eval $RES
         if echo "${proxy:-}" | egrep -q '(localhost|127\.0\.0\.[0-9]*)'; then
@@ -43,22 +45,22 @@ proxy_detect() {
             # running container
             local bridge_ip=$(sh -c '. /etc/default/lxd-bridge; echo $LXD_IPV4_ADDR' 2>/dev/null)
             if [ -n "$bridge_ip" ]; then
-                ADT_APT_PROXY=$(echo "$proxy" | sed -r "s#localhost|127\.0\.0\.[0-9]*#$bridge_ip#")
+                AUTOPKGTEST_APT_PROXY=$(echo "$proxy" | sed -r "s#localhost|127\.0\.0\.[0-9]*#$bridge_ip#")
             fi
-            if [ -n "${ADT_APT_PROXY:-}" ]; then
-                echo "Detected local apt proxy, using $ADT_APT_PROXY as container proxy"
+            if [ -n "$AUTOPKGTEST_APT_PROXY" ]; then
+                echo "Detected local apt proxy, using $AUTOPKGTEST_APT_PROXY as container proxy"
             fi
         elif [ -n "${proxy:-}" ]; then
-            ADT_APT_PROXY="$proxy"
-            echo "Using $ADT_APT_PROXY as container proxy"
+            AUTOPKGTEST_APT_PROXY="$proxy"
+            echo "Using $AUTOPKGTEST_APT_PROXY as container proxy"
         fi
     fi
 }
 
 setup() {
     # set up apt proxy for the container
-    if [ -n "${ADT_APT_PROXY:-}" ] && [ "$ADT_APT_PROXY" != "none" ]; then
-        echo "Acquire::http::Proxy \"$ADT_APT_PROXY\";" | lxc file push - "$CONTAINER/etc/apt/apt.conf.d/01proxy"
+    if [ -n "$AUTOPKGTEST_APT_PROXY" ] && [ "$AUTOPKGTEST_APT_PROXY" != "none" ]; then
+        echo "Acquire::http::Proxy \"$AUTOPKGTEST_APT_PROXY\";" | lxc file push - "$CONTAINER/etc/apt/apt.conf.d/01proxy"
         # work around LP#1548878
         lxc exec "$CONTAINER" -- chmod 644 /etc/apt/apt.conf.d/01proxy
     fi
@@ -97,6 +99,10 @@ setup() {
 # main
 #
 
+if [ "${0%adt-build-lxd}" != "$0" ]; then
+    echo "WARNING: Deprecated command, please call this as autopkgtest-build-lxd" >&2
+fi
+
 if [ -z "${1:-}" ]; then
     echo "Usage: $0 <image>" >&2
     exit 1
@@ -113,13 +119,18 @@ setup
 # if there already is a published image, get its fingerprint to clean it up
 # afterwards
 DISTROLC=$(echo "$DISTRO" | tr '[:upper:]' '[:lower:]')
-ALIAS="adt/$DISTROLC/$RELEASE/$ARCH"
+ALIAS="autopkgtest/$DISTROLC/$RELEASE/$ARCH"
+if [ "${0%adt-build-lxd}" != "$0" ]; then
+    OLDALIAS="adt/$DISTROLC/$RELEASE/$ARCH"
+else
+    OLDALIAS=""
+fi
 DESCRIPTION="autopkgtest $DISTRO $RELEASE $ARCH"
 
-lxc publish "$CONTAINER" --alias "$ALIAS" --public description="$DESCRIPTION" distribution="$DISTROLC" release="$RELEASE" architecture="$ARCH"
+lxc publish "$CONTAINER" ${OLDALIAS:+--alias $OLDALIAS} --alias "$ALIAS" --public description="$DESCRIPTION" distribution="$DISTROLC" release="$RELEASE" architecture="$ARCH"
 
 # clean up old images
-for i in $(lxc image list | grep "$DESCRIPTION" | grep -v "$ALIAS" | cut -d'|' -f3); do
+for i in $(lxc image list | grep "$DESCRIPTION" | grep -v "$ALIAS${OLDALIAS:+\\|$OLDALIAS}" | cut -d'|' -f3); do
     echo "Removing previous image $i"
     lxc image delete "$i"
 done

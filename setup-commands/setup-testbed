@@ -19,7 +19,7 @@
 
 set -eu
 
-# Created files should be readable by user adt (this script is called as root)
+# Created files should be readable by user (this script is called as root)
 umask 0022
 
 if [ "${1:-}" = "--help" ]; then

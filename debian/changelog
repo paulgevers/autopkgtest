@@ -5,6 +5,7 @@ autopkgtest (3.20.8) UNRELEASED; urgency=medium
   * debian/tests/lxd: Set up LXD bridge, so that the test can actually work
     with current LXD.
   * Set $ADT_NORMAL_USER during tests that run as root.
+  * Re-enable lxd autopkgtest, now that LP: #1557161 is fixed.
 
  -- Martin Pitt <mpitt@debian.org>  Thu, 26 May 2016 21:20:16 +0200
 

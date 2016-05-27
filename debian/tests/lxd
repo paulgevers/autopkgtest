@@ -7,6 +7,28 @@ if [ "$arch" != i386 -a "$arch" != amd64 ]; then
     exit 0
 fi
 
+cat <<EOF > /etc/default/lxd-bridge
+ USE_LXD_BRIDGE="true"
+ LXD_BRIDGE="lxdbr0"
+ UPDATE_PROFILE="true"
+ LXD_CONFILE=""
+ LXD_DOMAIN="lxd"
+ LXD_IPV4_ADDR="10.0.8.1"
+ LXD_IPV4_NETMASK="255.255.255.0"
+ LXD_IPV4_NETWORK="10.0.8.1/24"
+ LXD_IPV4_DHCP_RANGE="10.0.8.10,10.0.8.254"
+ LXD_IPV4_DHCP_MAX="200"
+ LXD_IPV4_NAT="true"
+ LXD_IPV6_ADDR="fd3b:ba81:269c:19c4::1"
+ LXD_IPV6_MASK="64"
+ LXD_IPV6_NETWORK="fd3b:ba81:269c:19c4::1/64"
+ LXD_IPV6_NAT="false"
+ LXD_IPV6_PROXY="false"
+EOF
+
+
+cat <<EOF | su - $ADT_NORMAL_USER
 adt-build-lxd images:ubuntu/xenial/$arch
 export ADT_TEST_LXD=adt/ubuntu/xenial/$arch
 tests/adt-run LxdRunner
+EOF

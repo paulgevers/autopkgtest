@@ -2,6 +2,8 @@ autopkgtest (3.20.8) UNRELEASED; urgency=medium
 
   * adt-build-lxd: Fix "ADT_APT_PROXY: parameter not set" failure if host's
     apt proxy is not on localhost.
+  * debian/tests/lxd: Set up LXD bridge, so that the test can actually work
+    with current LXD.
 
  -- Martin Pitt <mpitt@debian.org>  Thu, 26 May 2016 21:20:16 +0200
 

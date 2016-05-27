@@ -947,6 +947,9 @@ fi
                  % {'t': tree.tb, 'a': test_artifacts, 'tmp': adttmp,
                     'cpu': build_parallel or self.nproc}
 
+        if 'needs-root' in test.restrictions and self.user is not None:
+            script += 'export ADT_NORMAL_USER=%s; ' % self.user
+
         for e in extra_env:
             script += 'export \'%s\'; ' % e
         # there's no way to tell su to not reset $PATH, for install-tmp mode;

@@ -1935,12 +1935,16 @@ class DebTestsVirtFS(DebTestsAll):
         # also test some fancy dependencies
         p = self.build_src('Tests: p1 p2\n'
                            'Depends: coreutils, aspell-doc [linux-any], apt-doc:native, unknown [nosucharch], bash-doc [!c64], bogus [!linux-any]\n'
+                           'Restrictions: needs-root\n\n'
+                           'Tests: n\n'
+                           'Depends:\n'
                            'Restrictions: needs-root\n',
                            {'p1': '#!/bin/sh -e\nif dpkg -s adt-satdep 2>/dev/null; then exit 1; fi; '
                             'apt-get --purge -y autoremove; '
                             'ls /usr/share/doc/aspell-doc/copyright;'
                             'echo I am fine\n',
-                            'p2': '#!/bin/sh\necho I am also fine; echo "SOMEVAR: >$SOMEVAR<"; echo "PATH: $PATH"\n'})
+                            'p2': '#!/bin/sh\necho I am also fine; echo "SOMEVAR: >$SOMEVAR<"; echo "PATH: $PATH"\n',
+                            'n': '#!/bin/sh -eu\nid $ADT_NORMAL_USER'})
 
         (code, out, err) = self.runtest(['-d', '--no-built-binaries', '--unbuilt-tree=' + p],
                                         env={'SOMEVAR': 'junk',
@@ -1951,11 +1955,15 @@ class DebTestsVirtFS(DebTestsAll):
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'p1\s+PASS', out)
         self.assertRegex(out, 'p2\s+PASS', out)
+        self.assertRegex(out, 'n\s+PASS', out)
 
         # $SOMEVAR does not leak into container
         self.assertIn('\nSOMEVAR: ><\n', out)
         # modified $PATH does not leak into container
         self.assertNotIn('/something/broken', out)
+
+        # should have $ADT_NORMAL_USER
+        self.assertIn('uid=', out)
 
         # handles expected packages
         self.assertIn('processing dependency coreutils', err)

@@ -119,7 +119,7 @@ setup() {
                   /usr/share/autopkgtest/setup-commands/setup-testbed; do
         if [ -r "$script" ]; then
             echo "Running setup script $script..."
-            cat "$script" | lxc-attach --name=$1 sh
+            cat "$script" | lxc-attach --name=$1 env MIRROR=${MIRROR:-} sh
             break
         fi
     done

@@ -9,6 +9,8 @@ autopkgtest (3.20.8) UNRELEASED; urgency=medium
   * debian/tests/lxd: Enable MSS clamping, to work around broken PTMU in
     Canonical's Scalingstack: Avoids lost IP packets due to MTU mismatches.
   * adt-build-lx{c,d}: Pass on $MIRROR to setup-testbed.
+  * adt-virt-qemu: Replace deprecated -redir QEMU option with
+    "-net user,hostfwd=".
 
  -- Martin Pitt <mpitt@debian.org>  Thu, 26 May 2016 21:20:16 +0200
 

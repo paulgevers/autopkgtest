@@ -514,13 +514,21 @@ def hook_open():
 
     overlay = prepare_overlay()
 
+    # find free port to forward VM port 22 (for SSH access)
+    ssh_port = find_free_port(10022)
+    if ssh_port:
+        adtlog.debug('Forwarding local port %i to VM ssh port 22' % ssh_port)
+        nic_opt = ',hostfwd=tcp::%i-:22' % ssh_port
+    else:
+        nic_opt = ''
+
     # start QEMU
     argv = [args.qemu_command,
             '-m', str(args.ram_size),
             '-smp', str(args.cpus),
             '-nographic',
-            '-net', 'user',
             '-net', 'nic,model=virtio',
+            '-net', 'user' + nic_opt,
             '-monitor', 'unix:%s/monitor,server,nowait' % workdir,
             '-serial', 'unix:%s/ttyS0,server,nowait' % workdir,
             '-serial', 'unix:%s/ttyS1,server,nowait' % workdir,
@@ -541,13 +549,6 @@ def hook_open():
     # pass through option to qemu
     if args.qemu_options:
         argv.extend(args.qemu_options.split())
-
-    # find free port to forward VM port 22 (for SSH access)
-    ssh_port = find_free_port(10022)
-    if ssh_port:
-        adtlog.debug('Forwarding local port %i to VM ssh port 22' % ssh_port)
-        argv.append('-redir')
-        argv.append('tcp:%i::22' % ssh_port)
 
     p_qemu = subprocess.Popen(argv)
 

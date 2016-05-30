@@ -16,6 +16,8 @@
 # You can set $ADT_APT_PROXY; if set, it will be configured in apt in
 # /etc/apt/apt.conf.d/01proxy. If you have an apt proxy configured on the host,
 # it will be used automatically, unless $ADT_APT_PROXY is set.
+#
+# You can set $MIRROR to change the default apt mirror.
 
 set -eu
 

@@ -6,6 +6,8 @@ autopkgtest (3.20.8) UNRELEASED; urgency=medium
     with current LXD.
   * Set $ADT_NORMAL_USER during tests that run as root.
   * Re-enable lxd autopkgtest, now that LP: #1557161 is fixed.
+  * debian/tests/lxd: Enable MSS clamping, to work around broken PTMU in
+    Canonical's Scalingstack: Avoids lost IP packets due to MTU mismatches.
 
  -- Martin Pitt <mpitt@debian.org>  Thu, 26 May 2016 21:20:16 +0200
 

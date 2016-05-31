@@ -11,6 +11,8 @@ autopkgtest (3.20.8) UNRELEASED; urgency=medium
   * adt-build-lx{c,d}: Pass on $MIRROR to setup-testbed.
   * adt-virt-qemu: Replace deprecated -redir QEMU option with
     "-net user,hostfwd=".
+  * adt-buildvm-ubuntu-cloud: Provide more user friedly error if no image
+    exists for the chosen release/architecture. (LP: #1586322)
 
  -- Martin Pitt <mpitt@debian.org>  Thu, 26 May 2016 21:20:16 +0200
 

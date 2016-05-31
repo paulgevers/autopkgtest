@@ -32,6 +32,7 @@ import subprocess
 import shutil
 import atexit
 import urllib.request
+import urllib.error
 import os
 import time
 import re
@@ -182,7 +183,14 @@ def download_image(cloud_img_url, release, arch):
                 sys.stdout.write('%i%% ' % percent)
                 sys.stdout.flush()
 
-    headers = urllib.request.urlretrieve(image_url, local_image, report)[1]
+    try:
+        headers = urllib.request.urlretrieve(image_url, local_image, report)[1]
+    except urllib.error.HTTPError as e:
+        if e.code == 404:
+            sys.stderr.write('\nNo image exists for this release/architecture\n')
+        else:
+            sys.stderr.write('\nDownload failed: %s\n' % str(e))
+        sys.exit(1)
     if headers['content-type'] not in ('application/octet-stream',
                                        'text/plain'):
         sys.stderr.write('\nDownload failed!\n')

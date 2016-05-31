@@ -1638,13 +1638,19 @@ Restrictions: needs-root
         p = self.build_src('Tests: pass\nDepends:\nRestrictions: needs-root\n',
                            {'pass': '#!/bin/sh -e\n[ -x /bin/cp_cp ]; cat /setup.log\n'})
 
-        # not expecting a normal user for chroot
+        # not expecting a normal user for chroot; but filter out any
+        # $ADT_NORMAL_USER from *our* environment
+        env = os.environ.copy()
+        try:
+            del env['ADT_NORMAL_USER']
+        except KeyError:
+            pass
         (code, out, err) = self.runtest(['-B', '--unbuilt-tree=' + p,
                                          '--setup-commands', '[ -z $ADT_NORMAL_USER ];'
                                          'sleep 3; cp /bin/cp /bin/cp_cp; '
                                          'echo setup_success > /setup.log',
                                          '--setup-commands', 'cp /bin/cp /bin/cp_cp',
-                                         '--timeout-short=1', '--timeout-copy=1'])
+                                         '--timeout-short=1', '--timeout-copy=1'], env=env)
         # test should succeed
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS', out)

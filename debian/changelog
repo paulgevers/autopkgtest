@@ -1,4 +1,4 @@
-autopkgtest (3.20.8) UNRELEASED; urgency=medium
+autopkgtest (3.20.8) unstable; urgency=medium
 
   * adt-build-lxd: Fix "ADT_APT_PROXY: parameter not set" failure if host's
     apt proxy is not on localhost.
@@ -17,7 +17,7 @@ autopkgtest (3.20.8) UNRELEASED; urgency=medium
     binaries from unrelated sources. Add a fallback for Ubuntu 12.04 to re-try
     without --only-source.
 
- -- Martin Pitt <mpitt@debian.org>  Thu, 26 May 2016 21:20:16 +0200
+ -- Martin Pitt <mpitt@debian.org>  Wed, 01 Jun 2016 12:39:50 +0200
 
 autopkgtest (3.20.7) unstable; urgency=medium
 

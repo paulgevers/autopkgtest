@@ -1,11 +1,11 @@
-autopkgtest (3.20.9) UNRELEASED; urgency=medium
+autopkgtest (3.20.9) unstable; urgency=medium
 
   * Fix "apt-get source" version detection for very old source packages that
     don't have "Package-List:" yet. (LP: #1588199)
   * Skip NullRunner.test_apt_source_nonexisting test instead of failing if
     there are no deb-src apt sources configured on the host.
 
- -- Martin Pitt <mpitt@debian.org>  Thu, 02 Jun 2016 15:42:03 +0200
+ -- Martin Pitt <mpitt@debian.org>  Thu, 02 Jun 2016 22:22:45 +0200
 
 autopkgtest (3.20.8) unstable; urgency=medium
 

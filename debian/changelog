@@ -1,3 +1,10 @@
+autopkgtest (3.20.9) UNRELEASED; urgency=medium
+
+  * Fix "apt-get source" version detection for very old source packages that
+    don't have "Package-List:" yet. (LP: #1588199)
+
+ -- Martin Pitt <mpitt@debian.org>  Thu, 02 Jun 2016 15:42:03 +0200
+
 autopkgtest (3.20.8) unstable; urgency=medium
 
   * adt-build-lxd: Fix "ADT_APT_PROXY: parameter not set" failure if host's

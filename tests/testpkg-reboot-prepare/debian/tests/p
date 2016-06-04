@@ -1,5 +1,5 @@
 #!/bin/sh
-if [ "$ADT_REBOOT_MARK" = phase1 ]; then
+if [ "$AUTOPKGTEST_REBOOT_MARK" = phase1 ]; then
     echo "continuing test after reboot"
 else
     echo "beginning test; my pid $$"

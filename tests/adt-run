@@ -933,7 +933,7 @@ bad                  FAIL non-zero exit status 1
         p = self.build_src('Test-Command: echo "Some Stdout"\nDepends:\n\n'
                            'Test-Command: echo "Some StdErr" >&2; sleep 0.5; echo done\nDepends:\n'
                            'Restrictions: allow-stderr\n\n'
-                           'Test-Command: echo "More Stderr" >&2; echo hello > $ADT_ARTIFACTS/world.txt\nDepends:\n',
+                           'Test-Command: echo "More Stderr" >&2; echo hello > $AUTOPKGTEST_ARTIFACTS/world.txt\nDepends:\n',
                            {})
 
         outdir = os.path.join(self.workdir, 'out')
@@ -951,7 +951,7 @@ bad                  FAIL non-zero exit status 1
         # shows commands
         self.assertIn('test command1: echo "Some Stdout"\n', err)
         self.assertIn('test command2: echo "Some StdErr" >&2; sleep 0.5; echo done\n', err)
-        self.assertIn('test command3: echo "More Stderr" >&2; echo hello > $ADT_ARTIFACTS/world.txt\n', err)
+        self.assertIn('test command3: echo "More Stderr" >&2; echo hello > $AUTOPKGTEST_ARTIFACTS/world.txt\n', err)
 
         # check artifacts
         with open(os.path.join(outdir, 'command1-stdout')) as f:
@@ -1209,7 +1209,7 @@ if ($pid) { # parent
         '''Respects $TMPDIR'''
 
         p = self.build_src('Tests: p\nDepends:\n',
-                           {'p': '#!/bin/sh\necho $ADTTMP\n[ "${ADTTMP#/var/tmp}" != "$ADTTMP" ]'})
+                           {'p': '#!/bin/sh\necho $AUTOPKGTEST_TMP\n[ "${AUTOPKGTEST_TMP#/var/tmp}" != "$AUTOPKGTEST_TMP" ]'})
 
         env = os.environ.copy()
         env['TMPDIR'] = '/var/tmp'
@@ -1540,16 +1540,16 @@ Restrictions: needs-root
         '''tests producing additional artifacts'''
 
         p = self.build_src('Tests: a1 a2 a3 a4\nDepends:\nRestrictions: needs-root\n',
-                           {'a1': '#!/bin/sh -e\n[ -d "$ADT_ARTIFACTS" ]\n'
-                                  'echo old > $ADT_ARTIFACTS/health.txt\n',
-                            'a2': '#!/bin/sh -e\n[ -d "$ADT_ARTIFACTS" ]\n'
-                                  'echo I am fine > $ADT_ARTIFACTS/health.txt\n',
-                            'a3': '#!/bin/sh -e\n[ -d "$ADT_ARTIFACTS" ]\n'
-                                  'mkdir $ADT_ARTIFACTS/logs\n'
-                                  'echo world > $ADT_ARTIFACTS/logs/hello.txt\n',
-                            'a4': '#!/bin/sh -e\n[ -d "$ADT_ARTIFACTS" ]\n'
-                                  'mkdir $ADT_ARTIFACTS/logs\n'
-                                  'echo 42 > $ADT_ARTIFACTS/logs/answer.txt\n'})
+                           {'a1': '#!/bin/sh -e\n[ -d "$AUTOPKGTEST_ARTIFACTS" ]\n'
+                                  'echo old > $AUTOPKGTEST_ARTIFACTS/health.txt\n',
+                            'a2': '#!/bin/sh -e\n[ -d "$AUTOPKGTEST_ARTIFACTS" ]\n'
+                                  'echo I am fine > $AUTOPKGTEST_ARTIFACTS/health.txt\n',
+                            'a3': '#!/bin/sh -e\n[ -d "$AUTOPKGTEST_ARTIFACTS" ]\n'
+                                  'mkdir $AUTOPKGTEST_ARTIFACTS/logs\n'
+                                  'echo world > $AUTOPKGTEST_ARTIFACTS/logs/hello.txt\n',
+                            'a4': '#!/bin/sh -e\n[ -d "$AUTOPKGTEST_ARTIFACTS" ]\n'
+                                  'mkdir $AUTOPKGTEST_ARTIFACTS/logs\n'
+                                  'echo 42 > $AUTOPKGTEST_ARTIFACTS/logs/answer.txt\n'})
 
         outdir = os.path.join(self.workdir, 'out')
 
@@ -1661,14 +1661,14 @@ Restrictions: needs-root
                            {'pass': '#!/bin/sh -e\n[ -x /bin/cp_cp ]; cat /setup.log\n'})
 
         # not expecting a normal user for chroot; but filter out any
-        # $ADT_NORMAL_USER from *our* environment
+        # $AUTOPKGTEST_NORMAL_USER from *our* environment
         env = os.environ.copy()
         try:
-            del env['ADT_NORMAL_USER']
+            del env['AUTOPKGTEST_NORMAL_USER']
         except KeyError:
             pass
         (code, out, err) = self.runtest(['-B', '--unbuilt-tree=' + p,
-                                         '--setup-commands', '[ -z $ADT_NORMAL_USER ];'
+                                         '--setup-commands', '[ -z $AUTOPKGTEST_NORMAL_USER ];'
                                          'sleep 3; cp /bin/cp /bin/cp_cp; '
                                          'echo setup_success > /setup.log',
                                          '--setup-commands', 'cp /bin/cp /bin/cp_cp',
@@ -1717,7 +1717,7 @@ Restrictions: needs-root
         '''--copy'''
 
         p = self.build_src('Tests: pass\nDepends:\nRestrictions: needs-root\n',
-                           {'pass': '#!/bin/sh -e\ncp -a /mytestdata/* $ADT_ARTIFACTS\necho test_ok'})
+                           {'pass': '#!/bin/sh -e\ncp -a /mytestdata/* $AUTOPKGTEST_ARTIFACTS\necho test_ok'})
 
         outdir = os.path.join(self.workdir, 'out')
         os.mkdir(outdir)
@@ -1972,7 +1972,7 @@ class DebTestsVirtFS(DebTestsAll):
                             'ls /usr/share/doc/aspell-doc/copyright;'
                             'echo I am fine\n',
                             'p2': '#!/bin/sh\necho I am also fine; echo "SOMEVAR: >$SOMEVAR<"; echo "PATH: $PATH"\n',
-                            'n': '#!/bin/sh -eu\nid $ADT_NORMAL_USER'})
+                            'n': '#!/bin/sh -eu\nid $AUTOPKGTEST_NORMAL_USER'})
 
         (code, out, err) = self.runtest(['-d', '--no-built-binaries', '--unbuilt-tree=' + p],
                                         env={'SOMEVAR': 'junk',
@@ -1990,7 +1990,7 @@ class DebTestsVirtFS(DebTestsAll):
         # modified $PATH does not leak into container
         self.assertNotIn('/something/broken', out)
 
-        # should have $ADT_NORMAL_USER
+        # should have $AUTOPKGTEST_NORMAL_USER
         self.assertIn('uid=', out)
 
         # handles expected packages
@@ -2079,7 +2079,7 @@ class DebTestsVirtFS(DebTestsAll):
 
         # we expect a normal user for LXC
         (code, out, err) = self.runtest(['-B', '-d', p + '//', '--setup-commands',
-                                         '[ -n "$ADT_NORMAL_USER" ]; getent passwd $ADT_NORMAL_USER;'
+                                         '[ -n "$AUTOPKGTEST_NORMAL_USER" ]; getent passwd $AUTOPKGTEST_NORMAL_USER;'
                                          'echo setupok >> /setup.log'])
 
         # test should succeed
@@ -2141,17 +2141,17 @@ class DebTestsVirtFS(DebTestsAll):
                                     echo r00t > xsrc/root.txt
                                     ''',
                             't': '''#!/bin/sh -e
-                                    echo world > $ADTTMP/hello.txt
-                                    cat $ADTTMP/hello.txt
-                                    mkdir -p $ADTTMP/one/subdir
-                                    echo deep > $ADTTMP/one/subdir/subdir.txt
-                                    cat $ADTTMP/one/subdir/subdir.txt
-                                    rm -r $ADTTMP/one
+                                    echo world > $AUTOPKGTEST_TMP/hello.txt
+                                    cat $AUTOPKGTEST_TMP/hello.txt
+                                    mkdir -p $AUTOPKGTEST_TMP/one/subdir
+                                    echo deep > $AUTOPKGTEST_TMP/one/subdir/subdir.txt
+                                    cat $AUTOPKGTEST_TMP/one/subdir/subdir.txt
+                                    rm -r $AUTOPKGTEST_TMP/one
                                     echo dir_is_rw > rw_flag
                                     echo user >> xsrc/root.txt
                                     cat rw_flag
-                                    echo hello > $ADT_ARTIFACTS/world.txt
-                                    chmod 600 $ADT_ARTIFACTS/world.txt
+                                    echo hello > $AUTOPKGTEST_ARTIFACTS/world.txt
+                                    chmod 600 $AUTOPKGTEST_ARTIFACTS/world.txt
                                     echo xxtmpdir > ${TMPDIR:=/tmp}/xxtmpdir.txt
                                     cat $TMPDIR/xxtmpdir.txt
                                     whoami'''})
@@ -2204,7 +2204,7 @@ class DebTestsVirtFS(DebTestsAll):
         '''handling copying timeout'''
 
         p = self.build_src('Tests: to\nDepends:\n',
-                           {'to': '#!/bin/sh\ntruncate -s 10G $ADT_ARTIFACTS/huge\n'})
+                           {'to': '#!/bin/sh\ntruncate -s 10G $AUTOPKGTEST_ARTIFACTS/huge\n'})
 
         outdir = os.path.join(self.workdir, 'out')
         (code, out, err) = self.runtest(['--output-dir=' + outdir,
@@ -2230,7 +2230,7 @@ class DebTestsVirtFS(DebTestsAll):
         '''copying files between host and testbed is fast and reliable'''
 
         p = self.build_src('Tests: t\nDepends:\n',
-                           {'t': '#!/bin/sh\ncp -r . $ADT_ARTIFACTS/tree\n'})
+                           {'t': '#!/bin/sh\ncp -r . $AUTOPKGTEST_ARTIFACTS/tree\n'})
         # create ~ 100 MB of fake source tree (~ 1000 files with 100 kB each)
         block = b'0123456789' * 10000
         for dirnum in range(33):
@@ -2315,11 +2315,11 @@ class DebTestsVirtContainer(DebTestsVirtFS):
         p = self.build_src('Tests: s r\nDepends:\nRestrictions: needs-root',
                            {'s': '#!/bin/sh\necho simple_done',
                             'r': '''#!/bin/sh -e
-        case "$ADT_REBOOT_MARK" in
-          mark1) echo "test in mark1"; echo one > $ADT_ARTIFACTS/mark1.txt; /tmp/autopkgtest-reboot mark2 ;;
-          mark2) echo "test in mark2"; echo two > $ADT_ARTIFACTS/mark2.txt ;;
-          "") echo "test beginning"; echo zero > $ADT_ARTIFACTS/begin.txt; /tmp/autopkgtest-reboot mark1 ;;
-          *) echo "unknown ADT_REBOOT_MARK value $ADT_REBOOT_MARK" >&2; exit 1 ;;
+        case "$AUTOPKGTEST_REBOOT_MARK" in
+          mark1) echo "test in mark1"; echo one > $AUTOPKGTEST_ARTIFACTS/mark1.txt; /tmp/autopkgtest-reboot mark2 ;;
+          mark2) echo "test in mark2"; echo two > $AUTOPKGTEST_ARTIFACTS/mark2.txt ;;
+          "") echo "test beginning"; echo zero > $AUTOPKGTEST_ARTIFACTS/begin.txt; /tmp/autopkgtest-reboot mark1 ;;
+          *) echo "unknown AUTOPKGTEST_REBOOT_MARK value $AUTOPKGTEST_REBOOT_MARK" >&2; exit 1 ;;
         esac
         echo "test end"'''})
 
@@ -2357,16 +2357,16 @@ class DebTestsVirtContainer(DebTestsVirtFS):
         p = self.build_src('Tests: s r\nDepends:\nRestrictions: needs-root',
                            {'s': '#!/bin/sh\necho simple_done',
                             'r': '''#!/bin/sh -e
-        case "$ADT_REBOOT_MARK" in
+        case "$AUTOPKGTEST_REBOOT_MARK" in
           "")
               echo "test beginning"
-              echo zero > $ADT_ARTIFACTS/begin.txt
+              echo zero > $AUTOPKGTEST_ARTIFACTS/begin.txt
               /tmp/autopkgtest-reboot-prepare mark1
               touch /var/post-prepare-1
               reboot ;;
           mark1)
               echo "test in mark1"
-              echo one > $ADT_ARTIFACTS/mark1.txt
+              echo one > $AUTOPKGTEST_ARTIFACTS/mark1.txt
               /tmp/autopkgtest-reboot-prepare mark2
               touch /var/post-prepare-2
               printf '#!/bin/sh\necho Linux 1.2.3-testy foobar' > /usr/local/bin/uname
@@ -2374,10 +2374,10 @@ class DebTestsVirtContainer(DebTestsVirtFS):
               reboot ;;
           mark2)
               echo "test in mark2"
-              echo two > $ADT_ARTIFACTS/mark2.txt
+              echo two > $AUTOPKGTEST_ARTIFACTS/mark2.txt
               ls /var/post-prepare-1 /var/post-prepare-2 ;;
           *)
-              echo "unknown ADT_REBOOT_MARK value $ADT_REBOOT_MARK" >&2
+              echo "unknown AUTOPKGTEST_REBOOT_MARK value $AUTOPKGTEST_REBOOT_MARK" >&2
               exit 1 ;;
         esac'''})
 
@@ -2526,9 +2526,9 @@ class QemuRunner(AdtTestCase, DebTestsVirtContainer):
 
         p = self.build_src('Tests: t\nDepends:',
                            {'t': '''echo CPUNUM; nproc
-                                 mkdir -p $ADTTMP/one/subdir
-                                 echo deep > $ADTTMP/one/subdir/subdir.txt
-                                 cat $ADTTMP/one/subdir/subdir.txt
+                                 mkdir -p $AUTOPKGTEST_TMP/one/subdir
+                                 echo deep > $AUTOPKGTEST_TMP/one/subdir/subdir.txt
+                                 cat $AUTOPKGTEST_TMP/one/subdir/subdir.txt
                                  whoami
                                  test -L /dev/baseimage || echo "no /dev/baseimage link"
                                  blkid -p /dev/baseimage'''})
@@ -2552,11 +2552,11 @@ class QemuRunner(AdtTestCase, DebTestsVirtContainer):
         p = self.build_src('Tests: s r\nDepends:\nRestrictions: needs-root breaks-testbed',
                            {'s': '#!/bin/sh\necho simple_done',
                             'r': '''#!/bin/sh -e
-        case "$ADT_REBOOT_MARK" in
-          mark1) echo "test in mark1"; echo one > $ADT_ARTIFACTS/mark1.txt; /tmp/autopkgtest-reboot mark2 ;;
-          mark2) echo "test in mark2"; echo two > $ADT_ARTIFACTS/mark2.txt ;;
-          "") echo "test beginning"; echo zero > $ADT_ARTIFACTS/begin.txt; /tmp/autopkgtest-reboot mark1 ;;
-          *) echo "unknown ADT_REBOOT_MARK value $ADT_REBOOT_MARK" >&2; exit 1 ;;
+        case "$AUTOPKGTEST_REBOOT_MARK" in
+          mark1) echo "test in mark1"; echo one > $AUTOPKGTEST_ARTIFACTS/mark1.txt; /tmp/autopkgtest-reboot mark2 ;;
+          mark2) echo "test in mark2"; echo two > $AUTOPKGTEST_ARTIFACTS/mark2.txt ;;
+          "") echo "test beginning"; echo zero > $AUTOPKGTEST_ARTIFACTS/begin.txt; /tmp/autopkgtest-reboot mark1 ;;
+          *) echo "unknown AUTOPKGTEST_REBOOT_MARK value $AUTOPKGTEST_REBOOT_MARK" >&2; exit 1 ;;
         esac
         echo "test end"'''})
 
@@ -3215,7 +3215,7 @@ simple               PASS
             ['-d', '--summary-file', sumfile,
              '--copy', '%s:/root/testclick.click' % self.click,
              '--setup-commands', self.setup_cmd,
-             '--setup-commands', 'click install --user $ADT_NORMAL_USER /root/testclick.click',
+             '--setup-commands', 'click install --user $AUTOPKGTEST_NORMAL_USER /root/testclick.click',
              '--setup-commands', os.path.join(root_dir, 'setup-commands', 'ro-apt'),
              self.click_src, '--click', 'testclick'])
         self.assertEqual(code, 4, err)
@@ -3411,11 +3411,11 @@ class SshRunnerNoScript(AdtTestCase):
         self.start_container(sudo_nopwd=True)
         p = self.build_src('Tests:r\nDepends:\nRestrictions: needs-root',
                            {'r': '''#!/bin/sh -e
-        case "$ADT_REBOOT_MARK" in
-          mark1) echo "test in mark1"; echo one > $ADT_ARTIFACTS/mark1.txt; /tmp/autopkgtest-reboot mark2 ;;
-          mark2) echo "test in mark2"; echo two > $ADT_ARTIFACTS/mark2.txt ;;
-          "") echo "test beginning"; echo zero > $ADT_ARTIFACTS/begin.txt; /tmp/autopkgtest-reboot mark1 ;;
-          *) echo "unknown ADT_REBOOT_MARK value $ADT_REBOOT_MARK" >&2; exit 1 ;;
+        case "$AUTOPKGTEST_REBOOT_MARK" in
+          mark1) echo "test in mark1"; echo one > $AUTOPKGTEST_ARTIFACTS/mark1.txt; /tmp/autopkgtest-reboot mark2 ;;
+          mark2) echo "test in mark2"; echo two > $AUTOPKGTEST_ARTIFACTS/mark2.txt ;;
+          "") echo "test beginning"; echo zero > $AUTOPKGTEST_ARTIFACTS/begin.txt; /tmp/autopkgtest-reboot mark1 ;;
+          *) echo "unknown AUTOPKGTEST_REBOOT_MARK value $AUTOPKGTEST_REBOOT_MARK" >&2; exit 1 ;;
         esac
         echo "test end"'''})
 
@@ -3449,25 +3449,25 @@ class SshRunnerNoScript(AdtTestCase):
         p = self.build_src('Tests: s r\nDepends:\nRestrictions: needs-root',
                            {'s': '#!/bin/sh\necho simple_done',
                             'r': '''#!/bin/sh -e
-        case "$ADT_REBOOT_MARK" in
+        case "$AUTOPKGTEST_REBOOT_MARK" in
           "")
               echo "test beginning"
-              echo zero > $ADT_ARTIFACTS/begin.txt
+              echo zero > $AUTOPKGTEST_ARTIFACTS/begin.txt
               /tmp/autopkgtest-reboot-prepare mark1
               touch /var/post-prepare-1
               reboot ;;
           mark1)
               echo "test in mark1"
-              echo one > $ADT_ARTIFACTS/mark1.txt
+              echo one > $AUTOPKGTEST_ARTIFACTS/mark1.txt
               /tmp/autopkgtest-reboot-prepare mark2
               touch /var/post-prepare-2
               reboot ;;
           mark2)
               echo "test in mark2"
-              echo two > $ADT_ARTIFACTS/mark2.txt
+              echo two > $AUTOPKGTEST_ARTIFACTS/mark2.txt
               ls /var/post-prepare-1 /var/post-prepare-2 ;;
           *)
-              echo "unknown ADT_REBOOT_MARK value $ADT_REBOOT_MARK" >&2
+              echo "unknown AUTOPKGTEST_REBOOT_MARK value $AUTOPKGTEST_REBOOT_MARK" >&2
               exit 1 ;;
         esac'''})
 
@@ -3731,11 +3731,11 @@ class SshRunnerSnappy(AdtTestCase):
 
         p = self.build_src('Tests:r\nDepends:\nRestrictions: needs-root',
                            {'r': '''#!/bin/sh -e
-        case "$ADT_REBOOT_MARK" in
-          mark1) echo "test in mark1"; echo one > $ADT_ARTIFACTS/mark1.txt; /tmp/autopkgtest-reboot mark2 ;;
-          mark2) echo "test in mark2"; echo two > $ADT_ARTIFACTS/mark2.txt ;;
-          "") echo "test beginning"; echo zero > $ADT_ARTIFACTS/begin.txt; /tmp/autopkgtest-reboot mark1 ;;
-          *) echo "unknown ADT_REBOOT_MARK value $ADT_REBOOT_MARK" >&2; exit 1 ;;
+        case "$AUTOPKGTEST_REBOOT_MARK" in
+          mark1) echo "test in mark1"; echo one > $AUTOPKGTEST_ARTIFACTS/mark1.txt; /tmp/autopkgtest-reboot mark2 ;;
+          mark2) echo "test in mark2"; echo two > $AUTOPKGTEST_ARTIFACTS/mark2.txt ;;
+          "") echo "test beginning"; echo zero > $AUTOPKGTEST_ARTIFACTS/begin.txt; /tmp/autopkgtest-reboot mark1 ;;
+          *) echo "unknown AUTOPKGTEST_REBOOT_MARK value $AUTOPKGTEST_REBOOT_MARK" >&2; exit 1 ;;
         esac
         echo "test end"'''})
 

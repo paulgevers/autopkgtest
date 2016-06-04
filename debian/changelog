@@ -19,6 +19,15 @@ autopkgtest (4.0) UNRELEASED; urgency=medium
     with"autopkgtest" instead of "adt". Keep compatibility symlink for the old
     commands, and when being called through them, also produce images with the
     old adt* names.
+  * Rename public ADT_* env vars to AUTOPKGTEST_*:
+    - AUTOPKGTEST_APT_PROXY
+    - AUTOPKGTEST_ARTIFACTS
+    - AUTOPKGTEST_AUTOPILOT_MODULE
+    - AUTOPKGTEST_NORMAL_USER
+    - AUTOPKGTEST_REBOOT_MARK
+    - AUTOPKGTEST_TMP
+    As these are being used in existing tests and tools, also export/check
+    those under their old ADT_* name.
 
  -- Martin Pitt <mpitt@debian.org>  Sun, 05 Jun 2016 09:01:35 +0200
 

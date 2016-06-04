@@ -275,6 +275,7 @@ class Testbed:
 
         xenv = ['AUTOPKGTEST_IS_SETUP_COMMAND=1']
         if self.user:
+            xenv.append('AUTOPKGTEST_NORMAL_USER=' + self.user)
             xenv.append('ADT_NORMAL_USER=' + self.user)
 
         for c in self.setup_commands:
@@ -925,7 +926,7 @@ fi
 
         # create script to run test
         test_artifacts = '%s/%s-artifacts' % (self.scratch, test.name)
-        adttmp = '%s/adttmp' % (self.scratch)
+        autopkgtest_tmp = '%s/autopkgtest_tmp' % (self.scratch)
         assert self.nproc is not None
         script = 'set -e; ' \
                  'export USER=`id -nu`; ' \
@@ -933,8 +934,10 @@ fi
                  ' . ~/.profile >/dev/null 2>&1 || true; ' \
                  'buildtree="%(t)s"; ' \
                  'mkdir -p -m 1777 -- "%(a)s"; ' \
-                 'export ADT_ARTIFACTS="%(a)s"; ' \
-                 'mkdir -p -m 755 "%(tmp)s"; export ADTTMP="%(tmp)s" ' \
+                 'export AUTOPKGTEST_ARTIFACTS="%(a)s"; ' \
+                 'export ADT_ARTIFACTS="$AUTOPKGTEST_ARTIFACTS"; ' \
+                 'mkdir -p -m 755 "%(tmp)s"; export AUTOPKGTEST_TMP="%(tmp)s"; ' \
+                 'export ADTTMP="$AUTOPKGTEST_TMP"; ' \
                  'export DEBIAN_FRONTEND=noninteractive; ' \
                  'export LANG=C.UTF-8; ' \
                  '''export DEB_BUILD_OPTIONS=parallel=%(cpu)s; ''' \
@@ -944,10 +947,11 @@ fi
                  'rm -f /tmp/autopkgtest_script_pid; set -C; echo $$ > /tmp/autopkgtest_script_pid; set +C; ' \
                  'trap "rm -f /tmp/autopkgtest_script_pid" EXIT INT QUIT PIPE; '\
                  'cd "$buildtree"; '\
-                 % {'t': tree.tb, 'a': test_artifacts, 'tmp': adttmp,
+                 % {'t': tree.tb, 'a': test_artifacts, 'tmp': autopkgtest_tmp,
                     'cpu': build_parallel or self.nproc}
 
         if 'needs-root' in test.restrictions and self.user is not None:
+            script += 'export AUTOPKGTEST_NORMAL_USER=%s; ' % self.user
             script += 'export ADT_NORMAL_USER=%s; ' % self.user
 
         for e in extra_env:
@@ -1003,7 +1007,7 @@ fi
         timeout = False
         while True:
             if self.last_reboot_marker:
-                script_prefix = 'export ADT_REBOOT_MARK="%s"; ' % self.last_reboot_marker
+                script_prefix = 'export AUTOPKGTEST_REBOOT_MARK="%s"; export ADT_REBOOT_MARK="$AUTOPKGTEST_REBOOT_MARK"; ' % self.last_reboot_marker
             else:
                 script_prefix = ''
             try:
@@ -1101,11 +1105,11 @@ fi
                 os.rmdir(ap.host)
 
         if shell or (shell_on_failure and not test.result):
-            self.run_shell(tree.tb, ['ADT_ARTIFACTS="%s"' % test_artifacts,
-                                     'ADTTMP="%s"' % adttmp])
+            self.run_shell(tree.tb, ['AUTOPKGTEST_ARTIFACTS="%s"' % test_artifacts,
+                                     'AUTOPKGTEST_TMP="%s"' % autopkgtest_tmp])
 
-        # clean up artifacts and ADTTMP dirs
-        self.check_exec(['rm', '-rf', test_artifacts, adttmp])
+        # clean up artifacts and AUTOPKGTEST_TMP dirs
+        self.check_exec(['rm', '-rf', test_artifacts, autopkgtest_tmp])
 
         if need_click_restore:
             self.apparmor_restore_click(test.clicks, test.installed_clicks)

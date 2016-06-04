@@ -29,7 +29,7 @@ EOF
 # work around broken PTMU in Canonical Scalingstack
 iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 
-cat <<EOF | su - $ADT_NORMAL_USER
+cat <<EOF | su - $AUTOPKGTEST_NORMAL_USER
 adt-build-lxd images:ubuntu/xenial/$arch
 export AUTOPKGTEST_TEST_LXD=adt/ubuntu/xenial/$arch
 cd $(pwd)

@@ -58,16 +58,16 @@ that the tests must test the *installed* version of the click package.
 Tests may not modify the source tree (and may not have write access to
 it).
 
-During execution of the test, the environment variable ``$ADTTMP`` will
-point to a directory for the execution of this particular test, which
-starts empty and will be deleted afterwards (so there is no need for the
-test to clean up files left there).
+During execution of the test, the environment variable
+``$AUTOPKGTEST_TMP`` will point to a directory for the execution of this
+particular test, which starts empty and will be deleted afterwards (so
+there is no need for the test to clean up files left there).
 
 If tests want to create artifacts which are useful to attach to test
 results, such as additional log files or screenshots, they can put them
-into the directory specified by the ``$ADT_ARTIFACTS`` environment
-variable. When using the ``--output-dir`` option, they will be copied
-into ``outputdir/artifacts/``.
+into the directory specified by the ``$AUTOPKGTEST_ARTIFACTS``
+environment variable. When using the ``--output-dir`` option, they will
+be copied into ``outputdir/artifacts/``.
 
 Control fields
 --------------

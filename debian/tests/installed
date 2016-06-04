@@ -2,7 +2,7 @@
 set -eu
 
 # avoid using Python modules in source tree
-cd $ADTTMP
+cd $AUTOPKGTEST_TMP
 
 mkdir -p mypkg/debian/tests
 echo "mypkg (1) UNRELEASED" > mypkg/debian/changelog

@@ -32,16 +32,16 @@ If the file to be executed has no execute bits set, ``chmod a+x`` is
 applied to it (this means that tests can be added in patches without the
 need for additional chmod; contrast this with debian/rules).
 
-During execution of the test, the environment variable ``$ADTTMP`` will
-point to a directory for the execution of this particular test, which
-starts empty and will be deleted afterwards (so there is no need for the
-test to clean up files left there).
+During execution of the test, the environment variable
+``$AUTOPKGTEST_TMP`` will point to a directory for the execution of this
+particular test, which starts empty and will be deleted afterwards (so
+there is no need for the test to clean up files left there).
 
 If tests want to create artifacts which are useful to attach to test
 results, such as additional log files or screenshots, they can put them
-into the directory specified by the ``$ADT_ARTIFACTS`` environment
-variable. When using the ``--output-dir`` option, they will be copied
-into ``outputdir/artifacts/``.
+into the directory specified by the ``$AUTOPKGTEST_ARTIFACTS``
+environment variable. When using the ``--output-dir`` option, they will
+be copied into ``outputdir/artifacts/``.
 
 Tests must declare all applicable Restrictions - see below.
 
@@ -176,11 +176,11 @@ build-needed
     Please use this considerately, as for large builds it unnecessarily
     builds the entire project when you only need a tiny subset (like the
     tests/ subdirectory). It is often possible to run ``make -C tests``
-    instead, or copy the test code to ``$ADTTMP`` and build it there
-    with some custom commands. This cuts down the load on the Continuous
-    Integration servers and also makes tests more robust as it prevents
-    accidentally running them against the built source tree instead of
-    the installed packages.
+    instead, or copy the test code to ``$AUTOPKGTEST_TMP`` and build it
+    there with some custom commands. This cuts down the load on the
+    Continuous Integration servers and also makes tests more robust as
+    it prevents accidentally running them against the built source tree
+    instead of the installed packages.
 
 allow-stderr
     Output to stderr is not considered a failure. This is useful for
@@ -263,14 +263,14 @@ The particular steps for a rebooting tests are:
   (with ``SIGKILL``).
 
 - autopkgtest backs up the current state of the test source tree and
-  any ``$ADT_ARTIFACTS`` that were created so far, reboots the
+  any ``$AUTOPKGTEST_ARTIFACTS`` that were created so far, reboots the
   testbed, and restores the test source tree and artifacts.
 
 - The test gets run again, this time with a new environment variable
-  ``$ADT_REBOOT_MARK`` containing the argument to
+  ``$AUTOPKGTEST_REBOOT_MARK`` containing the argument to
   ``autopkgtest-reboot``, e. g. ``my_mark``.
 
-- The test needs to check ``$ADT_REBOOT_MARK`` and jump to the
+- The test needs to check ``$AUTOPKGTEST_REBOOT_MARK`` and jump to the
   appropriate point. A nonexisting variable means "start from the
   beginning".
 
@@ -279,7 +279,7 @@ This example test will reboot the testbed two times in between:
 ::
 
     #!/bin/sh -e
-    case "$ADT_REBOOT_MARK" in
+    case "$AUTOPKGTEST_REBOOT_MARK" in
       "") echo "test beginning"; /tmp/autopkgtest-reboot mark1 ;;
       mark1) echo "test in mark1"; /tmp/autopkgtest-reboot mark2 ;;
       mark2) echo "test in mark2" ;;
@@ -299,7 +299,7 @@ Example:
 ::
 
     #!/bin/sh
-    if [ "$ADT_REBOOT_MARK" = phase1 ]; then
+    if [ "$AUTOPKGTEST_REBOOT_MARK" = phase1 ]; then
         echo "continuing test after reboot"
         ls -l /var/post-request-action
         echo "end of test"

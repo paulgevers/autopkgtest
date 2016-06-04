@@ -23,7 +23,7 @@ apt-get install --assume-yes --no-install-recommends dbus-x11 xvfb python3-xlib 
 rm -f /sbin/apparmor_parser
 
 # start X server
-su -c 'Xvfb :5 -screen 0 1024x768x24 >/tmp/Xvfb-5.log 2>&1 &' $ADT_NORMAL_USER
+su -c 'Xvfb :5 -screen 0 1024x768x24 >/tmp/Xvfb-5.log 2>&1 &' $AUTOPKGTEST_NORMAL_USER
 cat <<EOF >> /etc/environment
 DISPLAY=:5
 XAUTHORITY=/dev/null
@@ -37,7 +37,7 @@ if [ -e /dev/uinput ]; then
 fi
 
 # start user upstart session
-cat <<EOF | su $ADT_NORMAL_USER >> /etc/environment
+cat <<EOF | su $AUTOPKGTEST_NORMAL_USER >> /etc/environment
 set -e
 export LANG=$LANG
 export XDG_RUNTIME_DIR=\$(mktemp -d)

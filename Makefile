@@ -44,7 +44,7 @@ virts =		virt/chroot \
 		virt/ssh \
 		$(NULL)
 
-programs =	tools/adt-buildvm-ubuntu-cloud \
+programs =	tools/autopkgtest-buildvm-ubuntu-cloud \
 		tools/autopkgtest-build-lxc \
 		tools/autopkgtest-build-lxd \
 		runner/autopkgtest \
@@ -88,6 +88,7 @@ install:
 	ln -s autopkgtest $(bindir)/adt-run
 	ln -s autopkgtest-build-lxc $(bindir)/adt-build-lxc
 	ln -s autopkgtest-build-lxd $(bindir)/adt-build-lxd
+	ln -s autopkgtest-buildvm-ubuntu-cloud $(bindir)/adt-buildvm-ubuntu-cloud
 	$(INSTALL_DATA) runner/adt-run.1 $(man1dir)
 
 clean:

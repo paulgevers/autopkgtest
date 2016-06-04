@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# adt-buildvm-ubuntu-cloud is part of autopkgtest
+# autopkgtest-buildvm-ubuntu-cloud is part of autopkgtest
 # autopkgtest is a tool for testing Debian binary packages
 #
 # autopkgtest is Copyright (C) 2006-2014 Canonical Ltd.
@@ -43,7 +43,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(
 
 import VirtSubproc
 
-workdir = tempfile.mkdtemp(prefix='adt-buildvm-ubuntu-cloud')
+workdir = tempfile.mkdtemp(prefix='autopkgtest-buildvm-ubuntu-cloud')
 atexit.register(shutil.rmtree, workdir)
 
 
@@ -273,7 +273,7 @@ def build_seed(mirror, proxy, no_apt_upgrade, metadata_file=None,
         sys.stderr.write('\nCould not find setup-testbed script\n')
         sys.exit(1)
 
-    genisoimage = subprocess.Popen(['genisoimage', '-output', 'adt.seed',
+    genisoimage = subprocess.Popen(['genisoimage', '-output', 'autopkgtest.seed',
                                     '-volid', 'cidata', '-joliet', '-rock',
                                     '-quiet', 'user-data', 'meta-data',
                                     'setup-testbed'],
@@ -282,7 +282,7 @@ def build_seed(mirror, proxy, no_apt_upgrade, metadata_file=None,
     if genisoimage.returncode != 0:
         sys.exit(1)
 
-    return os.path.join(workdir, 'adt.seed')
+    return os.path.join(workdir, 'autopkgtest.seed')
 
 
 def host_tz():
@@ -359,5 +359,10 @@ resize_image(image, args.disk_size)
 seed = build_seed(args.mirror, args.proxy, args.no_apt_upgrade,
                   args.metadata, args.userdata, args.post_command)
 boot_image(image, seed, args.qemu_command, args.verbose, args.timeout)
-install_image(image, os.path.join(args.output_dir, 'adt-%s-%s-cloud.img' %
-                                  (args.release, args.arch)))
+
+if 'adt-buildvm' in sys.argv[0]:
+    fname = 'adt-%s-%s-cloud.img' % (args.release, args.arch)
+else:
+    fname = 'autopkgtest-%s-%s.img' % (args.release, args.arch)
+
+install_image(image, os.path.join(args.output_dir, fname))

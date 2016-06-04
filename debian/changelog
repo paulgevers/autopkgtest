@@ -15,6 +15,10 @@ autopkgtest (4.0) UNRELEASED; urgency=medium
       e. g. "ssh" instead of "adt-virt-ssh".
     The old "adt-run" CLI will still be available for some time.
     (Closes: #795274, LP: #1453509)
+  * Rename adt-build* tools to autopkgtest-build* and build images prefixed
+    with"autopkgtest" instead of "adt". Keep compatibility symlink for the old
+    commands, and when being called through them, also produce images with the
+    old adt* names.
 
  -- Martin Pitt <mpitt@debian.org>  Sun, 05 Jun 2016 09:01:35 +0200
 

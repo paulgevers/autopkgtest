@@ -40,7 +40,7 @@ import adtlog
 progname = "<VirtSubproc>"
 devnull_read = open('/dev/null', 'r')
 caller = __main__
-copy_timeout = int(os.getenv('ADT_VIRT_COPY_TIMEOUT', '300'))
+copy_timeout = int(os.getenv('AUTOPKGTEST_VIRT_COPY_TIMEOUT', '300'))
 
 downtmp_open = None  # downtmp after opening testbed
 downtmp = None  # current downtmp (None after close)

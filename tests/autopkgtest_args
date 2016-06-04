@@ -306,11 +306,11 @@ Files:
                  '--copy.*non/existing.*not exist')
 
     def test_env(self):
-        args = self.parse(['--env', 'ADT_X=one', '--env=ADT_Y=two', 'mypkg'])[0]
-        self.assertEqual(args.env, ['ADT_X=one', 'ADT_Y=two'])
+        args = self.parse(['--env', 'AUTOPKGTEST_X=one', '--env=AUTOPKGTEST_Y=two', 'mypkg'])[0]
+        self.assertEqual(args.env, ['AUTOPKGTEST_X=one', 'AUTOPKGTEST_Y=two'])
 
     def test_wrong_env(self):
-        self.err(['--env', 'ADT_X', 'mypkg'], 'must be KEY=value')
+        self.err(['--env', 'AUTOPKGTEST_X', 'mypkg'], 'must be KEY=value')
 
     def test_help(self):
         try:

@@ -357,7 +357,7 @@ for details.'''
             adt_testbed.timeouts[k] = v
 
     # this timeout is for the virt server, so pass it down via environment
-    os.environ['ADT_VIRT_COPY_TIMEOUT'] = str(adt_testbed.timeouts['copy'])
+    os.environ['AUTOPKGTEST_VIRT_COPY_TIMEOUT'] = str(adt_testbed.timeouts['copy'])
 
     # if we have --setup-commands and it points to a file, read its contents
     for i, c in enumerate(args.setup_commands):

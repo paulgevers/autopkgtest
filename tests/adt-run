@@ -375,8 +375,8 @@ class NullRunner(AdtTestCase, DebTestsAll, DebTestsFailureModes):
 
         (code, out, err) = self.runtest(['--no-built-binaries',
                                          '--unbuilt-tree=' + p,
-                                         '--env=ADT_COLOR=blue',
-                                         '--env=ADT_SOMETHING=foo bar',
+                                         '--env=COLOR=blue',
+                                         '--env=SOMETHING=foo bar',
                                          '--output-dir=' + outdir])
 
         # test results
@@ -445,7 +445,7 @@ class NullRunner(AdtTestCase, DebTestsAll, DebTestsFailureModes):
                          '%s %s %s' % (u.sysname, u.release, u.version))
         self.assertNotIn('test_kernel_versions', info)
         self.assertEqual(info['custom_environment'],
-                         ['ADT_COLOR=blue', 'ADT_SOMETHING=foo bar'])
+                         ['COLOR=blue', 'SOMETHING=foo bar'])
         self.assertEqual(info['virt_server'], 'null')
         self.assertEqual(info['nproc'],
                          subprocess.check_output(['nproc'], universal_newlines=True).strip())
@@ -1139,10 +1139,10 @@ if ($pid) { # parent
         '''Pass environment variable to test'''
 
         p = self.build_src('Tests: pass\nDepends: coreutils\n',
-                           {'pass': '#!/bin/sh -eu\necho Hey ${ADT_NAME}! favourite color: ${FAV_COLOR}.\n'})
+                           {'pass': '#!/bin/sh -eu\necho Hey ${NAME}! favourite color: ${FAV_COLOR}.\n'})
 
         (code, out, err) = self.runtest(
-            ['-d', '--env=FAV_COLOR=blue', '--env', 'ADT_NAME=Joe', '-B', '--unbuilt-tree=' + p])
+            ['-d', '--env=FAV_COLOR=blue', '--env', 'NAME=Joe', '-B', '--unbuilt-tree=' + p])
         # test should succeed
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS', out)
@@ -3617,7 +3617,7 @@ class SshRunnerWithScript(AdtTestCase, DebTestsAll):
         '''click source, with root'''
 
         env = os.environ.copy()
-        env['ADT_CLICK_NO_FRAMEWORK_CHECK'] = '1'
+        env['AUTOPKGTEST_CLICK_NO_FRAMEWORK_CHECK'] = '1'
         (code, out, err) = self.runtest(
             ['-d',
              '--setup-commands', 'apt-get install -y --no-install-recommends click',

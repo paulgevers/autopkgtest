@@ -383,7 +383,7 @@ details.'''
             adt_testbed.timeouts[k] = v
 
     # this timeout is for the virt server, so pass it down via environment
-    os.environ['ADT_VIRT_COPY_TIMEOUT'] = str(adt_testbed.timeouts['copy'])
+    os.environ['AUTOPKGTEST_VIRT_COPY_TIMEOUT'] = str(adt_testbed.timeouts['copy'])
 
     if not actions:
         parser.error('You must specify at least one action')

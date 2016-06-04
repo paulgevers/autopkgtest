@@ -121,7 +121,7 @@ if [ -e "$root/etc/cloud/cloud.cfg" ]; then
 fi
 
 # set up networking
-if [ -z "${ADT_IS_SETUP_COMMAND:-}" ]; then
+if [ -z "${AUTOPKGTEST_IS_SETUP_COMMAND:-}" ]; then
     if ! grep -q 'source.*interfaces.d' "$root/etc/network/interfaces"; then
         printf "\nsource-directory /etc/network/interfaces.d\n" >> "$root/etc/network/interfaces"
     fi
@@ -170,7 +170,7 @@ if [ "$root" != "/" ] && [ -z "$AUTOPKGTEST_APT_PROXY" ]; then
     fi
 fi
 
-if [ -z "${ADT_IS_SETUP_COMMAND:-}" ]; then
+if [ -z "${AUTOPKGTEST_IS_SETUP_COMMAND:-}" ]; then
     chroot "$root" apt-get update || (sleep 15; chroot "$root" apt-get update)
 fi
 
@@ -186,7 +186,7 @@ if [ ! -e "$root/usr/share/doc/libpam-systemd" ] && chroot "$root" apt-cache sho
 fi
 
 # upgrade and trim image (not for --setup-command)
-if [ -z "${ADT_IS_SETUP_COMMAND:-}" ]; then
+if [ -z "${AUTOPKGTEST_IS_SETUP_COMMAND:-}" ]; then
     [ ! -d "$root/usr/share/doc/cloud-init" ] || have_cloudinit=1
 
     # clean up bloat from Ubuntu cloud images when building an image
@@ -207,7 +207,7 @@ if [ -z "${ADT_IS_SETUP_COMMAND:-}" ]; then
         chroot "$root" env DEBIAN_FRONTEND=noninteractive eatmydata apt-get --auto-remove -y purge $purge_list || true
     fi
 
-    if [ "${ADT_SETUP_VM_UPGRADE:-}" != "false" ]; then
+    if [ "${AUTOPKGTEST_SETUP_VM_UPGRADE:-}" != "false" ]; then
         DEBIAN_FRONTEND=noninteractive chroot "$root" eatmydata apt-get -o Dpkg::Options::="--force-confold" -y dist-upgrade </dev/null
         DEBIAN_FRONTEND=noninteractive chroot "$root" eatmydata apt-get -o Dpkg::Options::="--force-confold" -y --purge autoremove </dev/null
     fi
@@ -242,11 +242,11 @@ if ! chroot "$root" sh -c 'type python3 >/dev/null 2>&1 || type python >/dev/nul
 fi
 
 # run post-install commands
-if [ -n "${ADT_SETUP_VM_POST_COMMAND:-}" ]; then
-    chroot "$root" sh -ec "$ADT_SETUP_VM_POST_COMMAND"
+if [ -n "${AUTOPKGTEST_SETUP_VM_POST_COMMAND:-}" ]; then
+    chroot "$root" sh -ec "$AUTOPKGTEST_SETUP_VM_POST_COMMAND"
 fi
 
-if [ -z "${ADT_IS_SETUP_COMMAND:-}" ]; then
+if [ -z "${AUTOPKGTEST_IS_SETUP_COMMAND:-}" ]; then
     chroot "$root" apt-get clean
 fi
 

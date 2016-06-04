@@ -143,7 +143,7 @@ class Testbed:
                           '''/bin/echo -e '#!/bin/sh -e\\n'''
                           '''[ -n "$1" ] || { echo "Usage: $0 <mark>" >&2; exit 1; }\\n'''
                           '''echo "$1" > /run/autopkgtest-reboot-mark\\n'''
-                          '''test_script_pid=$(cat /tmp/adt_test_script_pid)\\n'''
+                          '''test_script_pid=$(cat /tmp/autopkgtest_script_pid)\\n'''
                           '''p=$PPID; while true; do read _ c _ pp _ < /proc/$p/stat;'''
                           '''  [ $pp -ne $test_script_pid ] || break; p=$pp; done\\n'''
                           '''kill -KILL $p\\n' > /tmp/autopkgtest-reboot;'''
@@ -155,7 +155,7 @@ class Testbed:
                           '''/bin/echo -e '#!/bin/sh -e\\n'''
                           '''[ -n "$1" ] || { echo "Usage: $0 <mark>" >&2; exit 1; }\\n'''
                           '''echo "$1" > /run/autopkgtest-reboot-prepare-mark\\n'''
-                          '''test_script_pid=$(cat /tmp/adt_test_script_pid)\\n'''
+                          '''test_script_pid=$(cat /tmp/autopkgtest_script_pid)\\n'''
                           '''kill -KILL $test_script_pid\\n'''
                           '''while [ -e /run/autopkgtest-reboot-prepare-mark ]; do sleep 0.5; done\\n'''
                           ''' '> /tmp/autopkgtest-reboot-prepare;'''
@@ -273,7 +273,7 @@ class Testbed:
                          'for d in %s; do [ ! -d $d ] || touch -r $d %s/${d//\//_}.stamp; done' % (
                              boot_dirs, self.scratch)])
 
-        xenv = ['ADT_IS_SETUP_COMMAND=1']
+        xenv = ['AUTOPKGTEST_IS_SETUP_COMMAND=1']
         if self.user:
             xenv.append('ADT_NORMAL_USER=' + self.user)
 
@@ -740,7 +740,7 @@ fi
         tp.copydown()
         # install it
         clickopts = ['--all-users']
-        if 'ADT_CLICK_NO_FRAMEWORK_CHECK' in os.environ:
+        if 'AUTOPKGTEST_CLICK_NO_FRAMEWORK_CHECK' in os.environ:
             # this is mostly for testing
             clickopts.append('--force-missing-framework')
         if 'root-on-testbed' in self.caps:
@@ -941,8 +941,8 @@ fi
                  'unset LANGUAGE LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE '\
                  '  LC_MONETARY LC_MESSAGES LC_PAPER LC_NAME LC_ADDRESS '\
                  '  LC_TELEPHONE LC_MEASUREMENT LC_IDENTIFICATION LC_ALL;' \
-                 'rm -f /tmp/adt_test_script_pid; set -C; echo $$ > /tmp/adt_test_script_pid; set +C; ' \
-                 'trap "rm -f /tmp/adt_test_script_pid" EXIT INT QUIT PIPE; '\
+                 'rm -f /tmp/autopkgtest_script_pid; set -C; echo $$ > /tmp/autopkgtest_script_pid; set +C; ' \
+                 'trap "rm -f /tmp/autopkgtest_script_pid" EXIT INT QUIT PIPE; '\
                  'cd "$buildtree"; '\
                  % {'t': tree.tb, 'a': test_artifacts, 'tmp': adttmp,
                     'cpu': build_parallel or self.nproc}

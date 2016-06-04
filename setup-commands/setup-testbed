@@ -13,9 +13,9 @@
 #
 # See autopkgtest-qemu(1) for details how to use this with vmdeboostrap.
 #
-# You can set $ADT_APT_PROXY; if set, it will be configured in apt in
+# You can set $AUTOPKGTEST_APT_PROXY; if set, it will be configured in apt in
 # /etc/apt/apt.conf.d/01proxy. If you have an apt proxy configured on the host,
-# it will be used automatically, unless $ADT_APT_PROXY is set.
+# it will be used automatically, unless $AUTOPKGTEST_APT_PROXY is set.
 #
 # You can set $MIRROR to change the default apt mirror.
 
@@ -154,15 +154,18 @@ fi
 echo "Acquire::Languages \"none\";" > "$root"/etc/apt/apt.conf.d/90nolanguages
 echo 'force-unsafe-io' > "$root"/etc/dpkg/dpkg.cfg.d/autopkgtest
 
+# support backwards compatible env var too
+AUTOPKGTEST_APT_PROXY=${AUTOPKGTEST_APT_PROXY:-${ADT_APT_PROXY:-}}
+
 # detect apt proxy on the host (in chroot mode)
-if [ "$root" != "/" ] && [ -z "${ADT_APT_PROXY:-}" ]; then
+if [ "$root" != "/" ] && [ -z "$AUTOPKGTEST_APT_PROXY" ]; then
     RES=`apt-config shell proxy Acquire::http::Proxy`
     if [ -n "$RES" ]; then
         eval $RES
         if echo "$proxy" | egrep -q '(localhost|127\.0\.0\.[0-9]*)'; then
-            ADT_APT_PROXY=$(echo "$proxy" | sed -r "s#localhost|127\.0\.0\.[0-9]*#10.0.2.2#")
+            AUTOPKGTEST_APT_PROXY=$(echo "$proxy" | sed -r "s#localhost|127\.0\.0\.[0-9]*#10.0.2.2#")
         elif [ -n "${proxy:-}" ]; then
-            ADT_APT_PROXY="$proxy"
+            AUTOPKGTEST_APT_PROXY="$proxy"
         fi
     fi
 fi
@@ -249,8 +252,8 @@ fi
 
 # set up apt proxy, if given (this might be an IP which only works in the VM,
 # so don't run the previous apt-get with that already)
-if [ -n "${ADT_APT_PROXY:-}" ]; then
-    echo "Acquire::http { Proxy \"$ADT_APT_PROXY\"; };" > "$root"/etc/apt/apt.conf.d/01proxy
+if [ -n "$AUTOPKGTEST_APT_PROXY" ]; then
+    echo "Acquire::http { Proxy \"$AUTOPKGTEST_APT_PROXY\"; };" > "$root"/etc/apt/apt.conf.d/01proxy
 fi
 
 # avoid cron interference with apt-get update

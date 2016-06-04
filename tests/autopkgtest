@@ -2413,11 +2413,11 @@ class DebTestsVirtContainer(DebTestsVirtFS):
         self.assertIn('rebooting testbed', err)
 
 
-@unittest.skipUnless('ADT_TEST_LXC' in os.environ,
-                     'Set $ADT_TEST_LXC to an existing container')
+@unittest.skipUnless('AUTOPKGTEST_TEST_LXC' in os.environ,
+                     'Set $AUTOPKGTEST_TEST_LXC to an existing container')
 class LxcRunner(AdtTestCase, DebTestsVirtContainer):
     def __init__(self, *args, **kwargs):
-        self.container_name = os.environ.get('ADT_TEST_LXC')
+        self.container_name = os.environ.get('AUTOPKGTEST_TEST_LXC')
         if self.container_name:
             vargs = ['lxc', '--ephemeral', self.container_name]
             # check for unprivileged containers
@@ -2431,19 +2431,19 @@ class LxcRunner(AdtTestCase, DebTestsVirtContainer):
         super().__init__(vargs, *args, **kwargs)
 
 
-@unittest.skipUnless('ADT_TEST_LXD' in os.environ,
-                     'Set $ADT_TEST_LXD to an existing LXD image')
+@unittest.skipUnless('AUTOPKGTEST_TEST_LXD' in os.environ,
+                     'Set $AUTOPKGTEST_TEST_LXD to an existing LXD image')
 class LxdRunner(AdtTestCase, DebTestsVirtContainer):
     def __init__(self, *args, **kwargs):
-        vargs = ['lxd', os.environ.get('ADT_TEST_LXD')]
+        vargs = ['lxd', os.environ.get('AUTOPKGTEST_TEST_LXD')]
         super().__init__(vargs, *args, **kwargs)
 
 
-@unittest.skipUnless('ADT_TEST_QEMU' in os.environ,
-                     'Set $ADT_TEST_QEMU to an existing autopkgtest QEMU image')
+@unittest.skipUnless('AUTOPKGTEST_TEST_QEMU' in os.environ,
+                     'Set $AUTOPKGTEST_TEST_QEMU to an existing autopkgtest QEMU image')
 class QemuRunner(AdtTestCase, DebTestsVirtContainer):
     def __init__(self, *args, **kwargs):
-        super(QemuRunner, self).__init__(['qemu', os.environ.get('ADT_TEST_QEMU')], *args, **kwargs)
+        super(QemuRunner, self).__init__(['qemu', os.environ.get('AUTOPKGTEST_TEST_QEMU')], *args, **kwargs)
 
     def test_options_and_baseimage(self):
         '''autopkgtest-qemu options and /dev/baseimage'''
@@ -2530,11 +2530,11 @@ class QemuRunner(AdtTestCase, DebTestsVirtContainer):
         self.assertNotIn('tar:', err)
 
 
-@unittest.skipUnless('ADT_TEST_SCHROOT' in os.environ,
-                     'Set $ADT_TEST_SCHROOT to an existing schroot')
+@unittest.skipUnless('AUTOPKGTEST_TEST_SCHROOT' in os.environ,
+                     'Set $AUTOPKGTEST_TEST_SCHROOT to an existing schroot')
 class SchrootRunner(AdtTestCase, DebTestsVirtFS, DebTestsFailureModes):
     def __init__(self, *args, **kwargs):
-        super(SchrootRunner, self).__init__(['schroot', os.environ.get('ADT_TEST_SCHROOT')],
+        super(SchrootRunner, self).__init__(['schroot', os.environ.get('AUTOPKGTEST_TEST_SCHROOT')],
                                             *args, **kwargs)
 
     def test_binary(self):
@@ -2974,12 +2974,12 @@ Depends: nonexisting'''
             self.assertRegex(err, 'lxd\s+SKIP')
 
 
-@unittest.skipUnless('ADT_TEST_SCHROOT_CLICK' in os.environ,
-                     'Set $ADT_TEST_SCHROOT_CLICK to an existing schroot')
+@unittest.skipUnless('AUTOPKGTEST_TEST_SCHROOT_CLICK' in os.environ,
+                     'Set $AUTOPKGTEST_TEST_SCHROOT_CLICK to an existing schroot')
 class SchrootClickRunner(AdtTestCase):
     def __init__(self, *args, **kwargs):
         super(SchrootClickRunner, self).__init__(
-            ['schroot', os.environ.get('ADT_TEST_SCHROOT_CLICK')], *args, **kwargs)
+            ['schroot', os.environ.get('AUTOPKGTEST_TEST_SCHROOT_CLICK')], *args, **kwargs)
         self.click = os.path.join(test_dir, 'testclick_0.1_all.click')
         self.click_src = os.path.join(test_dir, 'testclick')
         self.setup_cmd = 'apt-get install -y --no-install-recommends click ubuntu-sdk-libs; adduser --no-create-home --system clickpkg; chown -R clickpkg:root /opt/click.ubuntu.com'
@@ -3157,8 +3157,8 @@ simple               PASS
         self.assertRegex(out, 't\s+PASS', out)
 
 
-@unittest.skipUnless('ADT_TEST_LXD' in os.environ,
-                     'Set $ADT_TEST_LXD to an existing container')
+@unittest.skipUnless('AUTOPKGTEST_TEST_LXD' in os.environ,
+                     'Set $AUTOPKGTEST_TEST_LXD to an existing container')
 class SshRunnerNoScript(AdtTestCase):
     def __init__(self, *args, **kwargs):
         super(SshRunnerNoScript, self).__init__(['invalid'], *args, **kwargs)
@@ -3174,7 +3174,7 @@ class SshRunnerNoScript(AdtTestCase):
             cmd.append('-S')
         elif sudo:
             cmd.append('-s')
-        cmd += ['open', os.environ.get('ADT_TEST_LXD')]
+        cmd += ['open', os.environ.get('AUTOPKGTEST_TEST_LXD')]
         out = subprocess.check_output(cmd, universal_newlines=True)
         for l in out.splitlines():
             (k, v) = l.split('=', 1)
@@ -3399,13 +3399,13 @@ class SshRunnerNoScript(AdtTestCase):
         self.assertNotIn('testbed auxverb failed with', err)
 
 
-@unittest.skipUnless('ADT_TEST_LXD' in os.environ,
-                     'Set $ADT_TEST_LXD to an existing container')
+@unittest.skipUnless('AUTOPKGTEST_TEST_LXD' in os.environ,
+                     'Set $AUTOPKGTEST_TEST_LXD to an existing container')
 class SshRunnerWithScript(AdtTestCase, DebTestsAll):
     def __init__(self, *args, **kwargs):
         super(SshRunnerWithScript, self).__init__(
             ['ssh', '--debug', '--setup-script', os.path.join(test_dir, 'ssh-setup-lxd'),
-             '--', os.environ.get('ADT_TEST_LXD'), '-k', '-s'],
+             '--', os.environ.get('AUTOPKGTEST_TEST_LXD'), '-k', '-s'],
             *args, **kwargs)
 
     def test_no_root(self):

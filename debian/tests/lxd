@@ -31,7 +31,7 @@ iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-m
 
 cat <<EOF | su - $ADT_NORMAL_USER
 adt-build-lxd images:ubuntu/xenial/$arch
-export ADT_TEST_LXD=adt/ubuntu/xenial/$arch
+export AUTOPKGTEST_TEST_LXD=adt/ubuntu/xenial/$arch
 cd $(pwd)
 tests/autopkgtest LxdRunner
 EOF

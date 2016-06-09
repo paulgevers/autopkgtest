@@ -369,6 +369,10 @@ class NullRunner(AdtTestCase, DebTestsAll, DebTestsFailureModes):
                             'sF': '#!/bin/sh\necho kaputt >&2',
                             'bP': '#!/bin/sh\n./test_built'})
 
+        # change to funny version
+        subprocess.check_call(['sed', '-i', 's/(1)/(1.2+git3.4-0foo1~testy)/',
+                               os.path.join(p, 'debian', 'changelog')])
+
         outdir = os.path.join(self.workdir, 'out')
         # check pre-existing, but empty dir
         os.mkdir(outdir)
@@ -415,7 +419,7 @@ class NullRunner(AdtTestCase, DebTestsAll, DebTestsFailureModes):
         self.assertIn('build needed for tests', contents)
         self.assertIn('dh build', contents)
         self.assertRegex(contents, 'sF\s+FAIL stderr: kaputt')
-        self.assertIn('testing package testpkg version 1\n', contents)
+        self.assertIn('testing package testpkg version 1.2+git3.4-0foo1~testy\n', contents)
         self.assertRegex(err, '@@@ summary\nsP\s+PASS\nsF\s+FAIL stderr: kaputt\nbP\s+PASS\n$')
 
         # check summary
@@ -423,9 +427,10 @@ class NullRunner(AdtTestCase, DebTestsAll, DebTestsFailureModes):
             self.assertRegex(f.read(), '^sP\s+PASS\nsF\s+FAIL stderr: kaputt\nbP\s+PASS$')
 
         # check test package version
+        self.assertIn('testing package testpkg version 1.2+git3.4-0foo1~testy\n', err)
         with open(os.path.join(outdir, 'testpkg-version')) as f:
             contents = f.read()
-        self.assertEqual(contents, 'testpkg 1\n')
+        self.assertEqual(contents, 'testpkg 1.2+git3.4-0foo1~testy\n')
 
         # check recorded package lists
         with open(os.path.join(outdir, 'testbed-packages')) as f:

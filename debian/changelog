@@ -2,6 +2,7 @@ autopkgtest (4.0.1) UNRELEASED; urgency=medium
 
   * Skip tests/autopkgtest NullRunner.test_apt_source_nonexisting test instead
     of failing if there are no deb-src apt sources configured on the host.
+  * Add test for correctly parsing version number with less common characters.
 
  -- Martin Pitt <mpitt@debian.org>  Thu, 09 Jun 2016 08:11:11 +0200
 

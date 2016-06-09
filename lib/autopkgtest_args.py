@@ -106,6 +106,8 @@ def process_package_arguments(parser, args):
         elif is_click_src(p):
             set_debsrc(p, 'click-source')
             has_clicksrc = True
+        elif re.match('[0-9a-z][0-9a-z.+-]+$', p):
+            set_debsrc(p, 'apt-source', False)
         elif os.path.isfile(os.path.join(p, 'debian', 'control')):
             if os.path.exists(os.path.join(p, 'debian', 'files')):
                 set_debsrc(p, 'built-tree', False)
@@ -116,8 +118,6 @@ def process_package_arguments(parser, args):
             set_debsrc(p, 'built-tree', False)
         elif '://' in p:
             set_debsrc(p, 'git-source')
-        elif re.match('[0-9a-z][0-9a-z.+-]+$', p):
-            set_debsrc(p, 'apt-source', False)
         else:
             parser.error('%s is not a valid test package' % p)
 

@@ -43,6 +43,12 @@ this is very similar to specifying a \fB.dsc\fR. If that is a built tree, all
 test dependencies get satisfied by archive packages, unless you explicitly
 specify locally built .debs as well.
 
+.B Attention:
+If you just specify a bare directory name which is a legal Debian source
+package name, it will be interpreted as the latter (see below). In this case,
+prefix the directory name with
+.BR ./ .
+
 .TP
 .B source package name
 Downloads the given source package name with \fBapt\-get source\fR in the

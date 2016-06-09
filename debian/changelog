@@ -3,6 +3,10 @@ autopkgtest (4.0.1) UNRELEASED; urgency=medium
   * Skip tests/autopkgtest NullRunner.test_apt_source_nonexisting test instead
     of failing if there are no deb-src apt sources configured on the host.
   * Add test for correctly parsing version number with less common characters.
+  * autopkgtest: If the test argument is a legal apt source name, prefer
+    testing that apt source name over testing that directory. If the latter
+    is wanted, it can always be prefixed with ./ to disambiguate. Update the
+    manpage accordingly.
 
  -- Martin Pitt <mpitt@debian.org>  Thu, 09 Jun 2016 08:11:11 +0200
 

@@ -36,7 +36,7 @@ class T(unittest.TestCase):
         self.testdeb2 = 'testbin2_0.1_all.deb'
         with open(self.testdeb2, 'w'):
             pass
-        self.testtree = 'testsrc-1'
+        self.testtree = './testsrc-1'
         os.makedirs(os.path.join(self.testtree, 'debian'))
         with open(os.path.join(self.testtree, 'debian', 'control'), 'w'):
             pass
@@ -101,6 +101,13 @@ class T(unittest.TestCase):
         self.assertEqual(virt, ['null'])
 
     def test_apt_source(self):
+        acts = self.parse(['mypkg'])[1]
+        self.assertEqual(acts, [('apt-source', 'mypkg', False)])
+
+    def test_apt_source_trumps_dir(self):
+        os.makedirs('mypkg/debian')
+        with open(os.path.join('mypkg', 'debian', 'control'), 'w'):
+            pass
         acts = self.parse(['mypkg'])[1]
         self.assertEqual(acts, [('apt-source', 'mypkg', False)])
 

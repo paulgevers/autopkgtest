@@ -1,3 +1,10 @@
+autopkgtest (4.0.1) UNRELEASED; urgency=medium
+
+  * Skip tests/autopkgtest NullRunner.test_apt_source_nonexisting test instead
+    of failing if there are no deb-src apt sources configured on the host.
+
+ -- Martin Pitt <mpitt@debian.org>  Thu, 09 Jun 2016 08:11:11 +0200
+
 autopkgtest (4.0) unstable; urgency=medium
 
   * Add new "autopkgtest" CLI. This provides a simplified CLI compared to the

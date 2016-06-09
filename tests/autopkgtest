@@ -47,6 +47,10 @@ have_apt = subprocess.call(['apt-get', 'download', 'gir1.2-json-1.0'],
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                            cwd=os.environ.get('TMPDIR', '/tmp')) == 0
 
+have_apt_src = subprocess.call(['apt-cache', 'showsrc', 'coreutils'],
+                               stdout=subprocess.PIPE,
+                               stderr=subprocess.STDOUT) == 0
+
 have_ubuntu_device_flash = subprocess.call(['which', 'ubuntu-device-flash'],
                                            stdout=subprocess.PIPE,
                                            stderr=subprocess.PIPE) == 0
@@ -950,6 +954,7 @@ bad                  FAIL non-zero exit status 1
         with open(os.path.join(outdir, 'artifacts', 'world.txt')) as f:
             self.assertEqual(f.read(), 'hello\n')
 
+    @unittest.skipUnless(have_apt_src, 'this test needs local deb-src apt sources')
     def test_apt_source_nonexisting(self):
         '''apt-source for nonexisting package'''
 

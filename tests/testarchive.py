@@ -164,7 +164,7 @@ Package-List:
 ''' % (name, ', '.join(binaries), version, os.path.join(self.pooldir, self.component, prefix, name)))
             for b in binaries:
                 f.write(' %s deb admin optional\n' % b)
-            f.write('\n')
+            f.write('Standards-Version: 1.0\n\n')
 
     def update_index(self):
         '''Update the Packages index and Release file.

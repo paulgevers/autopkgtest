@@ -8,6 +8,9 @@ autopkgtest (4.0.1) UNRELEASED; urgency=medium
     is wanted, it can always be prefixed with ./ to disambiguate. Update the
     manpage accordingly.
   * autopkgtest.1: Update separator. (LP: #1591179)
+  * Fix "apt-get source" version detection for source packages whose versions
+    in different pockets have disjoint sets of binary packages (like Ubuntu's
+    linux-raspi2).
 
  -- Martin Pitt <mpitt@debian.org>  Thu, 09 Jun 2016 08:11:11 +0200
 

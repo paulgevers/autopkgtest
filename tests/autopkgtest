@@ -2972,6 +2972,34 @@ Depends: nonexisting'''
                                          '--debug', 'flavor'])
         self.assertEqual(code, 12, err)
 
+    def test_apt_pocket_disjoint_binaries(self):
+        '''--apt-pocket new version in unstable with non-overlapping binaries'''
+
+        ar = testarchive.Archive(series='testy', component='main')
+        ar.add_sources('flavor', ['libflavor0'], '1')
+        ar.create_deb('libflavor0', '1', srcpkg='flavor')
+
+        ap = testarchive.Archive(path=ar.path, pooldir='pool-proposed',
+                                 series='testy-proposed', component='main')
+        ap.add_sources('flavor', ['libflavor2'], '2')
+        ap.add_sources('flavor', ['libflavor3'], '3')
+        ap.create_deb('libflavor2', '2', srcpkg='flavor')
+        ap.create_deb('libflavor3', '3', srcpkg='flavor')
+
+        apt_sources = os.path.join(self.workdir, 'sources.list')
+        with open(apt_sources, 'w') as f:
+            f.write('deb [trusted=yes] file:///tmp/testarchive/ testy main\n')
+            f.write('deb-src [trusted=yes] file:///tmp/testarchive/ testy main\n')
+
+        (code, out, err) = self.runtest(['--copy', '%s:/tmp/testarchive' % ar.path,
+                                         '--copy', '%s:/etc/apt/sources.list' % apt_sources,
+                                         '--apt-pocket=proposed=src:flavor',
+                                         '--apt-upgrade',
+                                         '--debug', 'flavor'])
+        # we cannot actually download the package, but it should get as far as trying
+        self.assertTrue('apt-get source -q --only-source flavor=3' in err, err)
+        self.assertEqual(code, 12, err)
+
     def test_git_source_build(self):
         '''Check out and build source from git'''
 

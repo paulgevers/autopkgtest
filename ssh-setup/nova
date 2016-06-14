@@ -380,7 +380,13 @@ wait_reboot() {
         echo "Needs to be called with --uuid <server UUID>" >&2
         exit 1
     fi
-    nova reboot --poll "$SRVUUID"
+    if ! timeout 5m nova reboot --poll "$SRVUUID"; then
+        echo "soft reboot timed out, doing hard reboot" >&2
+        if ! nova reboot --hard --poll "$SRVUUID"; then
+            echo "hard reboot failed, aborting" >&2
+            exit 1
+        fi
+    fi
 }
 
 debug_failure() {

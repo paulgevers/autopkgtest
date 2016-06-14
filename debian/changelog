@@ -11,6 +11,9 @@ autopkgtest (4.0.1) UNRELEASED; urgency=medium
   * Fix "apt-get source" version detection for source packages whose versions
     in different pockets have disjoint sets of binary packages (like Ubuntu's
     linux-raspi2).
+  * ssh-setup/nova: If the normal "nova reboot" does not finish after five
+    minutes, use the bigger "reboot --hard" hammer. This works around reboot
+    bugs on some architectures.
 
  -- Martin Pitt <mpitt@debian.org>  Thu, 09 Jun 2016 08:11:11 +0200
 

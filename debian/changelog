@@ -14,6 +14,8 @@ autopkgtest (4.0.1) UNRELEASED; urgency=medium
   * ssh-setup/nova: If the normal "nova reboot" does not finish after five
     minutes, use the bigger "reboot --hard" hammer. This works around reboot
     bugs on some architectures.
+  * Fix "apt-get source" version detection for old (Ubuntu precise) apts which
+    does not yet understand --only-source, by ignoring other sources in awk.
 
  -- Martin Pitt <mpitt@debian.org>  Thu, 09 Jun 2016 08:11:11 +0200
 

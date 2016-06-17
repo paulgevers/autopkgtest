@@ -1,4 +1,4 @@
-autopkgtest (4.0.1) UNRELEASED; urgency=medium
+autopkgtest (4.0.1) unstable; urgency=medium
 
   * Skip tests/autopkgtest NullRunner.test_apt_source_nonexisting test instead
     of failing if there are no deb-src apt sources configured on the host.
@@ -17,7 +17,7 @@ autopkgtest (4.0.1) UNRELEASED; urgency=medium
   * Fix "apt-get source" version detection for old (Ubuntu precise) apts which
     does not yet understand --only-source, by ignoring other sources in awk.
 
- -- Martin Pitt <mpitt@debian.org>  Thu, 09 Jun 2016 08:11:11 +0200
+ -- Martin Pitt <mpitt@debian.org>  Fri, 17 Jun 2016 12:08:55 +0300
 
 autopkgtest (4.0) unstable; urgency=medium
 

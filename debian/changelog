@@ -9,6 +9,7 @@ autopkgtest (4.0.2) UNRELEASED; urgency=medium
   * setup-commands/setup-testbed: Remove ubuntu-core-launcher and
     snap-confine.
   * Fix some leftover "adt" → "autopkgtest" in manpages.
+  * debian/tests/lxd: Move from adt-build-lxd to autopkgtest-build-lxd.
 
  -- Martin Pitt <mpitt@debian.org>  Mon, 20 Jun 2016 08:51:31 +0200
 

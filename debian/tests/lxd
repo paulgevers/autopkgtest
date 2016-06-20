@@ -30,8 +30,8 @@ EOF
 iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu
 
 cat <<EOF | su - $AUTOPKGTEST_NORMAL_USER
-adt-build-lxd images:ubuntu/xenial/$arch
-export AUTOPKGTEST_TEST_LXD=adt/ubuntu/xenial/$arch
+autopkgtest-build-lxd images:ubuntu/xenial/$arch
+export AUTOPKGTEST_TEST_LXD=autopkgtest/ubuntu/xenial/$arch
 cd $(pwd)
 tests/autopkgtest LxdRunner
 EOF

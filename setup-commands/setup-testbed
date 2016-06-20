@@ -197,7 +197,7 @@ if [ -z "${AUTOPKGTEST_IS_SETUP_COMMAND:-}" ]; then
              ubuntu-release-upgrader-core libcpan-changes-perl git \
              cgmanager lxc-common lxc lxd lxd-client open-iscsi mdadm dmeventd lvm2 \
              unattended-upgrades update-notifier-common ureadahead debootstrap \
-             lxcfs ppp pppconfig pppoeconf snapd \
+             lxcfs ppp pppconfig pppoeconf snapd snap-confine ubuntu-core-launcher \
              thermald xdg-user-dirs zerofree xml-core; do
         if [ -d "$root/usr/share/doc/$p" ]; then
             purge_list="$purge_list $p"

@@ -1967,7 +1967,7 @@ class DebTestsVirtFS(DebTestsAll):
                            'Tests: n\n'
                            'Depends:\n'
                            'Restrictions: needs-root\n',
-                           {'p1': '#!/bin/sh -e\nif dpkg -s adt-satdep 2>/dev/null; then exit 1; fi; '
+                           {'p1': '#!/bin/sh -e\nif dpkg -s autopkgtest-satdep 2>/dev/null; then exit 1; fi; '
                             'apt-get --purge -y autoremove; '
                             'ls /usr/share/doc/aspell-doc/copyright;'
                             'echo I am fine\n',
@@ -2820,7 +2820,7 @@ class SchrootRunner(AdtTestCase, DebTestsVirtFS, DebTestsFailureModes):
                     self.assertIn('aspell-doc\t', contents)
                 else:
                     self.assertNotIn('aspell-doc\t', contents)
-                self.assertNotIn('adt-satdep', contents)
+                self.assertNotIn('autopkgtest-satdep', contents)
 
         # check binaries
         bins = os.listdir(os.path.join(outdir, 'binaries'))

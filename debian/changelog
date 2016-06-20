@@ -10,6 +10,7 @@ autopkgtest (4.0.2) UNRELEASED; urgency=medium
     snap-confine.
   * Fix some leftover "adt" → "autopkgtest" in manpages.
   * debian/tests/lxd: Move from adt-build-lxd to autopkgtest-build-lxd.
+  * ssh-setup/nova: Use "autopkgtest*" instance name instead of "adt*".
 
  -- Martin Pitt <mpitt@debian.org>  Mon, 20 Jun 2016 08:51:31 +0200
 

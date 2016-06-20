@@ -206,7 +206,7 @@ EOF
     image=$(echo "$last" | cut -f2)
 
     # Boot a nova instance and returns its connection parameters
-    [ -n "$SRVNAME" ] || SRVNAME=`mktemp -u adt-nova-XXXXXX`
+    [ -n "$SRVNAME" ] || SRVNAME=`mktemp -u autopkgtest-nova-XXXXXX`
     echo "Creating nova instance $SRVNAME from image ${image} (UUID $imageuuid)..." >&2
 
     # generate cloud-init user data; mostly for manage_etc_hosts, but also get
@@ -215,7 +215,7 @@ EOF
     local userdata=`mktemp`
     cat <<EOF > $userdata
 #cloud-config
-hostname: adt
+hostname: autopkgtest
 manage_etc_hosts: true
 apt_update: true
 apt_upgrade: false
@@ -225,7 +225,7 @@ runcmd:
  - echo 'Acquire::Languages "none";' > /etc/apt/apt.conf.d/90nolanguages
  - echo 'force-unsafe-io' > /etc/dpkg/dpkg.cfg.d/autopkgtest
  - printf '$EXTRA_ENV' >> /etc/environment
- - sed -i -r '/^127.0.1.1/ s/adt-[^ ]+\\./adt\\./' /etc/hosts
+ - sed -i -r '/^127.0.1.1/ s/autopkgtest-[^ ]+\\./autopkgtest\\./' /etc/hosts
 EOF
 
     EXTRA_OPTS=''

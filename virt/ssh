@@ -86,7 +86,7 @@ KILL=""
 for pid in $PS; do
     [ $pid -ne $$ ] && [ $pid -ne $PPID ] && [ $pid -ne $PPPID ] || continue
     [ -r /proc/$pid/comm ] && [ "$(< /proc/$pid/comm)" != sshd ] || continue
-    #echo "XXXadt-ssh-wrapper($$ $PPID $PPPID $myout $myerr): killing $pid (`cat /proc/$pid/cmdline`)" >&2
+    #echo "XXXautopkgtest-ssh-wrapper($$ $PPID $PPPID $myout $myerr): killing $pid (`cat /proc/$pid/cmdline`)" >&2
     KILL="$KILL $pid"
 done
 
@@ -326,16 +326,16 @@ def build_auxverb():
     # create remote wrapper
     rc = VirtSubproc.execute_timeout(
         terminal_kill_wrapper % extra_cmd, 30, sshcmd +
-        ['rm -f /tmp/adt-run-wrapper; set -C; cat > /tmp/adt-run-wrapper; chmod 755 /tmp/adt-run-wrapper'],
+        ['rm -f /tmp/autopkgtest-run-wrapper; set -C; cat > /tmp/autopkgtest-run-wrapper; chmod 755 /tmp/autopkgtest-run-wrapper'],
         stdin=subprocess.PIPE)[0]
     if rc != 0:
-        VirtSubproc.bomb('Failed to create /tmp/adt-run-wrapper')
+        VirtSubproc.bomb('Failed to create /tmp/autopkgtest-run-wrapper')
 
     # create local auxverb script
     auxverb = os.path.join(workdir, 'runcmd')
     with open(auxverb, 'w') as f:
         f.write('''#!/bin/bash
-exec %s -- %s /tmp/adt-run-wrapper $(printf '%%q ' "$@")
+exec %s -- %s /tmp/autopkgtest-run-wrapper $(printf '%%q ' "$@")
 ''' % (" ".join(sshcmd), sudocmd or ''))
     os.chmod(auxverb, 0o755)
     VirtSubproc.auxverb = [auxverb]

@@ -391,7 +391,7 @@ class Debian(unittest.TestCase):
         '''custom control file path'''
 
         os.makedirs(os.path.join(self.pkgdir, 'stuff'))
-        c_path = os.path.join(self.pkgdir, 'stuff', 'adtctrl')
+        c_path = os.path.join(self.pkgdir, 'stuff', 'ctrl')
         with open(c_path, 'w') as f:
             f.write('Tests: one\nDepends: foo')
 
@@ -509,7 +509,7 @@ class Click(unittest.TestCase):
         kls.click_src = os.path.join(test_dir, 'testclick')
 
         # bzr fake
-        kls.fake_bins = tempfile.TemporaryDirectory(prefix='adt-fake-bins.')
+        kls.fake_bins = tempfile.TemporaryDirectory(prefix='autopkgtest-fake-bins.')
         with open(os.path.join(kls.fake_bins.name, 'bzr'), 'w') as f:
             f.write('''#!/bin/sh -e
 [ "$1" = checkout ]

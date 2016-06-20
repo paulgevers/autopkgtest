@@ -1232,6 +1232,29 @@ if ($pid) { # parent
         # should not have any test stderr
         self.assertNotIn(' stderr ', err)
 
+    def test_setup_commands_fail_transient(self):
+        '''--setup-commands which exit with 1 (transient error)'''
+
+        p = self.build_src('Test-Command: false\nDepends:\n', {})
+
+        (code, out, err) = self.runtest(['-B', '-d', p, '--setup-commands', 'false'])
+
+        self.assertEqual(code, 16, err)
+        self.assertNotIn('badpkg', out)
+        self.assertIn('ERROR: testbed failure: testbed setup commands failed with status 1', err)
+        self.assertNotIn('command1', out)
+
+    def test_setup_commands_fail_badpkg(self):
+        '''--setup-commands which exit with 100 (bad package)'''
+
+        p = self.build_src('Test-Command: false\nDepends:\n', {})
+
+        (code, out, err) = self.runtest(['-B', '-d', p, '--setup-commands', 'exit 100'])
+
+        self.assertEqual(code, 12, err)
+        self.assertIn('badpkg: testbed setup commands failed with status 100', out)
+        self.assertNotIn('command1', out)
+
 
 @unittest.skipIf(os.getuid() > 0,
                  'NullRunnerRoot tests need to run as root')

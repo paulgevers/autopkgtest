@@ -10,6 +10,8 @@
 
 set -e
 mount -o remount,rw /
-apt-get update || (sleep 15; apt-get update)
+# ensure that this fails with something other than 100, as apt-get update
+# failures are usually transient
+apt-get update || (sleep 15; apt-get update) || false
 mount -o remount,ro /
 

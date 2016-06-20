@@ -195,6 +195,12 @@ without directory will be searched in both the current directory and in
 so you do not need to give the full path for setup scripts shipped with
 autopkgtest.
 
+Normally, if the setup commands fail, autopkgtest will consider this a
+transient testbed error (exit code 16). However, if the setup commands exit
+with code 100, autopkgtest will consider this an "erroneous package" (exit code
+12) instead, so this can be used to e. g. detect upgrade errors to a new
+version. Note that apt exits with exit code 100 in these cases.
+
 This option can be specified multiple times.
 
 If

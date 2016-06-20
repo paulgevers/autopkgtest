@@ -1,3 +1,14 @@
+autopkgtest (4.0.2) UNRELEASED; urgency=medium
+
+  * If --setup-commands exits with code 100, consider this as a bad package
+    (autopkgtest exit code 12) instead of a transient testbed failure (exit
+    code 16). This allows setup commands to detect errors which should be
+    attributed to the tested package itself (like dist-upgrading to the new
+    version). Change standard "apt-get update" setup commands to exit with
+    code 1 to continue treating that as a temporary failure.
+
+ -- Martin Pitt <mpitt@debian.org>  Mon, 20 Jun 2016 08:51:31 +0200
+
 autopkgtest (4.0.1) unstable; urgency=medium
 
   * Skip tests/autopkgtest NullRunner.test_apt_source_nonexisting test instead

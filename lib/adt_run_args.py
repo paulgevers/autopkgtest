@@ -261,10 +261,12 @@ details.'''
                          '(e. g. "apt-get update" or adding apt sources); '
                          'can be a string with the commands, or a file '
                          'containing the commands')
+    # ensure that this fails with something other than 100, as apt-get update
+    # failures are usually transient
     g_setup.add_argument('-U', '--apt-upgrade', dest='setup_commands',
                          action='append_const',
                          const='(apt-get update || (sleep 15; apt-get update)'
-                         ' || (sleep 60; apt-get update))'
+                         ' || (sleep 60; apt-get update) || false)'
                          ' && $(which eatmydata || true) apt-get dist-upgrade -y -o '
                          'Dpkg::Options::="--force-confnew"',
                          help='Run apt update/dist-upgrade before the tests')

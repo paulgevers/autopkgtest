@@ -281,7 +281,12 @@ class Testbed:
         for c in self.setup_commands:
             rc = self.execute(['sh', '-ec', c], xenv=xenv, kind='install')[0]
             if rc:
-                self.bomb('testbed setup commands failed with status %i' % rc)
+                # setup scripts should exit with 100 if it's the package's
+                # fault, otherwise it's considered a transient testbed failure
+                if rc == 100:
+                    self.badpkg('testbed setup commands failed with status 100')
+                else:
+                    self.bomb('testbed setup commands failed with status %i' % rc)
 
         # if the setup commands affected the boot, then reboot
         if self.setup_commands and 'reboot' in self.caps:

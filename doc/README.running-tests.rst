@@ -120,7 +120,7 @@ specifying tests and packages, so it is merely abbreviated as
 
      autopkgtest --setup-commands ubuntu-touch-session \
              --setup-commands ro-apt \
-             myclickapp/ myclickapp_0.1_all.click -- lxc adt-xenial
+             myclickapp/ myclickapp_0.1_all.click -- lxc autopkgtest-xenial
 
    See the comments in the setup-commands scripts for details.
 

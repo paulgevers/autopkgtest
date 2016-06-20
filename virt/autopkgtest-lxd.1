@@ -25,7 +25,7 @@ recommended that the image has eatmydata installed, or at least that gets
 installed via setup commands.
 
 For production use, it is recommended to use
-.BR adt-build-lxd (1)
+.BR autopkgtest-build-lxd (1)
 to generate an optimized image with autopkgtest's standard setup commands
 applied. Then these setup commands don't need to be applied for every test.
 This is particularly necessary if you want to use
@@ -115,12 +115,12 @@ standard image, and run gdk-pixbuf test in it:
 
 .RS
 .EX
-adt-build-lxd images:ubuntu/xenial/amd64
-autopkgtest gdk-pixbuf -- lxd adt/ubuntu/xenial/amd64
+autopkgtest-build-lxd images:ubuntu/xenial/amd64
+autopkgtest gdk-pixbuf -- lxd autopkgtest/ubuntu/xenial/amd64
 
 .SH SEE ALSO
 \fBautopkgtest\fR(1),
-\fBadt\-build-lxd\fR(1),
+\fBautopkgtest\-build-lxd\fR(1),
 \fB/usr/share/doc/autopkgtest/\fR.
 
 .SH AUTHORS AND COPYRIGHT

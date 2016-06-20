@@ -33,7 +33,7 @@ This allows tests that require nested VMs to reuse the same image. Be
 aware that
 .I /dev/baseimage
 will not be accessible between calling
-.B adt-reboot-prepare
+.B autopkgtest-reboot-prepare
 and the next boot, thus make sure to stop accessing it before.
 
 .SH REQUIREMENTS
@@ -184,7 +184,7 @@ vmdebootstrap --verbose --serial-console --distribution=sid \\
 .br
    --customize=/usr/share/autopkgtest/setup-commands/setup-testbed \\
 .br
-   --user=adt/adt --size=10000000000 --grub --image=autopkgtest-sid.raw
+   --user=test/test --size=10000000000 --grub --image=autopkgtest-sid.raw
 .br
 qemu-img convert -O qcow2 autopkgtest-sid.raw  autopkgtest-sid.img
 .br
@@ -210,18 +210,18 @@ AUTOPKGTEST_APT_PROXY=http://10.0.2.2:8080 vmdebootstrap [...]
 
 .SS Ubuntu
 
-For Ubuntu, autopkgtest provides \fBadt-buildvm-ubuntu-cloud\fR(1) to build a
+For Ubuntu, autopkgtest provides \fBautopkgtest-buildvm-ubuntu-cloud\fR(1) to build a
 VM based on the Ubuntu cloud images. To create an image for the current
 development series and the i386 architecture:
 
 .RS
 .EX
-adt-buildvm-ubuntu-cloud -v -a i386
+autopkgtest-buildvm-ubuntu-cloud -v -a i386
 .EE
 .RE
 
 This will produce e. g.
-.B adt-trusty-i386-cloud.img\fR.
+.B autopkgtest-trusty-i386-cloud.img\fR.
 
 .SH EXAMPLE
 
@@ -229,7 +229,7 @@ Run the tests of the gdk-pixbuf source package, using an Ubuntu cloud image:
 
 .RS
 .EX
-autopkgtest gdk-pixbuf -- qemu adt-trusty-i386-cloud.img
+autopkgtest gdk-pixbuf -- qemu autopkgtest-trusty-i386-cloud.img
 .EE
 .RE
 
@@ -237,7 +237,7 @@ autopkgtest gdk-pixbuf -- qemu adt-trusty-i386-cloud.img
 \fBautopkgtest\fR(1),
 \fBautopkgtest-schroot\fR(1),
 \fBautopkgtest-lxc\fR(1),
-\fBadt-buildvm-ubuntu-cloud\fR(1),
+\fBautopkgtest-buildvm-ubuntu-cloud\fR(1),
 \fBvmdebootstrap\fR(8),
 \fB/usr/share/doc/autopkgtest/\fR.
 

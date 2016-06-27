@@ -50,6 +50,11 @@ prefix the directory name with
 .BR ./ .
 
 .TP
+.B current directory
+If no source package is specified on the command line and the current directory
+is a Debian source package, this will be tested.
+
+.TP
 .B source package name
 Downloads the given source package name with \fBapt\-get source\fR in the
 testbed and run its tests. This is similar to specifying a .dsc

@@ -15,6 +15,8 @@ autopkgtest (4.0.2) UNRELEASED; urgency=medium
   * autopkgtest.1: Point out that if a .changes contains only debs, a
     corresponding .dsc must still be provided on the command line.
     (Closes: #828025)
+  * autopkgtest.1: Document that if no source is given on the command line,
+    the current directory will be tested.
 
  -- Martin Pitt <mpitt@debian.org>  Mon, 20 Jun 2016 08:51:31 +0200
 

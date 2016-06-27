@@ -79,9 +79,12 @@ package will be installed if necessary.
 .TP
 .B .changes file
 Run tests from the .dsc source package in the given .changes file. If
-the .changes containns .deb packages, they will be used for the test.
+the .changes contains .deb packages, they will be used for the test.
 Acts as if you had specified the .debs and .dsc from the .changes file as
-explicit arguments.
+explicit arguments. Note that if the .changes contains
+.I only
+debs, the corresponding .dsc still needs to be specified alongside, or the
+current directory must be the source package.
 
 .PP
 All other positional arguments must be .deb binary packages. They will be used

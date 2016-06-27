@@ -12,6 +12,9 @@ autopkgtest (4.0.2) UNRELEASED; urgency=medium
   * debian/tests/lxd: Move from adt-build-lxd to autopkgtest-build-lxd.
   * ssh-setup/nova: Use "autopkgtest*" instance name instead of "adt*".
   * Rename temporary "adt-satdep" package to "autopkgtest-satdep".
+  * autopkgtest.1: Point out that if a .changes contains only debs, a
+    corresponding .dsc must still be provided on the command line.
+    (Closes: #828025)
 
  -- Martin Pitt <mpitt@debian.org>  Mon, 20 Jun 2016 08:51:31 +0200
 

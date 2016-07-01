@@ -19,6 +19,8 @@ autopkgtest (4.0.2) UNRELEASED; urgency=medium
     the current directory will be tested.
   * debian/tests/installed: Fall back to old $ADT_TMP if $AUTOPKGTEST_TMP is
     not set, to work in debci (which runs an older autopkgtest).
+  * Disable SchrootClickRunner.test_setup_ubuntu_touch_session for now, it
+    breaks schroots and needs to move into a container.
 
  -- Martin Pitt <mpitt@debian.org>  Mon, 20 Jun 2016 08:51:31 +0200
 

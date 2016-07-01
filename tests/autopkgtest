@@ -3200,6 +3200,7 @@ simple               PASS
             summary = f.read()
         self.assertEqual(summary, 'simple               PASS\n')
 
+    @unittest.skip('breaks schroot, needs to move to container')
     def test_setup_ubuntu_touch_session(self):
         '''setup-commands/ubuntu-touch-session'''
 

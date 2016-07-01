@@ -1,4 +1,4 @@
-autopkgtest (4.0.2) UNRELEASED; urgency=medium
+autopkgtest (4.0.2) unstable; urgency=medium
 
   * If --setup-commands exits with code 100, consider this as a bad package
     (autopkgtest exit code 12) instead of a transient testbed failure (exit
@@ -22,7 +22,7 @@ autopkgtest (4.0.2) UNRELEASED; urgency=medium
   * Disable SchrootClickRunner.test_setup_ubuntu_touch_session for now, it
     breaks schroots and needs to move into a container.
 
- -- Martin Pitt <mpitt@debian.org>  Mon, 20 Jun 2016 08:51:31 +0200
+ -- Martin Pitt <mpitt@debian.org>  Fri, 01 Jul 2016 20:19:58 +0200
 
 autopkgtest (4.0.1) unstable; urgency=medium
 

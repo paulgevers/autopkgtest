@@ -348,8 +348,8 @@ def build_source(kind, arg, built_binaries):
 
         changelog = os.path.join(arg, 'debian', 'changelog')
         if os.path.exists(changelog):
-            with open(changelog, encoding='UTF-8') as f:
-                (testpkg_name, testpkg_version, _) = f.readline().split(' ', 2)
+            with open(changelog, 'rb') as f:
+                (testpkg_name, testpkg_version, _) = f.readline().decode().split(' ', 2)
                 testpkg_version = testpkg_version[1:-1]  # chop off parentheses
 
             adtlog.info('testing package %s version %s' % (testpkg_name, testpkg_version))

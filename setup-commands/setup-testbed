@@ -53,6 +53,27 @@ EOF
 
     chmod 755 "$root/etc/init.d/autopkgtest"
     chroot "$root" update-rc.d autopkgtest defaults
+
+    if [ -d "$root/etc/systemd/system" ]; then
+        cat <<EOF > "$root/etc/systemd/system/autopkgtest.service"
+[Unit]
+Description=autopkgtest root shell on ttyS1
+ConditionPathExists=/dev/ttyS1
+
+[Service]
+ExecStart=/bin/sh
+StandardInput=tty-fail
+StandardOutput=tty
+StandardError=tty
+TTYPath=/dev/ttyS1
+SendSIGHUP=yes
+
+[Install]
+WantedBy=multi-user.target
+EOF
+        mkdir -p "$root/etc/systemd/system/multi-user.target.wants"
+        ln -sf ../autopkgtest.service "$root/etc/systemd/system/multi-user.target.wants/autopkgtest.service"
+    fi
 fi
 
 # serial console for upstart

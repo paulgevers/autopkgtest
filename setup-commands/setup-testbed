@@ -67,6 +67,8 @@ StandardOutput=tty
 StandardError=tty
 TTYPath=/dev/ttyS1
 SendSIGHUP=yes
+# ignore I/O errors on unusable ttyS1
+SuccessExitStatus=0 208 SIGHUP SIGINT SIGTERM SIGPIPE
 
 [Install]
 WantedBy=multi-user.target

@@ -1,3 +1,20 @@
+autopkgtest (4.0.3) unstable; urgency=medium
+
+  [ Christian Kastner ]
+  * autopkgtest.1: Replace remaining "---" with "--" (Closes: #831035)
+
+  [ Martin Pitt ]
+  * Fix UnicodeDecodeError on invalid UTF-8 characters in debian/changelog with a built tree
+  * qemu: Add new --timeout-reboot option.
+    Lower default timeout from 5 to 1 minute.
+  * setup-commands/setup-testbed: Add systemd unit for ttyS1 root shell.
+  * setup-commands/setup-testbed: Ignore I/O errors on ttyS1 in autopkgtest.service.
+  * tools/autopkgtest-build-lxd: Run poweroff before "lxc stop"
+    This works around hanging containers when a container has systemd >= 231-1 but
+    the host LXC does not yet have <https://github.com/lxc/lxc/pull/1086>.
+
+ -- Martin Pitt <mpitt@debian.org>  Tue, 02 Aug 2016 09:30:29 +0200
+
 autopkgtest (4.0.2) unstable; urgency=medium
 
   * If --setup-commands exits with code 100, consider this as a bad package

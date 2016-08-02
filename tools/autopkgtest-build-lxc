@@ -27,7 +27,7 @@ set -e
 DISTRO="$1"
 RELEASE="$2"
 if [ -z "$1" ] || [ -z "$2" ]; then
-    echo "Usage: $0 debian|ubuntu <release> [arch]" >&2
+    echo "Usage: $0 debian|ubuntu <release> [arch] [script]" >&2
     exit 1
 fi
 
@@ -46,6 +46,12 @@ if [ "${0%adt-build-lxc}" != "$0" ]; then
     NAME="adt-${RELEASE}${ARCH:+-$ARCH}"
 else
     NAME="autopkgtest-${RELEASE}${ARCH:+-$ARCH}"
+fi
+
+SCRIPT=${4:-}
+if [ -n "$SCRIPT" -a ! -r "$SCRIPT" ]; then
+    echo "ERROR: can't read customization script $SCRIPT" >&2
+    exit 1
 fi
 
 # fall back for older LXC option name
@@ -130,6 +136,13 @@ setup() {
             break
         fi
     done
+
+    # run customize script
+    if [ -n "$SCRIPT" ]; then
+        echo "Running customization script $SCRIPT..."
+        cat "$SCRIPT" | lxc-attach --name=$1 env MIRROR=${MIRROR:-} sh
+    fi
+
     lxc-stop --name=$1
 }
 

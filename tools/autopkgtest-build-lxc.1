@@ -6,6 +6,7 @@ autopkgtest-build-lxc \- Create or update autopkgtest container for autopkgtest-
 .B autopkgtest-build-lxc
 .I distribution release
 .RI [ architecture ]
+.RI [ script ]
 
 .SH DESCRIPTION
 .B autopkgtest-build-lxc
@@ -28,6 +29,10 @@ apt sources, and runs
 
 It defaults to the native architecture, but you can specify a different one as
 third parameter.
+
+The path to a script to be executed inside the container to customize the
+container can be passed as the fourth parameter. The script must be a POSIX
+shell script, and should not depend on bash-specific features.
 
 If the container already exists, it updates it as unintrusively as possible by
 first creating a new temporary container \fBautopkgtest-\fIrelease\fB.new\fR, and then

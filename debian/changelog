@@ -1,3 +1,19 @@
+autopkgtest (4.0.4) unstable; urgency=medium
+
+  [ Antonio Terceiro ]
+  * autopkgtest-build-lxc: Add new optional argument for a customization script
+
+  [ Martin Pitt ]
+  * Add /usr/bin/adt-virt-* backwards compatibility symlinks (Closes: #833407)
+  * Add pyflakes3 build dependency to run pyflakes test at build time
+    (Closes: #833502)
+  * tools/autopkgtest-build-lxd: Drop running poweroff before "lxc stop"
+
+  [ Ondřej Nový ]
+  * Prefer pycodestyle over pep8 (Closes: #834076)
+
+ -- Martin Pitt <mpitt@debian.org>  Fri, 12 Aug 2016 11:07:10 +0200
+
 autopkgtest (4.0.3) unstable; urgency=medium
 
   [ Christian Kastner ]

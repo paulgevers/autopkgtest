@@ -92,7 +92,6 @@ setup() {
             break
         fi
     done
-    lxc exec "$CONTAINER" -- poweroff
     lxc stop "$CONTAINER"
 }
 

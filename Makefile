@@ -90,6 +90,8 @@ install:
 	ln -s autopkgtest-build-lxd $(bindir)/adt-build-lxd
 	ln -s autopkgtest-buildvm-ubuntu-cloud $(bindir)/adt-buildvm-ubuntu-cloud
 	$(INSTALL_DATA) runner/adt-run.1 $(man1dir)
+	# legacy virt runners
+	for v in $(virts); do ln -s ../share/autopkgtest/$$v $(bindir)/adt-virt-$$(basename $$v); done
 
 clean:
 	rm -f */*.pyc

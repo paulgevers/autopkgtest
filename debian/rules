@@ -36,7 +36,7 @@ override_dh_auto_install:
 override_dh_auto_test:
 ifeq (, $(findstring nocheck, $(DEB_BUILD_OPTIONS)))
 	if type pyflakes3 >/dev/null 2>&1; then tests/pyflakes; else echo "pyflakes3 not available, skipping"; fi
-	tests/pep8 || true
+	tests/pycodestyle || true
 	tests/testdesc
 	tests/run_args
 	env NO_PKG_MANGLE=1 tests/autopkgtest NullRunner

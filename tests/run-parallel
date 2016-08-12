@@ -5,7 +5,7 @@ MYDIR=$(dirname $0)
 
 # these are fast, run them first
 set -e
-$MYDIR/pep8
+$MYDIR/pycodestyle
 $MYDIR/pyflakes
 $MYDIR/testdesc
 $MYDIR/autopkgtest_args

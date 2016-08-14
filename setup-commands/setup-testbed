@@ -144,7 +144,7 @@ if [ -e "$root/etc/cloud/cloud.cfg" ]; then
 fi
 
 # set up networking
-if [ -z "${AUTOPKGTEST_IS_SETUP_COMMAND:-}" ]; then
+if [ -z "${AUTOPKGTEST_IS_SETUP_COMMAND:-}" ] && ! ls "$root"/etc/systemd/network/*.network >/dev/null 2>&1; then
     if ! grep -q 'source.*interfaces.d' "$root/etc/network/interfaces"; then
         printf "\nsource-directory /etc/network/interfaces.d\n" >> "$root/etc/network/interfaces"
     fi

@@ -1997,8 +1997,8 @@ class DebTestsVirtFS(DebTestsAll):
 
         # should build and install package
         self.assertIn('dh build', err)
-        self.assertIn('binaries/./testpkg.deb', out)
-        self.assertRegex(out, '\.\.\./aspell-doc_\d.*_all.deb')
+        self.assertRegex(out, 'binaries.*testpkg')
+        self.assertRegex(out, 'Unpacking.*aspell-doc')
 
         # should show test stdout
         self.assertRegex(out, '(^|\n)GOOD\n', out)
@@ -2595,7 +2595,7 @@ class SchrootRunner(AdtTestCase, DebTestsVirtFS, DebTestsFailureModes):
         # should install package
         self.assertNotIn('dh build', err)
         self.assertIn('Unpacking testpkg', out)
-        self.assertIn('binaries/./testpkg.deb', out)
+        self.assertRegex(out, 'binaries.*testpkg')
 
         # test should succeed
         self.assertRegex(out, 'pass\s+PASS', out)
@@ -2629,7 +2629,7 @@ class SchrootRunner(AdtTestCase, DebTestsVirtFS, DebTestsFailureModes):
 
         # should install package
         self.assertIn('Unpacking testpkg', out)
-        self.assertIn('binaries/./testpkg.deb', out)
+        self.assertRegex(out, 'binaries.*testpkg')
 
         # test should succeed
         self.assertRegex(out, 'pass\s+PASS', out)

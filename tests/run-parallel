@@ -15,7 +15,7 @@ set +e
 # get sudo password early, to avoid asking for it in background jobs
 [ `id -u` -eq 0 ] || sudo true
 
-(OUT=$($MYDIR/autopkgtest QemuRunner SshRunnerSnappy 2>&1) || rc=$?; echo "=== $c ==="; echo "$OUT"; exit $rc) &
+(OUT=$($MYDIR/autopkgtest QemuRunner 2>&1) || rc=$?; echo "=== $c ==="; echo "$OUT"; exit $rc) &
 (OUT=$($MYDIR/autopkgtest LxcRunner SshRunnerNoScript SshRunnerWithScript 2>&1) || rc=$?; echo "=== $c ==="; echo "$OUT"; exit $rc) &
 (OUT=$($MYDIR/autopkgtest NullRunner SchrootRunner SchrootClickRunner LxdRunner 2>&1) || rc=$?; echo "=== $c ==="; echo "$OUT"; exit $rc) &
 (OUT=$(sudo $MYDIR/autopkgtest NullRunnerRoot ChrootRunner 2>&1) || rc=$?; echo "=== $c ==="; echo "$OUT"; exit $rc) &

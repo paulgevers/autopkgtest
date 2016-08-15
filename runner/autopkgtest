@@ -40,9 +40,9 @@ our_base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if os.path.isdir(os.path.join(our_base, 'virt')):
     sys.path.insert(0, os.path.join(our_base, 'lib'))
     vserver_dir = os.path.join(our_base, 'virt')
+    os.environ['PATH'] = vserver_dir + ':' + os.environ.get('PATH', '')
 else:
     sys.path.insert(0, '/usr/share/autopkgtest/lib')
-    vserver_dir = '/usr/share/autopkgtest/virt'
 
 import adtlog
 import testdesc
@@ -648,19 +648,13 @@ def main():
         # meaning for that already
         sys.exit(20)
 
-    # add default path to virt server; copy so that the original value is
-    # retained for testinfo.json
-    vargs = list(vserver_args)
-    if '/' not in vargs[0]:
-        vargs[0] = os.path.join(vserver_dir, vargs[0])
-
     # ensure proper cleanup on signals
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGQUIT, signal_handler)
 
     try:
         setup_trace()
-        testbed = adt_testbed.Testbed(vserver_argv=vargs,
+        testbed = adt_testbed.Testbed(vserver_argv=vserver_args,
                                       output_dir=tmp,
                                       user=opts.user,
                                       setup_commands=opts.setup_commands,

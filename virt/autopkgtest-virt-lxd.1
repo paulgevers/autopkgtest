@@ -1,6 +1,6 @@
-.TH autopkgtest-lxd 1 2013 "Linux Programmer's Manual"
+.TH autopkgtest-virt-lxd 1 2013 "Linux Programmer's Manual"
 .SH NAME
-autopkgtest-lxd \- autopkgtest virtualisation server using LXD
+autopkgtest-virt-lxd \- autopkgtest virtualisation server using LXD
 
 .SH SYNOPSIS
 .BI "autopkgtest " "[...] " "-- lxd"
@@ -9,17 +9,17 @@ autopkgtest-lxd \- autopkgtest virtualisation server using LXD
 .RI [ "-- extra lxc launch args..." ]
 
 .SH DESCRIPTION
-.B autopkgtest-lxd
+.B autopkgtest-virt-lxd
 provides an autopkgtest virtualisation server using LXD. It creates temporary
 containers from the given LXD image name.
 
 Normally
-.B autopkgtest-lxd
+.B autopkgtest-virt-lxd
 will be invoked by
 .BR autopkgtest .
 
 .SH REQUIREMENTS
-.B autopkgtest-lxd
+.B autopkgtest-virt-lxd
 makes no strict assumptions about the image. However, it is highly
 recommended that the image has eatmydata installed, or at least that gets
 installed via setup commands.
@@ -58,7 +58,7 @@ gets appended verbatim to
 
 .SH INPUT, OUTPUT AND EXIT STATUS
 The behaviour of
-.B autopkgtest-lxd
+.B autopkgtest-virt-lxd
 is as described by the AutomatedTesting virtualisation regime
 specification.
 
@@ -124,7 +124,7 @@ autopkgtest gdk-pixbuf -- lxd autopkgtest/ubuntu/xenial/amd64
 \fB/usr/share/doc/autopkgtest/\fR.
 
 .SH AUTHORS AND COPYRIGHT
-.B autopkgtest-lxd
+.B autopkgtest-virt-lxd
 was written by Martin Pitt <martin.pitt@ubuntu.com>.
 
 This manpage is part of autopkgtest, a tool for testing Debian binary

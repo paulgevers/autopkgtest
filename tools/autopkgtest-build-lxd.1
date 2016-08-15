@@ -1,6 +1,6 @@
 .TH autopkgtest-build-lxd 1 2015 "Linux Programmer's Manual"
 .SH NAME
-autopkgtest-build-lxd \- Create or update autopkgtest container for autopkgtest-lxd
+autopkgtest-build-lxd \- Create or update autopkgtest container for autopkgtest-virt-lxd
 
 .SH SYNOPSIS
 .B autopkgtest-build-lxd
@@ -9,7 +9,7 @@ autopkgtest-build-lxd \- Create or update autopkgtest container for autopkgtest-
 .SH DESCRIPTION
 .B autopkgtest-build-lxd
 creates or updates an LXD image which is optimized for autopkgtest's LXD runner
-.BR autopkgtest-lxd (1).
+.BR autopkgtest-virt-lxd (1).
 
 It builds a temporary container from an existing given image, runs
 autopkgtest's standard
@@ -32,7 +32,7 @@ remote:
 $ autopkgtest-build-lxd images:debian/sid/i386
 
 .SH SEE ALSO
-\fBautopkgtest-lxd\fR(1),
+\fBautopkgtest-virt-lxd\fR(1),
 \fBautopkgtest\fR(1),
 \fBlxc\fR(1),
 \fB/usr/share/doc/autopkgtest/\fR.

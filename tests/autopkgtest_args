@@ -67,7 +67,7 @@ class T(unittest.TestCase):
         (args, acts, virt) = self.parse([self.testdsc])
         self.assertTrue(isinstance(args, argparse.Namespace))
         self.assertEqual(acts, [('source', self.testdsc, True)])
-        self.assertEqual(virt, ['null'])
+        self.assertEqual(virt, ['autopkgtest-virt-null'])
 
     def test_dsc_with_debs(self):
         (args, acts, virt) = self.parse(
@@ -83,7 +83,7 @@ class T(unittest.TestCase):
     def test_unbuilt_tree(self):
         (args, acts, virt) = self.parse([self.testtree])
         self.assertEqual(acts, [('unbuilt-tree', self.testtree, True)])
-        self.assertEqual(virt, ['null'])
+        self.assertEqual(virt, ['autopkgtest-virt-null'])
 
     def test_unbuilt_tree_with_debs(self):
         (args, acts, virt) = self.parse([self.testtree, self.testdeb1])
@@ -98,7 +98,7 @@ class T(unittest.TestCase):
             pass
         (args, acts, virt) = self.parse([self.testtree])
         self.assertEqual(acts, [('built-tree', self.testtree, False)])
-        self.assertEqual(virt, ['null'])
+        self.assertEqual(virt, ['autopkgtest-virt-null'])
 
     def test_apt_source(self):
         acts = self.parse(['mypkg'])[1]
@@ -184,7 +184,7 @@ Files:
         os.chdir(self.testtree)
         (args, acts, virt) = self.parse([])
         self.assertEqual(acts, [('unbuilt-tree', '.', True)])
-        self.assertEqual(virt, ['null'])
+        self.assertEqual(virt, ['autopkgtest-virt-null'])
 
     def test_cwd_built(self):
         os.chdir(self.testtree)
@@ -192,7 +192,7 @@ Files:
             pass
         (args, acts, virt) = self.parse([])
         self.assertEqual(acts, [('built-tree', '.', False)])
-        self.assertEqual(virt, ['null'])
+        self.assertEqual(virt, ['autopkgtest-virt-null'])
 
     def test_cwd_notest(self):
         self.err([], 'must specify .*source.* to test')
@@ -233,7 +233,7 @@ Files:
         self.assertEqual(args.auto_control, True)
 
         self.assertEqual(acts, [('apt-source', 'mypkg', False)])
-        self.assertEqual(virt, ['foo', '-d', '-s', '--', '-d'])
+        self.assertEqual(virt, ['autopkgtest-virt-foo', '-d', '-s', '--', '-d'])
 
     def test_timeouts(self):
         (args, acts, virt) = self.parse(
@@ -288,7 +288,7 @@ Files:
         self.assertEqual(args.timeout_copy, 5)
 
         self.assertEqual(acts, [('source', 'testsrc_1.dsc', True)])
-        self.assertEqual(virt, ['foo', '-d', '-x'])
+        self.assertEqual(virt, ['autopkgtest-virt-foo', '-d', '-x'])
 
     def test_setup_commands(self):
         cmd = os.path.join(self.workdir.name, 'cmd')
@@ -344,7 +344,7 @@ Files:
         (args, acts, virt) = self.parse(['--no-auto-control', 'mypkg', '--', 'foo'])
         self.assertEqual(args.auto_control, False)
         self.assertEqual(acts, [('apt-source', 'mypkg', False)])
-        self.assertEqual(virt, ['foo'])
+        self.assertEqual(virt, ['autopkgtest-virt-foo'])
 
     def test_build_parallel(self):
         args = self.parse(['--build-parallel=17', 'mypkg'])[0]
@@ -364,7 +364,7 @@ Files:
         (args, acts, virt) = self.parse([self.testdsc, '---', 'foo', '--fooarg'],
                                        default_virt=False)
         self.assertEqual(acts, [('source', self.testdsc, True)])
-        self.assertEqual(virt, ['foo', '--fooarg'])
+        self.assertEqual(virt, ['autopkgtest-virt-foo', '--fooarg'])
 
 
 if __name__ == '__main__':

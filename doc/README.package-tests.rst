@@ -189,18 +189,18 @@ allow-stderr
 isolation-container
     The test wants to start services or open network TCP ports. This
     commonly fails in a simple chroot/schroot, so tests need to be run
-    in their own container (e. g. autopkgtest-lxc) or their own machine/VM
-    (e. g. autopkgtest-qemu or autopkgtest-null). When running the test in a
-    virtualization server which does not provide this (like
-    autopkgtest-schroot) it will be skipped.
+    in their own container (e. g. autopkgtest-virt-lxc) or their own
+    machine/VM (e. g. autopkgtest-virt-qemu or autopkgtest-virt-null).
+    When running the test in a virtualization server which does not
+    provide this (like autopkgtest-schroot) it will be skipped.
 
 isolation-machine
     The test wants to interact with the kernel, reboot the machine, or
     other things which fail in a simple schroot and even a container.
     Those tests need to be run in their own machine/VM (e. g.
-    autopkgtest-qemu or autopkgtest-null). When running the test in a
-    virtualization server which does not provide this it will be
-    skipped.
+    autopkgtest-virt-qemu or autopkgtest-virt-null). When running the
+    test in a virtualization server which does not provide this it will
+    be skipped.
 
 needs-recommends
     Enable installation of recommended packages in apt for the test

@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 #
-# autopkgtest-qemu is part of autopkgtest
+# autopkgtest-virt-qemu is part of autopkgtest
 # autopkgtest is a tool for testing Debian binary packages
 #
 # autopkgtest is Copyright (C) 2006-2014 Canonical Ltd.
 #
-# autopkgtest-qemu was developed by
+# autopkgtest-virt-qemu was developed by
 # Martin Pitt <martin.pitt@ubuntu.com>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -37,6 +37,7 @@ import fcntl
 import re
 import argparse
 
+sys.path.insert(0, '/usr/share/autopkgtest/lib')
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))), 'lib'))
 
@@ -191,7 +192,7 @@ def setup_baseimage():
 
     # Setup udev rules for /dev/baseimage; set link_priority to -1024 so
     # that the duplicate UUIDs of the partitions will have no effect.
-    term.send(b'''mkdir -p -m 0755 /run/udev/rules.d ; printf '# Created by autopkgtest-qemu\\n%s\\n%s\\n' 'KERNEL=="vd*[!0-9]", ENV{ID_SERIAL}=="BASEIMAGE", OPTIONS+="link_priority=-1024", SYMLINK+="baseimage", MODE="0664"' 'KERNEL=="vd*[0-9]",  ENV{ID_SERIAL}=="BASEIMAGE", OPTIONS+="link_priority=-1024"' > /run/udev/rules.d/61-baseimage.rules\n''')
+    term.send(b'''mkdir -p -m 0755 /run/udev/rules.d ; printf '# Created by autopkgtest-virt-qemu\\n%s\\n%s\\n' 'KERNEL=="vd*[!0-9]", ENV{ID_SERIAL}=="BASEIMAGE", OPTIONS+="link_priority=-1024", SYMLINK+="baseimage", MODE="0664"' 'KERNEL=="vd*[0-9]",  ENV{ID_SERIAL}=="BASEIMAGE", OPTIONS+="link_priority=-1024"' > /run/udev/rules.d/61-baseimage.rules\n''')
     VirtSubproc.expect(term, b'#', 10)
     # Reload udev to make sure the rules take effect (udev only auto-
     # rereads rules every 3 seconds)
@@ -451,7 +452,7 @@ def find_free_port(start):
         adtlog.debug('find_free_port: trying %i' % p)
         try:
             try:
-                ssh_port_lock = open('/run/lock/autopkgtest-qemu.port.%i' % p, 'w')
+                ssh_port_lock = open('/run/lock/autopkgtest-virt-qemu.port.%i' % p, 'w')
                 fcntl.flock(ssh_port_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
             except (IOError, OSError):
                 adtlog.debug('find_free_port: %i is locked' % p)
@@ -507,7 +508,7 @@ def determine_normal_user(shared_dir):
 def hook_open():
     global workdir, p_qemu, ssh_port
 
-    workdir = tempfile.mkdtemp(prefix='autopkgtest-qemu.')
+    workdir = tempfile.mkdtemp(prefix='autopkgtest-virt-qemu.')
     os.chmod(workdir, 0o755)
 
     shareddir = os.path.join(workdir, 'shared')

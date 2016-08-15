@@ -1,6 +1,6 @@
-.TH autopkgtest-ssh 1 2014 "Linux Programmer's Manual"
+.TH autopkgtest-virt-ssh 1 2014 "Linux Programmer's Manual"
 .SH NAME
-autopkgtest-ssh \- autopkgtest virtualisation server using SSH
+autopkgtest-virt-ssh \- autopkgtest virtualisation server using SSH
 
 .SH SYNOPSIS
 .BI "autopkgtest " "[...] " "-- ssh"
@@ -9,26 +9,26 @@ autopkgtest-ssh \- autopkgtest virtualisation server using SSH
 
 
 .SH DESCRIPTION
-.B autopkgtest-ssh
+.B autopkgtest-virt-ssh
 provides an autopkgtest virtualisation server using SSH.
 
 Normally
-.B autopkgtest-ssh
+.B autopkgtest-virt-ssh
 will be invoked by
 .BR autopkgtest .
 
-.B autopkgtest-ssh
+.B autopkgtest-virt-ssh
 can use an already existing ssh target, or call a setup script to create/set up
 a test bed and the ssh server.
 
 .B WARNING!
-autopkgtest-ssh will modify the target system by installing packages and running
+autopkgtest-virt-ssh will modify the target system by installing packages and running
 arbitrary test code, so
 .B you are responsible for resetting the testbed youself
 especially without a setup script. So use this with care.
 
 .SH REQUIREMENTS
-.B autopkgtest-ssh
+.B autopkgtest-virt-ssh
 doesn't assume anything regarding the target host other than that the given ssh
 connection (and networking) stay available all the time. You can provide
 credententials on the command line for already working SSH hosts or use a
@@ -141,7 +141,7 @@ argument value.
 
 .SH INPUT, OUTPUT AND EXIT STATUS
 The behaviour of
-.B autopkgtest-ssh
+.B autopkgtest-virt-ssh
 is as described by the AutomatedTesting virtualisation regime
 specification.
 
@@ -154,7 +154,7 @@ yourself (e. g. using \fB\-\-setup\-commands\fR).
 
 .SH SETUP SCRIPT
 
-.B autopkgtest-ssh
+.B autopkgtest-virt-ssh
 accepts a setup script in argument to prepare the testbed and the ssh
 connection. A setup script is an executable that gets called with a command as
 first argument, and additional options for that command.
@@ -266,7 +266,7 @@ autopkgtest ./ubuntu-calculator-app ./com.ubuntu.calculator_1.3.283_all.click \\
 .BR /usr/share/autopkgtest/ssh-setup/SKELETON .
 
 .SH AUTHORS AND COPYRIGHT
-.B autopkgtest-ssh
+.B autopkgtest-virt-ssh
 was written by Martin Pitt <martin.pitt@ubuntu.com> and Jean-Baptiste
 Lallement <jean.baptiste.lallement@ubuntu.com>.
 

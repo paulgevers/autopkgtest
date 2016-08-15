@@ -1,6 +1,6 @@
-.TH autopkgtest-lxc 1 2013 "Linux Programmer's Manual"
+.TH autopkgtest-virt-lxc 1 2013 "Linux Programmer's Manual"
 .SH NAME
-autopkgtest-lxc \- autopkgtest virtualisation server using LXC
+autopkgtest-virt-lxc \- autopkgtest virtualisation server using LXC
 
 .SH SYNOPSIS
 .BI "autopkgtest " "[...] " "-- lxc"
@@ -9,14 +9,14 @@ autopkgtest-lxc \- autopkgtest virtualisation server using LXC
 .RI [ "-- extra lxc-start args..." ]
 
 .SH DESCRIPTION
-.B autopkgtest-lxc
+.B autopkgtest-virt-lxc
 provides an autopkgtest virtualisation server using LXC. It adapts the raw
 functionality provided by the
 .BR lxc- *
 tools for use by autopkgtest.
 
 Normally
-.B autopkgtest-lxc
+.B autopkgtest-virt-lxc
 will be invoked by
 .BR autopkgtest .
 
@@ -25,7 +25,7 @@ You can conveniently create a suitable container using the
 script.
 
 .SH REQUIREMENTS
-.B autopkgtest-lxc
+.B autopkgtest-virt-lxc
 assumes that you have already prepared a suitable Debian based LXC container.
 See
 .BR lxc-create (1)
@@ -74,7 +74,7 @@ gets passed verbatim to
 
 .SH INPUT, OUTPUT AND EXIT STATUS
 The behaviour of
-.B autopkgtest-lxc
+.B autopkgtest-virt-lxc
 is as described by the AutomatedTesting virtualisation regime
 specification.
 
@@ -122,7 +122,7 @@ autopkgtest \fIhello_2.8\-4.dsc\fR -- lxc -e \fIautopkgtest-sid\fR
 \fB/usr/share/doc/autopkgtest/\fR.
 
 .SH AUTHORS AND COPYRIGHT
-.B autopkgtest-lxc
+.B autopkgtest-virt-lxc
 was written by Robie Basak <robie.basak@canonical.com> and Martin Pitt
 <martin.pitt@ubuntu.com>.
 

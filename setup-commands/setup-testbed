@@ -11,7 +11,7 @@
 # as well as on a per-test basis as --setup-commands script (then some steps
 # will be skipped).
 #
-# See autopkgtest-qemu(1) for details how to use this with vmdeboostrap.
+# See autopkgtest-virt-qemu(1) for details how to use this with vmdeboostrap.
 #
 # You can set $AUTOPKGTEST_APT_PROXY; if set, it will be configured in apt in
 # /etc/apt/apt.conf.d/01proxy. If you have an apt proxy configured on the host,
@@ -32,7 +32,7 @@ fi
 
 root=${1:-/}
 
-# set up init script for root shell on ttyS1; necessary for autopkgtest-qemu local
+# set up init script for root shell on ttyS1; necessary for autopkgtest-virt-qemu local
 # images
 if [ "$root" != "/" ] || [ -e /dev/ttyS1 ]; then
     cat <<EOF > "$root/etc/init.d/autopkgtest"

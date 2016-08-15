@@ -1,6 +1,6 @@
 .TH autopkgtest-build-lxc 1 2014 "Linux Programmer's Manual"
 .SH NAME
-autopkgtest-build-lxc \- Create or update autopkgtest container for autopkgtest-lxc
+autopkgtest-build-lxc \- Create or update autopkgtest container for autopkgtest-virt-lxc
 
 .SH SYNOPSIS
 .B autopkgtest-build-lxc
@@ -11,7 +11,7 @@ autopkgtest-build-lxc \- Create or update autopkgtest container for autopkgtest-
 .SH DESCRIPTION
 .B autopkgtest-build-lxc
 creates or updates an LXC container \fBautopkgtest-\fIrelease\fR which is suitable for
-autopkgtest's LXC runner \fBautopkgtest-lxc\fR(1).
+autopkgtest's LXC runner \fBautopkgtest-virt-lxc\fR(1).
 
 It calls
 .B lxc-create
@@ -42,7 +42,7 @@ containers with ephemeral overlays (i. e. using the
 .B --ephemeral
 option), but it does work in general. This update process does not interfere at
 all if you use
-.B autopkgtest-lxc
+.B autopkgtest-virt-lxc
 with cloning.
 
 Note that you need to call this as root, unless you set up LXC to allow
@@ -63,7 +63,7 @@ the container will automatically use this, otherwise there is no default.
 $ sudo autopkgtest-build-lxc ubuntu trusty i386
 
 .SH SEE ALSO
-\fBautopkgtest-lxc\fR(1),
+\fBautopkgtest-virt-lxc\fR(1),
 \fBautopkgtest\fR(1),
 \fBlxc-create\fR(1),
 \fB/usr/share/doc/autopkgtest/\fR.

@@ -340,6 +340,10 @@ for details.'''
     if not virt_args:
         parser.error('You must specify -- <virt-server>...')
 
+    # autopkgtest-virt-* prefix can be skipped
+    if virt_args and '/' not in virt_args[0] and not virt_args[0].startswith('autopkgtest-virt-'):
+        virt_args[0] = 'autopkgtest-virt-' + virt_args[0]
+
     process_package_arguments(parser, args)
 
     # verify --env validity

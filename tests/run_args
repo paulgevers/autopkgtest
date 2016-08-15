@@ -46,7 +46,7 @@ class T(unittest.TestCase):
                                 ('binary', 'foodeb', None),
                                 ('click-source', '.', None),
                                 ('click', 'x.click', None)])
-        self.assertEqual(virt, ['null'])
+        self.assertEqual(virt, ['autopkgtest-virt-null'])
 
     def test_explicit_actions_eq(self):
         (args, acts, virt) = self.parse(
@@ -57,14 +57,14 @@ class T(unittest.TestCase):
                                 ('binary', 'foodeb', None),
                                 ('click-source', '.', None),
                                 ('click', 'x.click', None)])
-        self.assertEqual(virt, ['null'])
+        self.assertEqual(virt, ['autopkgtest-virt-null'])
 
     def test_implicit_built_tree(self):
         (args, acts, virt) = self.parse(['/proc/', './'])
         self.assertTrue(isinstance(args, argparse.Namespace))
         self.assertEqual(acts, [('built-tree', '/proc/', False),
                                 ('built-tree', './', False)])
-        self.assertEqual(virt, ['null'])
+        self.assertEqual(virt, ['autopkgtest-virt-null'])
 
     def test_implicit_unbuilt_tree(self):
         acts = self.parse(['/proc//', './/'])[1]
@@ -166,7 +166,7 @@ Files:
         self.assertEqual(args.auto_control, True)
 
         self.assertEqual(acts, [('built-tree', './', False)])
-        self.assertEqual(virt, ['foo', '-d', '-s', '--', '-d'])
+        self.assertEqual(virt, ['autopkgtest-virt-foo', '-d', '-s', '--', '-d'])
 
     def test_mix_opts_actions(self):
         (args, acts, virt) = self.parse(
@@ -238,7 +238,7 @@ Files:
         self.assertEqual(args.timeout_copy, 5)
 
         self.assertEqual(acts, [('source', 'mysrc_1.dsc', True)])
-        self.assertEqual(virt, ['foo', '-d', '-x'])
+        self.assertEqual(virt, ['autopkgtest-virt-foo', '-d', '-x'])
 
     def test_setup_commands(self):
         cmd = os.path.join(self.workdir.name, 'cmd')
@@ -295,7 +295,7 @@ Files:
             ['--no-auto-control', './', '---', 'foo'])
         self.assertEqual(args.auto_control, False)
         self.assertEqual(acts, [('built-tree', './', False)])
-        self.assertEqual(virt, ['foo'])
+        self.assertEqual(virt, ['autopkgtest-virt-foo'])
 
     def test_build_parallel(self):
         (args, acts, virt) = self.parse(

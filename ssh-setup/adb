@@ -146,7 +146,7 @@ EOF
         fi
     fi
 
-    # print info for autopkgtest-ssh
+    # print info for autopkgtest-virt-ssh
     cat<<EOF
 login=$SSH_USER
 hostname=localhost

@@ -362,9 +362,13 @@ details.'''
     if not virt_args:
         parser.error('You must specify --- <virt-server>...')
 
-    # for backwards compat, vserver can be given with "adt-virt-" prefix
-    if virt_args and '/' not in virt_args[0] and virt_args[0].startswith('adt-virt-'):
-        virt_args[0] = virt_args[0][9:]
+    if virt_args and '/' not in virt_args[0]:
+        # for backwards compat, vserver can be given with "adt-virt-" prefix
+        if virt_args[0].startswith('adt-virt-'):
+            virt_args[0] = virt_args[0][9:]
+        # autopkgtest-virt-* prefix can be skipped
+        if not virt_args[0].startswith('autopkgtest-virt-'):
+            virt_args[0] = 'autopkgtest-virt-' + virt_args[0]
 
     action_parser.parse_args(action_args)
 

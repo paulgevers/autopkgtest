@@ -1,6 +1,6 @@
 .TH autopkgtest-buildvm-ubuntu-cloud  1 2014 "Linux Programmer's Manual"
 .SH NAME
-autopkgtest-buildvm-ubuntu-cloud \- Create Ubuntu cloud image based VM for autopkgtest-qemu
+autopkgtest-buildvm-ubuntu-cloud \- Create Ubuntu cloud image based VM for autopkgtest-virt-qemu
 
 .SH SYNOPSIS
 .B autopkgtest-buildvm-ubuntu-cloud
@@ -9,7 +9,7 @@ autopkgtest-buildvm-ubuntu-cloud \- Create Ubuntu cloud image based VM for autop
 .SH DESCRIPTION
 .B autopkgtest-buildvm-ubuntu-cloud
 downloads an Ubuntu cloud image and configures it for autopkgtest's QEMU runner
-(\fBautopkgtest-qemu\fR):
+(\fBautopkgtest-virt-qemu\fR):
 
 .IP * 4
 Resize the image to 6 GB (by default, you can change this with an option),
@@ -23,7 +23,7 @@ Add apt sources for "restricted" and "multiverse" components.
 
 .IP * 4
 Create an init.d script to start a root shell on ttyS1 at boot, so that
-.B autopkgtest-qemu
+.B autopkgtest-virt-qemu
 can be used without additional arguments or logging in through ttyS0.
 
 You can select release, architecture, apt proxy, etc. with options. The
@@ -130,7 +130,7 @@ between short options and their values, they would become a part of the
 argument value.
 
 .SH SEE ALSO
-\fBautopkgtest-qemu\fR(1),
+\fBautopkgtest-virt-qemu\fR(1),
 \fBautopkgtest\fR(1),
 \fBhttp://cloud-images.ubuntu.com\fR,
 \fB/usr/share/doc/autopkgtest/\fR.

@@ -201,7 +201,7 @@ If your user can get root privileges with sudo, you can call autopkgtest as
 your normal user and specify ``-s`` (``--sudo``) so that the container
 can be started as root.
 
-See autopkgtest-lxc(1) manpage. This also explains how to build containers.
+See autopkgtest-virt-lxc(1) manpage. This also explains how to build containers.
 
 QEMU
 ~~~~
@@ -219,7 +219,7 @@ and breaks-testbed capabilities. But it is also the one with the biggest
 overhead and only works well on architectures with KVM acceleration (i.
 e. mostly x86).
 
-See autopkgtest-qemu(1) manpage. This also explains how to build suitable
+See autopkgtest-virt-qemu(1) manpage. This also explains how to build suitable
 images, and the requirements of the guest.
 
 null
@@ -232,7 +232,7 @@ This does not do any virtualization, but runs tests straight on the
 host. Beware that this will leave some clutter on your system (installed
 test or build dependency packages, configuration changes that the tests
 might make, etc.). It is not able to run tests with the "breaks-testbed"
-restriction. See autopkgtest-null(1) manpage.
+restriction. See autopkgtest-virt-null(1) manpage.
 
 chroot
 ~~~~~~

@@ -28,20 +28,19 @@ pkgname =	autopkgtest
 docdir =	$(share)/doc/$(pkgname)
 datadir =	$(share)/$(pkgname)
 pythondir = 	$(datadir)/lib
-virtdir = 	$(datadir)/virt
 
 INSTALL =	install
 INSTALL_DIRS =	$(INSTALL) -d
 INSTALL_PROG =	$(INSTALL) -m 0755
 INSTALL_DATA =	$(INSTALL) -m 0644
 
-virts =		virt/chroot \
-		virt/lxc \
-		virt/lxd \
-		virt/null \
-		virt/qemu \
-		virt/schroot \
-		virt/ssh \
+virts =		chroot \
+		lxc \
+		lxd \
+		null \
+		qemu \
+		schroot \
+		ssh \
 		$(NULL)
 
 programs =	tools/autopkgtest-buildvm-ubuntu-cloud \
@@ -68,15 +67,14 @@ htmlfiles =	$(patsubst %.rst,%.html,$(rstfiles))
 all: $(htmlfiles)
 
 install:
-	$(INSTALL_DIRS) $(bindir) $(docdir) $(man1dir) $(pythondir) $(virtdir) $(datadir)/setup-commands $(datadir)/ssh-setup
+	$(INSTALL_DIRS) $(bindir) $(docdir) $(man1dir) $(pythondir) $(datadir)/setup-commands $(datadir)/ssh-setup
 	set -e; for f in $(programs); do \
 		$(INSTALL_PROG) $$f $(bindir); \
 		test ! -f $$f.1 || $(INSTALL_DATA) $$f.1 $(man1dir); \
 		done
 	set -e; for f in $(virts); do \
-		$(INSTALL_PROG) $$f $(virtdir); \
-		man=$$(dirname $$f)/autopkgtest-$$(basename $$f).1; \
-		test ! -f $$man || $(INSTALL_DATA) $$man $(man1dir); \
+		$(INSTALL_PROG) virt/autopkgtest-virt-$$f $(bindir); \
+		$(INSTALL_DATA) virt/autopkgtest-virt-$${f}.1 $(man1dir); \
 		done
 	$(INSTALL_DATA) $(pythonfiles) $(pythondir)
 	$(INSTALL_DATA) CREDITS $(docdir)
@@ -91,7 +89,7 @@ install:
 	ln -s autopkgtest-buildvm-ubuntu-cloud $(bindir)/adt-buildvm-ubuntu-cloud
 	$(INSTALL_DATA) runner/adt-run.1 $(man1dir)
 	# legacy virt runners
-	for v in $(virts); do ln -s ../share/autopkgtest/$$v $(bindir)/adt-virt-$$(basename $$v); done
+	for v in $(virts); do ln -s autopkgtest-virt-$$v $(bindir)/adt-virt-$$(basename $$v); done
 
 clean:
 	rm -f */*.pyc

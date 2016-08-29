@@ -1427,7 +1427,7 @@ class ChrootRunner(AdtTestCase, DebTestsAll, DebTestsFailureModes):
                 if cmd == 'apt-get':
                     f.write('if [ "$1" = source ]; then cp -r /aptget-src $4-1; fi\n')
                 if cmd == 'apt-cache':
-                    f.write('if [ "$1" = showsrc ]; then printf "Package-List:\\n $2 deb utils optional arch=any\\nFormat: 1.0\\n"; fi\n')
+                    f.write('if [ "$1" = showsrc ]; then printf "Package-List:\\n $3 deb utils optional arch=any\\nFormat: 1.0\\n"; fi\n')
             os.chmod(p, 0o755)
         with open(os.path.join(self.chroot, 'bin', 'su'), 'w') as f:
             f.write('#!/bin/sh\nshift 4\nexec bash -c "$@"\n')
@@ -1624,6 +1624,23 @@ Restrictions: needs-root
 
         # should not build package
         self.assertNotIn('dh build', err)
+
+    def test_apt_source_single_line_package_list(self):
+        '''apt source, single-line Package-List:'''
+
+        # modify fake apt-cache to show single-line P-L
+        with open(os.path.join(self.chroot, 'usr', 'bin', 'apt-cache'), 'w') as f:
+            f.write('if [ "$1" = showsrc ]; then printf "Package-List: $3 deb utils optional arch=any\\nFormat: 1.0\\n"; fi\n')
+
+        p = self.build_src('Tests: pass\nDepends:\nRestrictions: needs-root\n',
+                           {'pass': '#!/bin/sh\necho I am fine\n'})
+        # copy that into the chroot where fake apt-get source can find it
+        shutil.copytree(p, os.path.join(self.chroot, 'aptget-src'))
+
+        (code, out, err) = self.runtest(['-d', 'testpkg'])
+        # test should succeed
+        self.assertEqual(code, 0, err)
+        self.assertRegex(out, 'pass\s+PASS', out)
 
     def test_setup_commands_string(self):
         '''--setup-commands with command string'''

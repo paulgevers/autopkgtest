@@ -1,3 +1,23 @@
+autopkgtest (4.0.5) unstable; urgency=medium
+
+  * setup-commands/setup-testbed: Don't configure ifupdown when using
+    networkd, as done by latest vmdebootstrap.
+  * autopkgtest-chroot.1: Fix typo
+  * Drop broken and unmaintained ssh-setup/snappy setup script.
+    This hasn't ever been used in production and stopped working long ago.
+  * Run tests/autopkgtest_args during package build
+  * Put virt servers back into $PATH.
+    The virt servers were originally intended to be public API (even though not
+    documented as such) and other packages might provide virt servers. Put them
+    back into /usr/bin, with an "autopkgtest-virt-" prefix to mirror the original
+    "adt-virt-" naming. Rename the manpages to match the binaries.
+    (Closes: #835204)
+  * tests/autopkgtest: Relax checks for testpkg.deb from local repository
+    apt 1.3 changes the format, so be less picky about it.
+  * Fix "apt-get source" version detection for single-line "Package-List:"
+
+ -- Martin Pitt <mpitt@debian.org>  Mon, 29 Aug 2016 08:35:00 +0200
+
 autopkgtest (4.0.4) unstable; urgency=medium
 
   [ Antonio Terceiro ]

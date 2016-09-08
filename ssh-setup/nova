@@ -177,15 +177,10 @@ open() {
     fi
 
     # check available images that match the given name, use the latest match
-    last=$(cat <<EOF | python
+    last=$(cat <<EOF | python3
 import os, re
-try:
-    import novaclient.v2
-    ver = '2'
-except ImportError:
-    import novaclient.v1_1
-    ver = '1.1'
-nova = novaclient.client.Client(ver, os.environ['NOVA_USERNAME'], os.environ['NOVA_PASSWORD'],
+import novaclient.client
+nova = novaclient.client.Client('2', os.environ['NOVA_USERNAME'], os.environ['NOVA_PASSWORD'],
                                 os.environ['NOVA_PROJECT_ID'], auth_url=os.environ['OS_AUTH_URL'],
                                 region_name=os.environ['NOVA_REGION'])
 latest = None

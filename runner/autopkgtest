@@ -389,14 +389,11 @@ def build_source(kind, arg, built_binaries):
                           'if [ -n "$RC" ]; then if echo "$OUT" | grep -q "Unable to find a source package"; then exit 1; else exit $RC; fi; fi;'
                           'echo "$OUT" | grep ^Get: || true' % {'src': arg})
     elif kind == 'git-source':
-        fields = arg.split()
-        if len(fields) == 1:
-            create_command = "git clone '%s' || { sleep 15; git clone '%s'; }" % (arg, arg)
-        elif len(fields) == 2:
-            create_command = "git clone --branch '%(b)s' '%(u)s' || { sleep 15; git clone --branch '%(b)s' '%(u)s'; }" \
-                % {'b': fields[1], 'u': fields[0]}
-        else:
-            adtlog.bomb('--git-source argument must be "URL" or "URL branchname"')
+        url, _, branch = arg.partition('#')
+        create_command = "git clone '%s' || { sleep 15; git clone '%s'; }" % (url, url)
+        if branch:
+            # This is url#branch or url#refspec (for pull requests)
+            create_command += "; (cd [a-z0-9]*; git fetch -fu origin '%s:testbranch' || { sleep 15; git fetch -fu origin '%s:testbranch'; }; git checkout testbranch)" % (branch, branch)
 
         testbed.satisfy_dependencies_string('git, ca-certificates', 'install git for --git-source')
     else:

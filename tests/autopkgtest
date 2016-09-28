@@ -1187,7 +1187,7 @@ if ($pid) { # parent
         subprocess.check_call(['git', 'commit', '--quiet', '-mdobranch'], cwd=p)
         subprocess.check_call(['git', 'checkout', '--quiet', 'master'], cwd=p)
 
-        (code, out, err) = self.runtest(['-B', 'file://%s wip' % p])
+        (code, out, err) = self.runtest(['-B', 'file://%s#wip' % p])
         # test should succeed
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'pass\s+PASS', out)

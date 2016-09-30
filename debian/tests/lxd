@@ -7,7 +7,8 @@ if [ "$arch" != i386 -a "$arch" != amd64 ]; then
     exit 0
 fi
 
-cat <<EOF > /etc/default/lxd-bridge
+if [ -e /etc/default/lxd-bridge ]; then
+    cat <<EOF > /etc/default/lxd-bridge
  USE_LXD_BRIDGE="true"
  LXD_BRIDGE="lxdbr0"
  UPDATE_PROFILE="true"
@@ -25,6 +26,10 @@ cat <<EOF > /etc/default/lxd-bridge
  LXD_IPV6_NAT="false"
  LXD_IPV6_PROXY="false"
 EOF
+else
+    lxc network create lxdbr0 ipv4.address=10.0.8.1/24 ipv4.nat=true ipv6.address=fd3b:ba81:269c:19c4::1/64 --force-local
+    lxc network attach-profile lxdbr0 default eth0 --force-local
+fi
 
 # work around broken PTMU in Canonical Scalingstack
 iptables -t mangle -A FORWARD -p tcp --tcp-flags SYN,RST SYN -j TCPMSS --clamp-mss-to-pmtu

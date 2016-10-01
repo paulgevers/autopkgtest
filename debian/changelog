@@ -1,3 +1,31 @@
+autopkgtest (4.1) unstable; urgency=medium
+
+  [ Martin Pitt ]
+  * ssh-setup/nova: Move to python3 and to current -novaclient API
+  * schroot: Bump end-session timeout to 5 minutes.
+    30 seconds might not be enough when running big schroots on slow disks.
+  * ssh-setup/nova: Add --nova-reboot option.
+    In some clouds using "nova reboot --poll" waits several minutes until
+    after the machine is actually up again. OTOH a simple "reboot" inside some
+    other clouds causes network to break after "reboot". As there is no method
+    that works everywhere, default to the autopkgtest-virt-ssh behaviour again
+    ("reboot" and wait for ssh), and add an option to use "nova reboot"
+    instead.
+
+  [ Stéphane Graber ]
+  * debian/tests/lxd: Update bridge setup to work with LXD 2.3 and higher.
+    This moves from /etc/default/lxd-bridge to lxd-internal configuration.
+
+  [ Barry Warsaw ]
+  * Support url#refspec format.
+    Fix the bug in the previously supported url#branch syntax, where the code
+    expected a space separator but the documentation described the # separator.
+    Generalize the approach with an explicit fetch/checkout so that GitHub style PR
+    refspecs like "refs/pull/21/head" also work as branch name.
+    (Closes: #839072)
+
+ -- Martin Pitt <mpitt@debian.org>  Sat, 01 Oct 2016 10:55:16 +0200
+
 autopkgtest (4.0.5) unstable; urgency=medium
 
   * setup-commands/setup-testbed: Don't configure ifupdown when using

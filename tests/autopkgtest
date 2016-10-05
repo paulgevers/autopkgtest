@@ -3480,6 +3480,16 @@ class SshRunnerNoScript(AdtTestCase):
         self.assertRegex(out, 't255\s+FAIL non-zero exit status 253')
         self.assertNotIn('testbed auxverb failed with', err)
 
+    def test_break_testbed(self):
+        '''test breaks sshd'''
+
+        self.start_container()
+        p = self.build_src('Test-Command: pkill -e -STOP sshd; sleep 5\nDepends:\n', {})
+
+        (code, out, err) = self.runtest(['-d', '-B', p, '--timeout-test=1', '--timeout-copy=1'])
+        self.assertEqual(code, 4, err)
+        self.assertRegex(out, 'command1\s+FAIL timed out')
+
 
 @unittest.skipUnless('AUTOPKGTEST_TEST_LXD' in os.environ,
                      'Set $AUTOPKGTEST_TEST_LXD to an existing container')
@@ -3639,6 +3649,15 @@ class SshRunnerWithScript(AdtTestCase, DebTestsAll):
         self.assertRegex(out, 'f\s+FAIL non-zero exit status 127', out)
         # this isn't a failure of the auxverb
         self.assertNotIn('testbed auxverb failed with', err)
+
+    def test_break_testbed(self):
+        '''test breaks sshd'''
+
+        p = self.build_src('Test-Command: pkill -e -STOP sshd; sleep 5\nDepends:\n', {})
+
+        (code, out, err) = self.runtest(['-d', '-B', p, '--timeout-test=1', '--timeout-copy=1'])
+        self.assertEqual(code, 4, err)
+        self.assertRegex(out, 'command1\s+FAIL timed out')
 
 
 if __name__ == '__main__':

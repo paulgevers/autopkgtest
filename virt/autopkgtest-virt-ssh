@@ -461,9 +461,14 @@ def hook_wait_reboot():
 def hook_cleanup():
     global capabilities, workdir, cleanup_paths, sshcmd
 
-    VirtSubproc.downtmp_remove()
-    if cleanup_paths:
-        VirtSubproc.check_exec(['rm', '-rf'] + cleanup_paths, downp=True, timeout=10)
+    try:
+        VirtSubproc.downtmp_remove()
+        if cleanup_paths:
+            VirtSubproc.check_exec(['rm', '-rf'] + cleanup_paths, downp=True,
+                                   timeout=VirtSubproc.copy_timeout)
+    except VirtSubproc.Timeout:
+        adtlog.error('Removing temporary files on testbed timed out')
+        # still do the remaining cleanup
 
     execute_setup_script('cleanup')
 

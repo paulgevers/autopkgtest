@@ -1055,9 +1055,21 @@ fi
         adtlog.debug('testbed executing test finished with exit status %i' % rc)
 
         # copy stdout/err files to host
-        so.copyup()
-        se.copyup()
-        se_size = os.path.getsize(se.host)
+        try:
+            so.copyup()
+            se.copyup()
+            se_size = os.path.getsize(se.host)
+        except adtlog.TestbedFailure:
+            if timeout:
+                # if the test timed out, it's likely that the test destroyed
+                # the testbed, so ignore this and call it a failure
+                adtlog.warning('Copying up test output timed out, ignoring')
+                se_size = 0
+                so.host = None
+                se.host = None
+            else:
+                # smells like a tmpfail
+                raise
 
         # avoid mixing up stdout (from report) and stderr (from logging) in output
         sys.stdout.flush()
@@ -1079,6 +1091,11 @@ fi
 
         sys.stdout.flush()
         sys.stderr.flush()
+
+        # skip the remaining processing if the testbed got broken
+        if se.host is None:
+            adtlog.debug('Skipping remaining log processing and testbed restore after timeout')
+            return
 
         if os.path.getsize(so.host) == 0:
             # don't produce empty -stdout files in --output-dir

@@ -165,23 +165,27 @@ def login_tty_and_setup_shell():
     term = VirtSubproc.get_unix_socket(os.path.join(workdir, 'ttyS0'))
 
     # send user name
-    term.send(args.user.encode('UTF-8'))
-    term.send(b'\n')
-    # wait until we get some more data for the password prompt
-    VirtSubproc.expect(term, None, 10, 'password prompt')
+    term.send(args.user.encode('UTF-8') + b'\n')
+    VirtSubproc.expect(term, b'assword:', 10, 'password prompt')
     # send password
-    term.send(args.password.encode('UTF-8'))
-    term.send(b'\n')
-    adtlog.debug('login_tty: sent password')
+    passwd_b = args.password.encode('UTF-8')
+    term.send(passwd_b + b'\n')
+    VirtSubproc.expect(term, None, 10, 'acked password')
+    term.send(b'echo "LOG""IN""_"OK\n')
+    adtlog.debug('login_tty: logged in')
+    VirtSubproc.expect(term, b'LOGIN_OK', 120, 'logged in')
 
-    cmd = b'setsid sh </dev/ttyS1 >/dev/ttyS1 2>&1 &'
+    cmd = b'sh </dev/ttyS1 >/dev/ttyS1 2>&1'
 
     # if we are a non-root user, run through sudo
     if args.user != 'root':
-        cmd = b"sudo sh -c '" + cmd + "'"
+        cmd = b"echo '%s' | sudo --background --stdin sh -c '" % passwd_b + cmd + b"'"
+    else:
+        cmd = b'setsid ' + cmd
 
-    term.send(cmd)
-    term.send(b'\nexit\n')
+    term.send(cmd + b'\n')
+    VirtSubproc.expect(term, None, 10, 'accepted ttyS1 shell command')
+    term.send(b'exit\n')
     VirtSubproc.expect(term, b'\nlogout', 10)
 
 

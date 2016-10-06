@@ -230,7 +230,7 @@ def get_unix_socket(path):
 
 
 def expect(sock, search_bytes, timeout_sec, description=None, echo=False):
-    adtlog.debug('expect: "%s"' % search_bytes.decode())
+    adtlog.debug('expect: "%s"' % (search_bytes or b'<none>').decode())
     what = '"%s"' % (description or search_bytes or 'data')
     out = b''
     with timeout(timeout_sec,

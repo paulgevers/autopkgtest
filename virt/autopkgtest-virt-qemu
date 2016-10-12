@@ -617,6 +617,7 @@ def hook_wait_reboot():
     shareddir = os.path.join(workdir, 'shared')
     os.unlink(os.path.join(shareddir, 'done_shared'))
     wait_boot()
+    setup_shell()
     setup_shared(shareddir)
     setup_baseimage()
 

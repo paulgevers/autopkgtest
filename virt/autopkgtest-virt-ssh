@@ -101,7 +101,7 @@ cleanup_paths = []  # paths on the device which we created
 
 
 def parse_args():
-    global args
+    global args, capabilities
 
     parser = argparse.ArgumentParser()
 
@@ -126,6 +126,10 @@ def parse_args():
                         help='Passed verbatim to ssh; see man ssh_config')
     parser.add_argument('-r', '--reboot', action='store_true',
                         help='Indicate that testbed supports reboot')
+    parser.add_argument('--capability', action='append',
+                        help='Indicate that testbed supports given capability.'
+                        ' Can be specified multiple times. Never use this on '
+                        'precious testbeds!')
     parser.add_argument('-s', '--setup-script',
                         help='Setup script to prepare testbed and ssh connection')
     parser.add_argument('--timeout-ssh', metavar='SECS', type=int, default=300,
@@ -154,6 +158,9 @@ def parse_args():
 
     if args.reboot:
         capabilities.append('reboot')
+
+    if args.capability:
+        capabilities += args.capability
 
 
 def execute_setup_script(command, fail_ok=False):

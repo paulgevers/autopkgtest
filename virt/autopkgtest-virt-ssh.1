@@ -91,6 +91,20 @@ can be used in the testbed. This is useful when running rebooting tests without
 a setup script (which can already declare capabilities).
 
 .TP
+.BI --capability CAPABILITY
+Indicate that the testbed has the given capability (see
+README.virtualisation-server). This option can be specified multiple times.
+
+This is useful when running rebooting tests without a setup script (which can
+already declare capabilities).
+
+WARNING: Never use this on precious testbeds, as specifying options like
+.B revert
+or
+.B isolation-machine
+can irrecoverably destroy the testbed!
+
+.TP
 .BI  -s " setup_script" " | --setup-script=" setup_script
 Setup script to prepare testbed and ssh connection (See
 .B SETUP SCRIPT

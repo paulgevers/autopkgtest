@@ -3490,6 +3490,21 @@ class SshRunnerNoScript(AdtTestCase):
         self.assertEqual(code, 4, err)
         self.assertRegex(out, 'command1\s+FAIL timed out')
 
+    def test_isolation(self):
+        '''--capability option for isolation'''
+
+        self.start_container()
+
+        p = self.build_src('Tests: mach\nDepends:\nRestrictions: isolation-machine\n\n'
+                           'Tests: cont\nDepends:\nRestrictions: isolation-container',
+                           {'mach': '#!/bin/sh\nfalse',
+                            'cont': '#!/bin/true'})
+        (code, out, err) = self.runtest(['-d', '-B', p],
+                                        self.virt_args + ['--capability=isolation-container'])
+        self.assertEqual(code, 2, err)
+        self.assertRegex(out, 'cont\s+PASS', out)
+        self.assertRegex(out, 'mach\s+SKIP Test requires machine-level isolation', out)
+
 
 @unittest.skipUnless('AUTOPKGTEST_TEST_LXD' in os.environ,
                      'Set $AUTOPKGTEST_TEST_LXD to an existing container')

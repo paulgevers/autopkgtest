@@ -38,7 +38,7 @@ import shutil
 import adtlog
 
 progname = "<VirtSubproc>"
-devnull_read = open('/dev/null', 'r')
+devnull_read = open('/dev/null', 'rb')
 caller = __main__
 copy_timeout = int(os.getenv('AUTOPKGTEST_VIRT_COPY_TIMEOUT', '300'))
 
@@ -512,9 +512,9 @@ def copyupdown_internal(wh, sd, upp):
     if not dirsp:
         rune = 'cat %s%s' % ('><'[upp], remfileq)
         if upp:
-            deststdout = open(sd[idst], 'w')
+            deststdout = open(sd[idst], 'wb')
         else:
-            srcstdin = open(sd[isrc], 'r')
+            srcstdin = open(sd[isrc], 'rb')
             status = os.fstat(srcstdin.fileno())
             if status.st_mode & 0o111:
                 rune += '; chmod +x -- %s' % (remfileq)

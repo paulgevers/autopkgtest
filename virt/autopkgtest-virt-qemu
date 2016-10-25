@@ -234,6 +234,44 @@ touch /run/autopkgtest/shared/done_shared
     term.send(b'[ -n "$HOME" ] || export HOME=`getent passwd root|cut -f6 -d:`\n')
     VirtSubproc.expect(term, b'#', 5)
 
+    # create helper for runcmd: cat data from its stdin (from a file) to stdout
+    # eternally (like tail -f), but stop once either an "EOF" file exists and
+    # we copied at least as many bytes as given in that EOF file (the first
+    # arg), or an "exit flag" file exists.
+    # We don't run that from /run/autopkgtest/shared as 9p from older QEMU
+    # versions is buggy and causes "invalid numeric result" errors on that.
+    term.send(b'''PYTHON=$(which python3) || PYTHON=$(which python); cat <<EOF > /tmp/eofcat; chmod 755 /tmp/eofcat
+#!$PYTHON
+import sys, os, fcntl, time, errno
+(feof, fexit) = sys.argv[1:]
+count = 0
+limit = None
+fcntl.fcntl(0, fcntl.F_SETFL, fcntl.fcntl(0, fcntl.F_GETFL) | os.O_NONBLOCK)
+while not os.path.exists(fexit):
+    try:
+        block = os.read(0, 1000000)
+        if block:
+            os.write(1, block)
+            count += len(block)
+            continue
+    except OSError as e:
+        if e.errno != errno.EAGAIN:
+            raise
+
+    time.sleep(0.05)
+    if limit is None:
+        try:
+            with open(feof, 'r') as f:
+                limit = int(f.read())
+        except (IOError, ValueError):
+            pass
+
+    if limit is not None and count >= limit:
+        break
+EOF
+''')
+    VirtSubproc.expect(term, b'# ', 5)
+
 
 def setup_config(shared_dir):
     '''Set up configuration files'''
@@ -268,44 +306,6 @@ def setup_config(shared_dir):
                          'one of them is required by autopkgtest')
     if b'\n# ' not in out:
         VirtSubproc.expect(term, b'# ', 5)
-
-    # create helper for runcmd: cat data from its stdin (from a file) to stdout
-    # eternally (like tail -f), but stop once either an "EOF" file exists and
-    # we copied at least as many bytes as given in that EOF file (the first
-    # arg), or an "exit flag" file exists.
-    # We don't run that from /run/autopkgtest/shared as 9p from older QEMU
-    # versions is buggy and causes "invalid numeric result" errors on that.
-    term.send(b'''PYTHON=$(which python3) || PYTHON=$(which python); cat <<EOF > /bin/eofcat; chmod 755 /bin/eofcat
-#!$PYTHON
-import sys, os, fcntl, time, errno
-(feof, fexit) = sys.argv[1:]
-count = 0
-limit = None
-fcntl.fcntl(0, fcntl.F_SETFL, fcntl.fcntl(0, fcntl.F_GETFL) | os.O_NONBLOCK)
-while not os.path.exists(fexit):
-    try:
-        block = os.read(0, 1000000)
-        if block:
-            os.write(1, block)
-            count += len(block)
-            continue
-    except OSError as e:
-        if e.errno != errno.EAGAIN:
-            raise
-
-    time.sleep(0.05)
-    if limit is None:
-        try:
-            with open(feof, 'r') as f:
-                limit = int(f.read())
-        except (IOError, ValueError):
-            pass
-
-    if limit is not None and count >= limit:
-        break
-EOF
-''')
-    VirtSubproc.expect(term, b'# ', 5)
 
 
 def make_auxverb(shared_dir):
@@ -376,7 +376,7 @@ t_stderr.start()
 # "real" stdin behaviour.
 s = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
 s.connect('%(tty)s')
-cmd = 'PYTHONHASHSEED=0 /bin/eofcat %%(d)s/stdin_eof %%(d)s/exit.tmp < %%(d)s/stdin | ' \\
+cmd = 'PYTHONHASHSEED=0 /tmp/eofcat %%(d)s/stdin_eof %%(d)s/exit.tmp < %%(d)s/stdin | ' \\
       '(%%(c)s >> %%(d)s/stdout 2>> %%(d)s/stderr; echo $? > %%(d)s/exit.tmp);' \\
       'mv %%(d)s/exit.tmp %%(d)s/exit\\n' %% \\
        {'d': job_guest, 'c': ' '.join(map(pipes.quote, sys.argv[1:]))}

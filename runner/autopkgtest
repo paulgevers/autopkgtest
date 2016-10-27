@@ -288,8 +288,8 @@ def source_rules_command(script, which, cwd=None, results_lines=0):
         else:
             adtlog.badpkg('rules %s failed with exit code %d' % (which, rc))
     if results_lines is not None and len(results) != results_lines:
-        adtlog.badpkg('got %d lines of results from %s where %d expected'
-                      % (len(results), which, results_lines))
+        adtlog.badpkg('got %d lines of results from %s where %d expected: %r'
+                      % (len(results), which, results_lines, results))
     if results_lines == 1:
         return results[0]
     return results

@@ -378,14 +378,23 @@ class Debian(unittest.TestCase):
         self.assertFalse(skipped)
 
     @patch('adtlog.report')
-    def test_testbed_compat(self, *args):
-        '''restrictions incompatible with testbed'''
+    def test_testbed_unavail_root(self, *args):
+        '''restriction needs-root incompatible with testbed'''
 
         (ts, skipped) = self.call_parse('Tests: t\nDepends:\nRestrictions: needs-root')
         self.assertEqual(ts, [])
         self.assertTrue(skipped)
         adtlog.report.assert_called_once_with(
             't', 'SKIP Test needs root on testbed which is not available')
+
+    @patch('adtlog.report')
+    def test_testbed_unavail_reboot(self, *args):
+        '''restriction needs-reboot incompatible with testbed'''
+        (ts, skipped) = self.call_parse('Tests: t\nDepends:\nRestrictions: needs-reboot')
+        self.assertEqual(ts, [])
+        self.assertTrue(skipped)
+        adtlog.report.assert_called_once_with(
+            't', 'SKIP Test needs to reboot testbed but testbed does not provide reboot capability')
 
     def test_custom_control_path(self):
         '''custom control file path'''

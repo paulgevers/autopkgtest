@@ -202,6 +202,10 @@ isolation-machine
     test in a virtualization server which does not provide this it will
     be skipped.
 
+needs-reboot
+    The test wants to reboot the machine using
+    ``/tmp/autopkgtest-reboot`` (see below).
+
 needs-recommends
     Enable installation of recommended packages in apt for the test
     dependencies. This does not affect build dependencies.

@@ -1255,6 +1255,14 @@ if ($pid) { # parent
         self.assertIn('badpkg: testbed setup commands failed with status 100', out)
         self.assertNotIn('command1', out)
 
+    def test_reboot(self):
+        '''needs-reboot test gets skipped'''
+
+        p = self.build_src('Test-Command: true\nDepends:\nRestrictions: needs-reboot', {})
+        (code, out, err) = self.runtest(['-d', '-B', p])
+        self.assertEqual(code, 2, err)
+        self.assertRegex(out, 'command1\s+SKIP Test needs to reboot testbed but testbed does not provide reboot capability')
+
 
 @unittest.skipIf(os.getuid() > 0,
                  'NullRunnerRoot tests need to run as root')
@@ -2289,7 +2297,7 @@ class DebTestsVirtContainer(DebTestsVirtFS):
     def test_reboot(self):
         '''test that reboots'''
 
-        p = self.build_src('Tests: s r\nDepends:\nRestrictions: needs-root',
+        p = self.build_src('Tests: s r\nDepends:\nRestrictions: needs-root, needs-reboot',
                            {'s': '#!/bin/sh\necho simple_done',
                             'r': '''#!/bin/sh -e
         case "$AUTOPKGTEST_REBOOT_MARK" in
@@ -2331,7 +2339,7 @@ class DebTestsVirtContainer(DebTestsVirtFS):
     def test_reboot_prepare(self):
         '''test that reboots by itself'''
 
-        p = self.build_src('Tests: s r\nDepends:\nRestrictions: needs-root',
+        p = self.build_src('Tests: s r\nDepends:\nRestrictions: needs-root, needs-reboot',
                            {'s': '#!/bin/sh\necho simple_done',
                             'r': '''#!/bin/sh -e
         case "$AUTOPKGTEST_REBOOT_MARK" in

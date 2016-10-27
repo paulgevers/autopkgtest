@@ -42,7 +42,7 @@ import adtlog
 
 known_restrictions = ['rw-build-tree', 'breaks-testbed', 'needs-root',
                       'build-needed', 'allow-stderr', 'isolation-container',
-                      'isolation-machine', 'needs-recommends']
+                      'isolation-machine', 'needs-recommends', 'needs-reboot']
 
 
 class Unsupported(Exception):
@@ -160,6 +160,12 @@ class Test:
             raise Unsupported(self.name,
                               'Test needs root on testbed which is not '
                               'available')
+
+        if 'needs-reboot' in self.restrictions and \
+           'reboot' not in caps:
+            raise Unsupported(self.name,
+                              'Test needs to reboot testbed but testbed does '
+                              'not provide reboot capability')
 
 #
 # Parsing for Debian source packages

@@ -1244,6 +1244,18 @@ if ($pid) { # parent
         self.assertIn('ERROR: testbed failure: testbed setup commands failed with status 1', err)
         self.assertNotIn('command1', out)
 
+    def test_setup_commands_boot_fail_transient(self):
+        '''--setup-commands-boot which exit with 1 (transient error)'''
+
+        p = self.build_src('Test-Command: false\nDepends:\n', {})
+
+        (code, out, err) = self.runtest(['-B', '-d', p, '--setup-commands-boot', 'false'])
+
+        self.assertEqual(code, 16, err)
+        self.assertNotIn('badpkg', out)
+        self.assertIn('ERROR: testbed failure: testbed boot setup commands failed with status 1', err)
+        self.assertNotIn('command1', out)
+
     def test_setup_commands_fail_badpkg(self):
         '''--setup-commands which exit with 100 (bad package)'''
 
@@ -1253,6 +1265,17 @@ if ($pid) { # parent
 
         self.assertEqual(code, 12, err)
         self.assertIn('badpkg: testbed setup commands failed with status 100', out)
+        self.assertNotIn('command1', out)
+
+    def test_setup_commands_boot_fail_badpkg(self):
+        '''--setup-commands-boot which exit with 100 (bad package)'''
+
+        p = self.build_src('Test-Command: false\nDepends:\n', {})
+
+        (code, out, err) = self.runtest(['-B', '-d', p, '--setup-commands-boot', 'exit 100'])
+
+        self.assertEqual(code, 12, err)
+        self.assertIn('badpkg: testbed boot setup commands failed with status 100', out)
         self.assertNotIn('command1', out)
 
     def test_reboot(self):
@@ -2061,13 +2084,14 @@ class DebTestsVirtFS(DebTestsAll):
         '''--setup-commands'''
 
         p = self.build_src('Tests: t1 t2\nDepends:\n',
-                           {'t1': '#!/bin/sh -e\ncat /setup.log; echo t1ok\n',
-                            't2': '#!/bin/sh -e\ncat /setup.log; echo t2ok\n'})
+                           {'t1': '#!/bin/sh -e\ncat /setup.log /setup_boot.log; echo t1ok\n',
+                            't2': '#!/bin/sh -e\ncat /setup.log /setup_boot.log; echo t2ok\n'})
 
         # we expect a normal user for LXC
         (code, out, err) = self.runtest(['-B', '-d', p, '--setup-commands',
                                          '[ -n "$AUTOPKGTEST_NORMAL_USER" ]; getent passwd $AUTOPKGTEST_NORMAL_USER;'
-                                         'echo setupok >> /setup.log'])
+                                         'echo setupok >> /setup.log',
+                                         '--setup-commands-boot', 'echo bootok >> /setup_boot.log'])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -2075,8 +2099,8 @@ class DebTestsVirtFS(DebTestsAll):
         self.assertRegex(out, 't2\s+PASS', out)
 
         # should show test stdout
-        self.assertRegex(out, '^\w+:x:.*\nsetupok\nt1ok\n')
-        self.assertIn('\nsetupok\nt2ok\n', out)
+        self.assertRegex(out, '^\w+:x:.*\nsetupok\nbootok\nt1ok\n')
+        self.assertIn('\nsetupok\nbootok\nt2ok\n', out)
         # should not have any test stderr
         self.assertNotIn(' stderr ', err)
 
@@ -2301,8 +2325,8 @@ class DebTestsVirtContainer(DebTestsVirtFS):
                            {'s': '#!/bin/sh\necho simple_done',
                             'r': '''#!/bin/sh -e
         case "$AUTOPKGTEST_REBOOT_MARK" in
-          mark1) echo "test in mark1"; echo one > $AUTOPKGTEST_ARTIFACTS/mark1.txt; /tmp/autopkgtest-reboot mark2 ;;
-          mark2) echo "test in mark2"; echo two > $AUTOPKGTEST_ARTIFACTS/mark2.txt ;;
+          mark1) cat /run/bootstamp; echo "test in mark1"; echo one > $AUTOPKGTEST_ARTIFACTS/mark1.txt; /tmp/autopkgtest-reboot mark2 ;;
+          mark2) cat /run/bootstamp; echo "test in mark2"; echo two > $AUTOPKGTEST_ARTIFACTS/mark2.txt ;;
           "") echo "test beginning"; echo zero > $AUTOPKGTEST_ARTIFACTS/begin.txt; /tmp/autopkgtest-reboot mark1 ;;
           *) echo "unknown AUTOPKGTEST_REBOOT_MARK value $AUTOPKGTEST_REBOOT_MARK" >&2; exit 1 ;;
         esac
@@ -2316,7 +2340,8 @@ class DebTestsVirtContainer(DebTestsVirtFS):
             virt_args = [a for a in self.virt_args if a != '--ephemeral']
         else:
             virt_args = self.virt_args
-        (code, out, err) = self.runtest(['--output-dir=' + outdir, '-B', p],
+        (code, out, err) = self.runtest(['--output-dir=' + outdir, '-B', p,
+                                         '--setup-commands-boot=echo BOOTSTAMP >/run/bootstamp'],
                                         virt_args=virt_args)
 
         # test should succeed
@@ -2326,7 +2351,7 @@ class DebTestsVirtContainer(DebTestsVirtFS):
 
         # should have all three phases
         self.assertIn('simple_done\n', out)
-        self.assertIn('\ntest beginning\ntest in mark1\ntest in mark2\ntest end\n', out)
+        self.assertIn('\ntest beginning\nBOOTSTAMP\ntest in mark1\nBOOTSTAMP\ntest in mark2\ntest end\n', out)
         self.assertIn('test process requested reboot with marker mark1', err)
         self.assertIn('test process requested reboot with marker mark2', err)
 

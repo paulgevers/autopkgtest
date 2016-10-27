@@ -45,7 +45,8 @@ timeouts = {'short': 100, 'copy': 300, 'install': 3000, 'test': 10000,
 
 class Testbed:
     def __init__(self, vserver_argv, output_dir, user,
-                 setup_commands=[], add_apt_pockets=[], copy_files=[]):
+                 setup_commands=[], setup_commands_boot=[], add_apt_pockets=[],
+                 copy_files=[]):
         self.sp = None
         self.lastsend = None
         self.scratch = None
@@ -60,6 +61,7 @@ class Testbed:
         self.install_tmp_env = []
         self.user = user
         self.setup_commands = setup_commands
+        self.setup_commands_boot = setup_commands_boot
         self.add_apt_pockets = add_apt_pockets
         self.copy_files = copy_files
         self.initial_kernel_version = None
@@ -185,6 +187,21 @@ class Testbed:
             m = re.search('^(flags|features)\s*:\s*(.*)$', cpu_info, re.MULTILINE | re.IGNORECASE)
             if m:
                 self.cpu_flags = m.group(2)
+
+        xenv = ['AUTOPKGTEST_IS_SETUP_BOOT_COMMAND=1']
+        if self.user:
+            xenv.append('AUTOPKGTEST_NORMAL_USER=' + self.user)
+            xenv.append('ADT_NORMAL_USER=' + self.user)
+
+        for c in self.setup_commands_boot:
+            rc = self.execute(['sh', '-ec', c], xenv=xenv, kind='install')[0]
+            if rc:
+                # setup scripts should exit with 100 if it's the package's
+                # fault, otherwise it's considered a transient testbed failure
+                if rc == 100:
+                    self.badpkg('testbed boot setup commands failed with status 100')
+                else:
+                    self.bomb('testbed boot setup commands failed with status %i' % rc)
 
     def _opened(self, pl):
         self.scratch = pl[0]

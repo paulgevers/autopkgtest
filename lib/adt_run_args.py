@@ -261,6 +261,10 @@ details.'''
                          '(e. g. "apt-get update" or adding apt sources); '
                          'can be a string with the commands, or a file '
                          'containing the commands')
+    g_setup.add_argument('--setup-commands-boot', metavar='COMMANDS_OR_PATH',
+                         action='append', default=[],
+                         help='Run these commands after --setup-commands, '
+                         'and also every time the testbed is rebooted')
     # ensure that this fails with something other than 100, as apt-get update
     # failures are usually transient
     g_setup.add_argument('-U', '--apt-upgrade', dest='setup_commands',

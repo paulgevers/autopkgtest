@@ -301,6 +301,18 @@ Files:
         self.assertEqual(args.setup_commands,
                          ['apt update', './setup.py install', 'cleanup'])
 
+    def test_setup_commands_boot(self):
+        cmd = os.path.join(self.workdir.name, 'cmd')
+        with open(cmd, 'w') as f:
+            f.write('touch /run/foo/bar\n')
+
+        args = self.parse(
+            ['--setup-commands-boot', 'mkdir /run/foo',
+             '--setup-commands-boot', cmd,
+             '--setup-commands-boot=cleanup', 'mypkg'])[0]
+        self.assertEqual(args.setup_commands_boot,
+                         ['mkdir /run/foo', 'touch /run/foo/bar', 'cleanup'])
+
     def test_copy(self):
         stuff = os.path.join(self.workdir.name, 'stuff')
         with open(stuff, 'w') as f:

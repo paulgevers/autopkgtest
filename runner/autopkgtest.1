@@ -226,6 +226,21 @@ rebooted after the setup commands. This can be suppressed by creating a file
 .BR /run/autopkgtest_no_reboot.stamp .
 
 .TP
+.BI \-\-setup\-commands\-boot= commands
+Run
+.I commands
+after the
+.BR \-\-setup\-commands ,
+and after every reboot. For example, these commands could be used to
+add files in a tmpfs.
+
+These commands never cause the testbed to be rebooted (because that could
+lead to an infinite loop). Otherwise, they are just like the
+.BR \-\-setup\-commands .
+
+This option can be specified multiple times.
+
+.TP
 .BR --apt-upgrade " | " -U
 Run
 .B apt\-get update

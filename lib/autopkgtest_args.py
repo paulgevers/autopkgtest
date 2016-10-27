@@ -250,6 +250,10 @@ for details.'''
                          ' && $(which eatmydata || true) apt-get dist-upgrade -y -o '
                          'Dpkg::Options::="--force-confnew"',
                          help='Run apt update/dist-upgrade before the tests')
+    g_setup.add_argument('--setup-commands-boot', metavar='COMMANDS_OR_PATH',
+                         action='append', default=[],
+                         help='Run these commands after --setup-commands, '
+                         'and also every time the testbed is rebooted')
     g_setup.add_argument('--apt-pocket', action='append',
                          metavar='POCKETNAME[=pkgname,src:srcname,...]',
                          default=[],
@@ -378,6 +382,15 @@ for details.'''
         if os.path.exists(c):
             with open(c, encoding='UTF-8') as f:
                 args.setup_commands[i] = f.read().strip()
+
+    for i, c in enumerate(args.setup_commands_boot):
+        if '/' not in c:
+            shipped = os.path.join('/usr/share/autopkgtest/setup-commands', c)
+            if os.path.exists(shipped):
+                c = shipped
+        if os.path.exists(c):
+            with open(c, encoding='UTF-8') as f:
+                args.setup_commands_boot[i] = f.read().strip()
 
     # parse --copy arguments
     copy_pairs = []

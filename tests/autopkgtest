@@ -3054,6 +3054,32 @@ Depends: nonexisting'''
         if code == 2:
             self.assertRegex(err, 'lxd\s+SKIP')
 
+    def test_persistent_apt_failure(self):
+        '''persistent apt errors are treated as test failure'''
+
+        self.build_src('Test-Command: true', {})
+        (code, out, err) = self.runtest(
+            ['--setup-commands', 'echo "deb http://archive.ubuntu.com/ubuntu/ nonexisting main" > /etc/apt/sources.list',
+             '--apt-upgrade'])
+
+        self.assertEqual(code, 12, err)
+        # apt output should be visible
+        self.assertIn('nonexisting/main', err)
+        self.assertIn('testbed setup commands failed with status 100\n', err)
+
+    def test_transient_apt_failure(self):
+        '''transient apt errors are treated as testbed failure'''
+
+        self.build_src('Test-Command: true', {})
+        (code, out, err) = self.runtest(
+            ['--setup-commands', 'echo "deb http://nonexist.ing/ nonexisting main" > /etc/apt/sources.list',
+             '--apt-upgrade'])
+
+        self.assertEqual(code, 16, err)
+        # apt output should be visible
+        self.assertIn('nonexisting/main', err)
+        self.assertIn('testbed setup commands failed with status 1\n', err)
+
 
 @unittest.skipUnless('AUTOPKGTEST_TEST_SCHROOT_CLICK' in os.environ,
                      'Set $AUTOPKGTEST_TEST_SCHROOT_CLICK to an existing schroot')

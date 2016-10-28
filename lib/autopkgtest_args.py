@@ -238,12 +238,15 @@ for details.'''
                          '(e. g. "apt-get update" or adding apt sources); '
                          'can be a string with the commands, or a file '
                          'containing the commands')
-    # ensure that this fails with something other than 100, as apt-get update
-    # failures are usually transient
+    # Ensure that this fails with something other than 100 in most error cases,
+    # as apt-get update failures are usually transient; but if we find a
+    # nonexisting apt source (404 Not Found) we *do* want 100, as otherwise
+    # we'd get eternally looping tests.
     g_setup.add_argument('-U', '--apt-upgrade', dest='setup_commands',
                          action='append_const',
-                         const='(apt-get update || (sleep 15; apt-get update)'
-                         ' || (sleep 60; apt-get update) || false)'
+                         const='''(O=$(bash -o pipefail -ec 'apt-get update | tee /proc/self/fd/2') ||'''
+                         '{ [ "${O%404*Not Found*}" = "$O" ] || exit 100; sleep 15; apt-get update; }'''
+                         ' || { sleep 60; apt-get update; } || false)'
                          ' && $(which eatmydata || true) apt-get dist-upgrade -y -o '
                          'Dpkg::Options::="--force-confnew"',
                          help='Run apt update/dist-upgrade before the tests')

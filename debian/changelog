@@ -1,3 +1,52 @@
+autopkgtest (4.2) unstable; urgency=medium
+
+  [ Martin Pitt ]
+  * ssh: Fix result of tests that break the testbed. (LP: #1630578)
+  * qemu: Fix user/password login mode without a ttyS1 root shell.
+     - Concatenate bytes with each other, not a str to a byte.
+     - Sync/flush console after sending password and ttyS1 shell command, wait
+       until login is complete before continuing.
+     - Send password to sudo for ttyS1 shell command, to also work with
+       password-requiring sudo. (LP: #1630963)
+  * qemu: Fix reboot in user/password login mode.
+  * ssh: Add --capability option.
+    This is useful to run tests which require an isolation level or have
+    breaks-testbed without a setup script.
+  * autopkgtest-build-lxd: Ask "lxc profile" for default bridge instead of
+    /etc/default/lxd-bridge. The latter went away in recent LXD versions, and
+    "lxc profile show default" also works in earlier versions.
+  * Make --apt-upgrade consider a "404" error as test failure.
+    Previously all errors from "apt-get update" were considered temporary
+    failures, i. e. the setup command always exited with 1. But if we specify
+    e. g. a nonexisting release from a distro or a PPA, this won't just go
+    away by itself -- we want the test to actually fail instead of getting
+    stuck in an eternal "retry on temporary failures" loop.
+  * schroot: Don't fail on stderr of schroot as long as it succeeds.
+    (LP: #1637898)
+  * qemu: Hide detected udev file system properties on /dev/baseimage.
+    (Closes: #842299)
+
+  [ Simon McVittie ]
+  * VirtSubproc: open arbitrary files in binary mode.
+  * VirtSubproc: if check_exec status is nonzero, include stderr in message.
+  * qemu: put the shared directory in /run. If the virtual machine's root
+    filesystem is read-only, we won't be able to create /autopkgtest.
+  * qemu: Move eofcat into /tmp. This avoids having to write it to /bin, which
+    might be read-only.  Re-create eofcat on every boot for this.
+  * source_rules_command: log the result we got if it is not as expected
+    (Closes: #842302)
+  * Add 'needs-reboot' restriction. This allows tests to be explicit about
+    needing to reboot the machine, rather than assuming that
+    'isolation-machine' is enough. It is plumbed into the existing 'reboot'
+    capability, which is distinct from 'isolation-machine'.
+    (Closes: #842300)
+  * Add --setup-commands-boot for commands that must be run at every boot.
+    This can be used for doing "mount -o remount,rw /" before any dpkg
+    operation, or transient setup like writing files into /run/.
+    (Closes: #842091)
+
+ -- Martin Pitt <mpitt@debian.org>  Tue, 01 Nov 2016 23:12:55 +0200
+
 autopkgtest (4.1) unstable; urgency=medium
 
   [ Martin Pitt ]

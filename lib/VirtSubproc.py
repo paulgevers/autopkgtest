@@ -159,7 +159,7 @@ def execute_timeout(instr, timeout, *popenargs, **popenargsk):
     return (status, out, err)
 
 
-def check_exec(argv, downp=False, outp=False, timeout=0):
+def check_exec(argv, downp=False, outp=False, timeout=0, fail_on_stderr=True):
     '''Run successful command (argv list)
 
     Command must succeed (exit code 0) and not produce any stderr. If downp is
@@ -185,7 +185,7 @@ def check_exec(argv, downp=False, outp=False, timeout=0):
     if status:
         bomb("%s%s failed (exit status %d, stderr %r)" %
              ((downp and "(down) " or ""), argv, status, err))
-    if err:
+    if fail_on_stderr and err:
         bomb("%s unexpectedly produced stderr output `%s'" %
              (argv, err))
 

@@ -118,7 +118,7 @@ def hook_open():
     sessid = VirtSubproc.check_exec(['schroot', '--quiet', '--begin-session',
                                      '--chroot', schroot] +
                                     (sessid and ['--session-name', sessid] or []),
-                                    outp=True)
+                                    outp=True, fail_on_stderr=False)
     VirtSubproc.auxverb = ['schroot', '--run-session', '--quiet',
                            '--directory=/', '--chroot', sessid]
     if 'root-on-testbed' in capabilities:

@@ -996,7 +996,7 @@ fi
             test_cmd = "bash -ec '%s'" % test.command
 
         script += 'touch %(o)s %(e)s; ' \
-                  '%(t)s 2> >(tee -a %(e)s >&2) > >(tee -a %(o)s); ' \
+                  '%(t)s 2> >(tee -a %(e)s >&2) > >(tee -a %(o)s);' \
                   % {'t': test_cmd, 'o': so.tb, 'e': se.tb}
 
         if 'needs-root' not in test.restrictions and self.user is not None:

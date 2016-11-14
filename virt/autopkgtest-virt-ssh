@@ -343,7 +343,7 @@ def build_auxverb():
     auxverb = os.path.join(workdir, 'runcmd')
     with open(auxverb, 'w') as f:
         f.write('''#!/bin/bash
-exec %s -- %s /tmp/autopkgtest-run-wrapper $(printf '%%q ' "$@")
+exec %s -- %s /tmp/autopkgtest-run-wrapper $(printf '%%q ' "${@%% }")
 ''' % (" ".join(sshcmd), sudocmd or ''))
     os.chmod(auxverb, 0o755)
     VirtSubproc.auxverb = [auxverb]

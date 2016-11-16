@@ -207,6 +207,10 @@ fi
 if [ ! -e "$root/usr/share/doc/libpam-systemd" ] && chroot "$root" apt-cache show libpam-systemd >/dev/null 2>&1; then
     chroot "$root" apt-get install -y libpam-systemd </dev/null
 fi
+# optimization as we need to install it for most tests anyway
+if [ ! -e "$root/usr/share/doc/dpkg-dev" ]; then
+    chroot "$root" apt-get install -y --no-install-recommends dpkg-dev </dev/null
+fi
 
 # upgrade and trim image (not for --setup-command)
 if [ -z "${AUTOPKGTEST_IS_SETUP_COMMAND:-}" ]; then

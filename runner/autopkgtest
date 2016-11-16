@@ -339,6 +339,7 @@ def build_source(kind, arg, built_binaries):
                                   os.path.join(testbed.scratch, 'ubtree-' + os.path.basename(arg)))
         ubtree.copydown()
         create_command = 'cp -rd --preserve=timestamps -- "%s" real-tree' % ubtree.tb
+        create_command += '; [ -x real-tree/debian/rules ] && dpkg-source --before-build real-tree'
 
     elif kind == 'built-tree':
         # this is a special case: we don't want to build, or even copy down
@@ -399,7 +400,7 @@ def build_source(kind, arg, built_binaries):
     else:
         adtlog.bomb('unknown action kind for build_source: ' + kind)
 
-    if kind in ['source', 'apt-source']:
+    if kind in ['source', 'apt-source', 'unbuilt-tree']:
         testbed.install_deps([], False)
         if testbed.execute(['which', 'dpkg-source'],
                            stdout=subprocess.PIPE,
@@ -480,7 +481,8 @@ def build_source(kind, arg, built_binaries):
         testbed.satisfy_dependencies_string(bd + ', ' + bdi + ', ' + ', '.join(build_essential), arg,
                                             build_dep=True, shell_on_failure=opts.shell_fail)
 
-        source_rules_command([dpkg_buildpackage], 'build', cwd=result_pwd)
+        # keep patches applied for tests
+        source_rules_command([dpkg_buildpackage, 'dpkg-source --before-build .'], 'build', cwd=result_pwd)
 
     # copy built tree from testbed to hosts
     tests_tree = adt_testbed.Path(testbed, os.path.join(tmp, 'tests-tree'), result_pwd, is_dir=True)

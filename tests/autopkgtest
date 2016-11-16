@@ -525,12 +525,12 @@ class NullRunner(AdtTestCase, DebTestsAll, DebTestsFailureModes):
             contents = f.read()
         self.assertRegex(contents, 's\s+PASS')
 
-    def test_tree_apply_patches(self):
-        '''source tree, 3.0 (quilt) patches get applied'''
+    def test_tree_apply_patches_build_needed(self):
+        '''source tree, 3.0 (quilt) patches get applied with build-needed'''
 
         p = self.build_src('Tests: pass\nDepends: coreutils\nRestrictions: build-needed\n',
                            {'pass': '#!/bin/sh -e\ndebian/testpkg/usr/bin/test_built\n'
-                            'debian/testpkg/usr/bin/test_static\n'})
+                            'debian/testpkg/usr/bin/test_static; ./test_static\n'})
 
         # add patch
         patchdir = os.path.join(p, 'debian', 'patches')
@@ -561,13 +561,56 @@ class NullRunner(AdtTestCase, DebTestsAll, DebTestsFailureModes):
 
         # should have patched source
         self.assertRegex(err, 'dpkg-source:.*01_hack.patch')
-        self.assertIn('built script OK\nstatic patched script OK\n', out)
+        self.assertIn('built script OK\nstatic patched script OK\nstatic patched script OK\n', out)
 
         # should not have any test stderr
         self.assertNotIn(' stderr ', err)
 
         # should build package
         self.assertIn('dh build', err)
+
+    def test_tree_apply_patches_nobuild(self):
+        '''source tree, 3.0 (quilt) patches get applied with built package'''
+
+        p = self.build_src('Tests: pass\nDepends: coreutils',
+                           {'pass': '#!/bin/sh -e\n./test_static\n'})
+
+        # add patch
+        patchdir = os.path.join(p, 'debian', 'patches')
+        os.mkdir(patchdir)
+        with open(os.path.join(patchdir, '01_hack.patch'), 'w') as f:
+            f.write('''--- testpkg.orig/test_static
++++ testpkg/test_static
+@@ -1,2 +1,2 @@
+ #!/bin/sh
+-echo "static script OK"
++echo "static patched script OK"
+''')
+        with open(os.path.join(patchdir, 'series'), 'w') as f:
+            f.write('01_hack.patch')
+
+        # turn into 3.0 (quilt) source
+        dsrcdir = os.path.join(p, 'debian', 'source')
+        os.mkdir(dsrcdir)
+        with open(os.path.join(dsrcdir, 'format'), 'w') as f:
+            f.write('3.0 (quilt)\n')
+
+        # run tests, should apply unapplied patches
+        (code, out, err) = self.runtest(['-B', '-d', p])
+
+        # test should succeed
+        self.assertRegex(out, 'pass\s+PASS', out)
+        self.assertEqual(code, 0, err)
+
+        # should have patched source
+        self.assertRegex(err, 'dpkg-source:.*01_hack.patch')
+        self.assertIn('static patched script OK\n', out)
+
+        # should not have any test stderr
+        self.assertNotIn(' stderr ', err)
+
+        # should not build package
+        self.assertNotIn('dh build', err)
 
     def test_dsc_norestrictions_nobuild_success(self):
         '''dsc, no build, no restrictions, test success'''
@@ -1448,7 +1491,7 @@ class ChrootRunner(AdtTestCase, DebTestsAll, DebTestsFailureModes):
         subprocess.check_call(['mount', '-o', 'bind', '/proc', proc_dir])
 
         # some fakes
-        for cmd in ['dpkg', 'dpkg-query', 'apt-get', 'apt-key', 'apt-cache']:
+        for cmd in ['dpkg', 'dpkg-query', 'dpkg-source', 'apt-get', 'apt-key', 'apt-cache']:
             p = os.path.join(self.chroot, 'usr', 'bin', cmd)
             with open(p, 'w') as f:
                 f.write('#!/bin/sh\n')
@@ -2099,7 +2142,8 @@ class DebTestsVirtFS(DebTestsAll):
         self.assertRegex(out, 't2\s+PASS', out)
 
         # should show test stdout
-        self.assertRegex(out, '^\w+:x:.*\nsetupok\nbootok\nt1ok\n')
+        self.assertRegex(out, '^\w+:x:.*:.*:')
+        self.assertIn('\nsetupok\nbootok\nt1ok\n', out)
         self.assertIn('\nsetupok\nbootok\nt2ok\n', out)
         # should not have any test stderr
         self.assertNotIn(' stderr ', err)
@@ -2291,7 +2335,7 @@ class DebTestsVirtContainer(DebTestsVirtFS):
 
         # we expect a normal user for LXC
         (code, out, err) = self.runtest(['-B', p, '--setup-commands',
-                                         'rm -f /etc/default/locale /etc/environment'])
+                                         'rm -f /etc/default/locale; sed -i "/^L/d" /etc/environment'])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -3112,6 +3156,50 @@ Depends: nonexisting'''
         # apt output should be visible
         self.assertIn('nonexisting/main', err)
         self.assertIn('testbed setup commands failed with status 1\n', err)
+
+    def test_tree_apply_patches_unbuilt_tree(self):
+        '''source tree, 3.0 (quilt) patches get applied on unbuilt tree'''
+
+        p = self.build_src('Tests: pass\nDepends: coreutils',
+                           {'pass': '#!/bin/sh -e\ndebian/testpkg/usr/bin/test_built\n'
+                            './test_static\n'})
+
+        # add patch
+        patchdir = os.path.join(p, 'debian', 'patches')
+        os.mkdir(patchdir)
+        with open(os.path.join(patchdir, '01_hack.patch'), 'w') as f:
+            f.write('''--- testpkg.orig/test_static
++++ testpkg/test_static
+@@ -1,2 +1,2 @@
+ #!/bin/sh
+-echo "static script OK"
++echo "static patched script OK"
+''')
+        with open(os.path.join(patchdir, 'series'), 'w') as f:
+            f.write('01_hack.patch')
+
+        # turn into 3.0 (quilt) source
+        dsrcdir = os.path.join(p, 'debian', 'source')
+        os.mkdir(dsrcdir)
+        with open(os.path.join(dsrcdir, 'format'), 'w') as f:
+            f.write('3.0 (quilt)\n')
+
+        # run tests, should apply unapplied patches
+        (code, out, err) = self.runtest(['-d', p])
+
+        # test should succeed
+        self.assertRegex(out, 'pass\s+PASS', out)
+        self.assertEqual(code, 0, err)
+
+        # should have patched source
+        self.assertRegex(err, 'dpkg-source:.*01_hack.patch')
+        self.assertIn('built script OK\nstatic patched script OK\n', out)
+
+        # should not have any test stderr
+        self.assertNotIn(' stderr ', err)
+
+        # should build package
+        self.assertIn('dh build', err)
 
 
 @unittest.skipUnless('AUTOPKGTEST_TEST_SCHROOT_CLICK' in os.environ,

@@ -1426,7 +1426,7 @@ class ChrootRunner(AdtTestCase, DebTestsAll, DebTestsFailureModes):
         subprocess.check_call(['mount', '-o', 'bind', '/proc', proc_dir])
 
         # some fakes
-        for cmd in ['dpkg', 'dpkg-query', 'apt-get', 'apt-key', 'apt-cache']:
+        for cmd in ['dpkg', 'dpkg-query', 'dpkg-source', 'apt-get', 'apt-key', 'apt-cache']:
             p = os.path.join(self.chroot, 'usr', 'bin', cmd)
             with open(p, 'w') as f:
                 f.write('#!/bin/sh\n')

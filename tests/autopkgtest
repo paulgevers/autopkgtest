@@ -446,7 +446,7 @@ class NullRunner(AdtTestCase, DebTestsAll, DebTestsFailureModes):
             info = json.load(f)
         u = os.uname()
         self.assertEqual(info['kernel_version'],
-                         '%s %s %s' % (u.sysname, u.release, u.version))
+                         '%s %s %s' % (u.sysname, u.release, u.version.strip()))
         self.assertNotIn('test_kernel_versions', info)
         self.assertEqual(info['custom_environment'],
                          ['COLOR=blue', 'SOMETHING=foo bar'])
@@ -2479,7 +2479,7 @@ class DebTestsVirtContainer(DebTestsVirtFS):
         if 'Qemu' not in self.__class__.__name__:
             u = os.uname()
             self.assertEqual(info['kernel_version'],
-                             '%s %s %s' % (u.sysname, u.release, u.version))
+                             '%s %s %s' % (u.sysname, u.release, u.version.strip()))
 
     def test_exit_255(self):
         '''test exits with code 255
@@ -2845,7 +2845,7 @@ class SchrootRunner(AdtTestCase, DebTestsVirtFS, DebTestsFailureModes):
             info = json.load(f)
         u = os.uname()
         self.assertEqual(info['kernel_version'],
-                         '%s %s %s' % (u.sysname, u.release, u.version))
+                         '%s %s %s' % (u.sysname, u.release, u.version.strip()))
         self.assertNotIn('test_kernel_versions', info)
         self.assertEqual(info['virt_server'], 'autopkgtest-virt-schroot ' + self.virt_args[1])
 

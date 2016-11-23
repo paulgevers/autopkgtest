@@ -1,3 +1,16 @@
+autopkgtest (4.2.1) unstable; urgency=medium
+
+  * Fix trailing '\' in test command  with ssh runner
+  * ssh: Filter out trailing spaces from commands in auxverb
+  * Apply patches for tests with unbuilt-tree (Closes: #844454)
+  * setup-commands/setup-testbed: Install dpkg-dev
+  * Fix stray ')' in --apt-pocket handling
+  * Adjust expected cpu_model in NullRunner.test_tree_output_dir()
+  * PEP-8 fixes
+  * Robustify tests against kernel versions with trailing space
+
+ -- Martin Pitt <mpitt@debian.org>  Wed, 23 Nov 2016 22:49:59 +0100
+
 autopkgtest (4.2) unstable; urgency=medium
 
   [ Martin Pitt ]

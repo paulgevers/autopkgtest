@@ -368,28 +368,28 @@ class Testbed:
                       format_exception_only(type, value))
 
     def expect(self, keyword, nresults):
-        l = self.sp.stdout.readline()
-        if not l:
+        line = self.sp.stdout.readline()
+        if not line:
             self.bomb('unexpected eof from the testbed')
-        if not l.endswith('\n'):
+        if not line.endswith('\n'):
             self.bomb('unterminated line from the testbed')
-        l = l.rstrip('\n')
-        adtlog.debug('got reply from testbed: ' + l)
-        ll = l.split()
+        line = line.rstrip('\n')
+        adtlog.debug('got reply from testbed: ' + line)
+        ll = line.split()
         if not ll:
             self.bomb('unexpected whitespace-only line from the testbed')
         if ll[0] != keyword:
             if self.lastsend is None:
                 self.bomb("got banner `%s', expected `%s...'" %
-                          (l, keyword))
+                          (line, keyword))
             else:
                 self.bomb("sent `%s', got `%s', expected `%s...'" %
-                          (self.lastsend, l, keyword))
+                          (self.lastsend, line, keyword))
         ll = ll[1:]
         if nresults is not None and len(ll) != nresults:
             self.bomb("sent `%s', got `%s' (%d result parameters),"
                       " expected %d result parameters" %
-                      (self.lastsend, l, len(ll), nresults))
+                      (self.lastsend, line, len(ll), nresults))
         return ll
 
     def command(self, cmd, args=(), nresults=0, unquote=True):

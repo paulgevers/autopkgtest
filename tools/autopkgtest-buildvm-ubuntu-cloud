@@ -292,12 +292,12 @@ def host_tz():
     '''
     if os.path.exists('/etc/timezone'):
         with open('/etc/timezone', 'rb') as f:
-            for l in f:
-                if l.startswith(b'#'):
+            for line in f:
+                if line.startswith(b'#'):
                     continue
-                l = l.strip()
-                if l:
-                    return l.decode()
+                line = line.strip()
+                if line:
+                    return line.decode()
 
     return 'Etc/UTC'
 
@@ -348,6 +348,7 @@ def install_image(src, dest):
     desttmp = dest + str(time.time())
     shutil.move(image, desttmp)
     os.rename(desttmp, dest)
+
 
 #
 # main

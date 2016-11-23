@@ -187,18 +187,18 @@ def parse_rfc822(path):
     # filter out comments, python-debian doesn't do that
     # (http://bugs.debian.org/743174)
     lines = []
-    for l in f:
+    for line in f:
         # completely ignore ^# as that breaks continuation lines
-        if l.startswith('#'):
+        if line.startswith('#'):
             continue
         # filter out comments which don't start on first column (Debian
         # #743174); entirely remove line if all that's left is whitespace, as
         # that again breaks continuation lines
-        if '#' in l:
-            l = l.split('#', 1)[0]
-            if not l.strip():
+        if '#' in line:
+            line = line.split('#', 1)[0]
+            if not line.strip():
                 continue
-        lines.append(l)
+        lines.append(line)
     f.close()
 
     for p in debian.deb822.Deb822.iter_paragraphs(lines):

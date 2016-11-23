@@ -283,12 +283,12 @@ def setup_config(shared_dir):
     if os.path.exists('/etc/timezone'):
         tz = None
         with open('/etc/timezone', 'rb') as f:
-            for l in f:
-                if l.startswith(b'#'):
+            for line in f:
+                if line.startswith(b'#'):
                     continue
-                l = l.strip()
-                if l:
-                    tz = l
+                line = line.strip()
+                if line:
+                    tz = line
                     break
 
         if tz:

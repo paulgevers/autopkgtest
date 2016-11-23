@@ -651,6 +651,7 @@ def command():
         r = fc.e
     print(' '.join(r))
 
+
 signal_list = [	signal.SIGHUP, signal.SIGTERM,
                 signal.SIGINT, signal.SIGPIPE]
 

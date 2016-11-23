@@ -2062,9 +2062,9 @@ class DebTestsVirtFS(DebTestsAll):
         self.assertIn('dh build', err)
 
         # test should run as user
-        l = [l for l in out.splitlines() if l.startswith('XXX')]
-        self.assertEqual(len(l), 1, l)
-        fields = l[0].split()
+        lines = [l for l in out.splitlines() if l.startswith('XXX')]
+        self.assertEqual(len(lines), 1, lines)
+        fields = lines[0].split()
         self.assertEqual(len(fields), 4)
         self.assertNotEqual(fields[1], 'root')
         self.assertEqual(fields[1], fields[2])

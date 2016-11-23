@@ -327,10 +327,10 @@ def build_source(kind, arg, built_binaries):
         dsc = os.path.join(tmp, 'fake.dsc')
         with open(dsc, 'w', encoding='UTF-8') as f_dsc:
             with open(os.path.join(arg, 'debian/control'), encoding='UTF-8') as f_control:
-                for l in f_control:
-                    if l == '\n':
+                for line in f_control:
+                    if line == '\n':
                         break
-                    f_dsc.write(l)
+                    f_dsc.write(line)
             f_dsc.write('Binary: none-so-this-is-not-a-package-name\n')
         atexit.register(lambda f: os.path.exists(f) and os.unlink(f), dsc)
 
@@ -669,5 +669,6 @@ def main():
         create_testinfo(vserver_args)
     cleanup()
     sys.exit(errorcode)
+
 
 main()

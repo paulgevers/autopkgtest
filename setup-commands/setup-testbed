@@ -24,6 +24,9 @@ set -eu
 # Created files should be readable by user (this script is called as root)
 umask 0022
 
+# avoid debconf hangs
+export DEBIAN_FRONTEND=noninteractive
+
 if [ "${1:-}" = "--help" ]; then
     echo "Usage: $0 [chroot dir]"
     echo "if chroot dir is not given, run on the main system (for running in VMs)"
@@ -231,12 +234,12 @@ if [ -z "${AUTOPKGTEST_IS_SETUP_COMMAND:-}" ]; then
         fi
     done
     if [ -n "$purge_list" ]; then
-        chroot "$root" env DEBIAN_FRONTEND=noninteractive eatmydata apt-get --auto-remove -y purge $purge_list || true
+        chroot "$root" eatmydata apt-get --auto-remove -y purge $purge_list || true
     fi
 
     if [ "${AUTOPKGTEST_SETUP_VM_UPGRADE:-}" != "false" ]; then
-        DEBIAN_FRONTEND=noninteractive chroot "$root" eatmydata apt-get -o Dpkg::Options::="--force-confold" -y dist-upgrade </dev/null
-        DEBIAN_FRONTEND=noninteractive chroot "$root" eatmydata apt-get -o Dpkg::Options::="--force-confold" -y --purge autoremove </dev/null
+        chroot "$root" eatmydata apt-get -o Dpkg::Options::="--force-confold" -y dist-upgrade </dev/null
+        chroot "$root" eatmydata apt-get -o Dpkg::Options::="--force-confold" -y --purge autoremove </dev/null
     fi
 
     # ensure cloud-init is still installed

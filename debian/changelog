@@ -1,3 +1,15 @@
+autopkgtest (4.2.2) unstable; urgency=medium
+
+  * tests/adt-run: Adjust expected cpu_model in
+    NullRunner.test_tree_output_dir()
+  * autopkgtest-buildvm-ubuntu-cloud: Run setup script with -x in verbose
+    mode. This provides more useful information when updating/adjusting
+    setup-testbed.
+  * setup-commands/setup-testbed: Run all apt operations with
+    DEBIAN_FRONTEND=noninteractive.
+
+ -- Martin Pitt <mpitt@debian.org>  Tue, 29 Nov 2016 09:11:05 +0100
+
 autopkgtest (4.2.1) unstable; urgency=medium
 
   * Fix trailing '\' in test command  with ssh runner

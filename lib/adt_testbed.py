@@ -330,7 +330,7 @@ class Testbed:
             self._opened(pl)
         self.modified = False
 
-    def install_deps(self, deps_new, recommends):
+    def install_deps(self, deps_new, recommends, shell_on_failure=False):
         '''Install dependencies into testbed'''
         adtlog.debug('install_deps: deps_new=%s, recommends=%s' % (deps_new, recommends))
 
@@ -338,7 +338,7 @@ class Testbed:
         self.recommends_installed = recommends
         if not deps_new:
             return
-        self.satisfy_dependencies_string(', '.join(deps_new), 'install-deps', recommends)
+        self.satisfy_dependencies_string(', '.join(deps_new), 'install-deps', recommends, shell_on_failure=shell_on_failure)
 
     def needs_reset(self):
         # show what caused a reset
@@ -555,6 +555,8 @@ Description: satisfy autopkgtest test dependencies
                     self.check_exec(['/bin/sh', '-ec', 'rm /etc/apt/preferences.d/autopkgtest-*-' + pocket])
                     continue
 
+                if shell_on_failure:
+                    self.run_shell()
                 self.badpkg('Test dependencies are unsatisfiable. A common reason is '
                             'that your testbed is out of date with respect to the '
                             'archive, and you need to use a current testbed or run '

@@ -157,7 +157,7 @@ def run_tests(tests, tree):
         adtlog.info('test %s: preparing testbed' % t.name)
         testbed.reset(t.depends, 'needs-recommends' in t.restrictions)
         binaries.publish()
-        testbed.install_deps(t.depends, 'needs-recommends' in t.restrictions)
+        testbed.install_deps(t.depends, 'needs-recommends' in t.restrictions, opts.shell_fail)
 
         testbed.run_test(tree, t, opts.env, opts.shell_fail, opts.shell,
                          opts.build_parallel)

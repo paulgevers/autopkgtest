@@ -1132,7 +1132,7 @@ if ($pid) { # parent
     def test_test_not_found(self):
         '''Tests: specifies a nonexisting test'''
 
-        p = self.build_src('Tests: foo\nDepends:\n', {'xxxbarxxx': '#!/bin/sh -e\nno_such_command'})
+        p = self.build_src('Tests: foo\nDepends:\n', {'xxbar': '#!/bin/sh -e\nno_such_command'})
 
         (code, out, err) = self.runtest(['-B', p])
         self.assertEqual(code, 12, err)
@@ -1140,8 +1140,8 @@ if ($pid) { # parent
         self.assertIn('badpkg: debian/tests/foo does not exist', out)
         self.assertIn('debian/tests/foo does not exist', err)
         self.assertNotIn('testbed auxverb failed with', err)
-        self.assertNotIn('xxxbarxxx', out)
-        self.assertNotIn('xxxbarxxx', err)
+        self.assertNotIn('xxbar', out)
+        self.assertNotIn('xxbar', err)
 
     def test_invalid_depends(self):
         '''Depends: has invalid syntax'''

@@ -1093,7 +1093,7 @@ if ($pid) { # parent
                             'two': '#!/bin/sh\necho 2_TWO',
                             'three': '#!/bin/sh\necho 3_THREE'})
 
-        (code, out, err) = self.runtest(['-B', '--testname', 'two', p])
+        (code, out, err) = self.runtest(['-B', '--test-name', 'two', p])
 
         self.assertEqual(code, 0, err)
         self.assertRegex(out, 'two\s+PASS', out)
@@ -1112,7 +1112,7 @@ if ($pid) { # parent
                             'two': '#!/bin/sh\necho 2_TWO',
                             'three': '#!/bin/sh\necho 3_THREE'})
 
-        (code, out, err) = self.runtest(['-B', '--testname', 'four', p])
+        (code, out, err) = self.runtest(['-B', '--test-name', 'four', p])
 
         self.assertEqual(code, 8, err)
         for w in ['one', 'two', 'three']:

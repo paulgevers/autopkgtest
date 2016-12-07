@@ -202,8 +202,12 @@ for details.'''
     g_test.add_argument('--override-control', metavar='PATH',
                         help='run tests from control file/manifest PATH instead '
                         'of the source/click package')
-    g_test.add_argument('--testname',
-                        help='run only given test name in the next package')
+    # Don't display the deprecated argument name in the --help output.
+    g_test.add_argument('--testname', help=argparse.SUPPRESS)
+    g_test.add_argument('--test-name',
+                        dest='testname',
+                        help='run only given test name. '
+                        'This replaces --testname, which is deprecated.')
     g_test.add_argument('-B', '--no-built-binaries', dest='built_binaries',
                         action='store_false', default=True,
                         help='do not build/use binaries from .dsc, git source, or unbuilt tree')
@@ -321,6 +325,10 @@ for details.'''
     # first, expand argument files
     file_parser = ArgumentParser(add_help=False)
     arglist = file_parser.parse_known_args(arglist)[1]
+
+    # deprecation warning
+    if '--testname' in arglist:
+        adtlog.warning('--testname is deprecated; use --test-name')
 
     # split off virt-server args
     try:

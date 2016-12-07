@@ -209,7 +209,14 @@ Files:
     #
 
     def test_testname(self):
+        # --testname is deprecated; use --test-name
         (args, acts, virt) = self.parse(['--testname', 'foo', 'mypkg'])
+        self.assertEqual(acts, [('apt-source', 'mypkg', False)])
+        self.assertEqual(args.testname, 'foo')
+
+    def test_test_name(self):
+        # --testname is deprecated; use --test-name
+        (args, acts, virt) = self.parse(['--test-name', 'foo', 'mypkg'])
         self.assertEqual(acts, [('apt-source', 'mypkg', False)])
         self.assertEqual(args.testname, 'foo')
 
@@ -249,7 +256,7 @@ Files:
     def test_read_file(self):
         argfile = os.path.join(self.workdir.name, 'myopts')
         with open(argfile, 'w') as f:
-            f.write('testsrc_1.dsc\n--testname=foo\n--timeout-copy=5')
+            f.write('testsrc_1.dsc\n--test-name=foo\n--timeout-copy=5')
 
         autopkgtest_args.adtlog.verbosity = 2
         (args, acts, virt) = self.parse(
@@ -346,7 +353,7 @@ Files:
         # has description
         self.assertIn('Test installed bin', out)
         # has actions
-        self.assertIn('--testname', out)
+        self.assertIn('--test-name', out)
         # has options
         self.assertIn('--no-built-binaries', out)
         # has virt server

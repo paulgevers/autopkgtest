@@ -242,6 +242,65 @@ class Debian(unittest.TestCase):
                           'three (>= 0~) [c64 vax]'])
         self.assertFalse(skipped)
 
+    def test_test_name_feature(self):
+        '''Features: test-name=foobar'''
+
+        (ts, skipped) = self.call_parse(
+            'Test-Command: t1\n'
+            'Depends: foo\n'
+            'Features: test-name=foobar')
+        self.assertEqual(len(ts), 1)
+        self.assertEqual(ts[0].features, ['test-name=foobar'])
+        self.assertEqual(ts[0].name, 'foobar')
+        self.assertFalse(skipped)
+
+    def test_test_name_feature_too_many(self, *args):
+        '''only one test-name= feature is allowed'''
+
+        with self.assertRaises(testdesc.InvalidControl) as cm:
+            self.call_parse(
+                'Test-Command: t1\n'
+                'Depends: foo\n'
+                'Features: test-name=foo,test-name=bar')
+        self.assertEqual(
+            str(cm.exception),
+            'InvalidControl test *: only one test-name feature allowed')
+
+    def test_test_name_feature_with_other_features(self):
+        '''Features: test-name=foobar, blue'''
+
+        (ts, skipped) = self.call_parse(
+            'Test-Command: t1\n'
+            'Depends: foo\n'
+            'Features: test-name=foo,blue')
+        self.assertEqual(len(ts), 1)
+        self.assertEqual(ts[0].features, ['test-name=foo', 'blue'])
+        self.assertFalse(skipped)
+
+    def test_test_name_missing_name(self, *args):
+        '''Features: test-name'''
+
+        with self.assertRaises(testdesc.InvalidControl) as cm:
+            self.call_parse(
+                'Test-Command: t1\n'
+                'Depends: foo\n'
+                'Features: test-name')
+        self.assertEqual(
+            str(cm.exception),
+            'InvalidControl test *: test-name feature with no argument')
+
+    def test_test_name_incompatible_with_tests(self, *args):
+        '''Tests: with Features: test-name=foo'''
+
+        with self.assertRaises(testdesc.InvalidControl) as cm:
+            self.call_parse(
+                'Tests: t1\n'
+                'Depends: foo\n'
+                'Features: test-name=foo')
+        self.assertEqual(
+            str(cm.exception),
+            'InvalidControl test *: test-name feature incompatible with Tests')
+
     def test_known_restrictions(self):
         '''known restrictions'''
 

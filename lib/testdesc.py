@@ -389,7 +389,25 @@ def parse_debian_source(srcdir, testbed_caps, testbed_arch, control_path=None,
         try:
             restrictions = record.get('Restrictions', '').replace(
                 ',', ' ').split()
-            features = record.get('Features', '').replace(',', ' ').split()
+
+            feature_test_name = None
+            features = []
+            record_features = record.get('Features', '').replace(
+                ',', ' ').split()
+            for feature in record_features:
+                details = feature.split('=', 1)
+                if details[0] != 'test-name':
+                    features.append(feature)
+                    continue
+                if len(details) != 2:
+                    # No value, i.e. a bare 'test-name'
+                    raise InvalidControl(
+                        '*', 'test-name feature with no argument')
+                if feature_test_name is not None:
+                    raise InvalidControl(
+                        '*', 'only one test-name feature allowed')
+                feature_test_name = details[1]
+                features.append(feature)
 
             if 'Tests' in record:
                 test_names = record['Tests'].replace(',', ' ').split()
@@ -400,6 +418,9 @@ def parse_debian_source(srcdir, testbed_caps, testbed_arch, control_path=None,
                 if 'Test-command' in record:
                     raise InvalidControl('*', 'Only one of "Tests" or '
                                          '"Test-Command" may be given')
+                if feature_test_name is not None:
+                    raise InvalidControl(
+                        '*', 'test-name feature incompatible with Tests')
                 test_dir = record.get('Tests-directory', 'debian/tests')
 
                 _debian_check_unknown_fields(test_names[0], record)
@@ -414,8 +435,11 @@ def parse_debian_source(srcdir, testbed_caps, testbed_arch, control_path=None,
                                                 record.get('Depends', '@'),
                                                 srcdir,
                                                 testbed_arch)
-                command_counter += 1
-                name = 'command%i' % command_counter
+                if feature_test_name is None:
+                    command_counter += 1
+                    name = 'command%i' % command_counter
+                else:
+                    name = feature_test_name
                 _debian_check_unknown_fields(name, record)
                 test = Test(name, None, command, restrictions, features,
                             depends, [], [])

@@ -1431,7 +1431,7 @@ class ChrootRunner(AdtTestCase, DebTestsAll, DebTestsFailureModes):
             with open(p, 'w') as f:
                 f.write('#!/bin/sh\n')
                 if cmd == 'dpkg':
-                    f.write('if [ "$1" = "--print-architecture" ]; then echo megacpu; exit; fi\n')
+                    f.write('if [ "$1" = "--print-architecture" ]; then echo powerpc; exit; fi\n')
                 f.write('echo "fake-%s: $@"\n' % cmd)
                 if cmd == 'apt-get':
                     f.write('if [ "$1" = source ]; then cp -r /aptget-src $4-1; fi\n')

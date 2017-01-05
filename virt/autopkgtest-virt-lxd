@@ -184,12 +184,46 @@ def hook_revert():
     hook_open()
 
 
+def get_uptime():
+    try:
+        (rc, out, _) = VirtSubproc.execute_timeout(
+            None, 10, ['lxc', 'exec', container_name, '--', 'cat', '/proc/uptime'],
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        if rc != 0:
+            return
+
+        return float(out.split()[0])
+    except IndexError:
+        return
+
+
 def hook_wait_reboot():
     adtlog.debug('hook_wait_reboot: waiting for container to shut down...')
     # "lxc exec" exits with 0 when the container stops, so just wait longer
     # than our timeout
-    VirtSubproc.execute_timeout(None, 300, ['lxc', 'exec', container_name,
-                                            'sleep', '3600'])
+    initial_uptime = get_uptime()
+
+    adtlog.debug('hook_wait_reboot: container up for %s, waiting for reboot' % initial_uptime)
+
+    for retry in range(20):
+        time.sleep(5)
+
+        current_uptime = get_uptime()
+
+        # container is probably in the very late stages of shutting down, just
+        # keep trying, if this persists we'll bomb out later on
+        if not current_uptime:
+            continue
+
+        if current_uptime < initial_uptime:
+            adtlog.debug('hook_wait_reboot: container now up for %s - has rebooted (initial uptime %s)' % (current_uptime, initial_uptime))
+            break
+        else:
+            adtlog.debug('hook_wait_reboot: container now up for %s - has not rebooted (initial uptime %s)' % (current_uptime, initial_uptime))
+    else:
+        VirtSubproc.bomb('timed out waiting for container %s to restart' % container_name)
+
     adtlog.debug('hook_wait_reboot: container restarted, waiting for boot to finish')
     wait_booted()
 

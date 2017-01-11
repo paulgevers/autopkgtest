@@ -1,3 +1,21 @@
+autopkgtest (4.3) unstable; urgency=medium
+
+  [ SZALAY Attila ]
+  * Respect --shell-on-failure on test dep install failure (Closes: #844255)
+
+  [ Barry Warsaw ]
+  * Use a test name that won't collide with my $HOME.
+  * Shorten the name in response to review
+  * testdesc.py: Feature: test-name=foobar added for better Test-Command names
+    (Closes: #839253)
+  * autopkgtest: Support --test-name and deprecate --testname
+
+  [ Paul Gevers ]
+  * tests: Use valid Debian architecture in ChrootRunner tests
+    (Closes: #849676)
+
+ -- Martin Pitt <mpitt@debian.org>  Wed, 11 Jan 2017 12:34:09 +0100
+
 autopkgtest (4.2.2) unstable; urgency=medium
 
   * tests/adt-run: Adjust expected cpu_model in

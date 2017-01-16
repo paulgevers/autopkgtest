@@ -314,4 +314,25 @@ Example:
         reboot
     fi
 
+Network access
+--------------
+autopkgtest needs access to the network at least for downloading test
+dependencies and possibly dist-upgrading testbeds. In environments with
+restricted internet access you need to set up an apt proxy and configure
+the testbed to use it. (Note that the standard tools like
+autopkgtest-build-lxc or mk-sbuild automatically use the apt proxy from
+the host system.)
+
+In general, tests are also allowed to access the internet. As this
+usually makes tests less reliable, this should be kept to a minimum; but
+for many packages their main purpose is to interact with remote web
+services and thus their testing should actually cover those too, to
+ensure that the distribution package keeps working with their
+corresponding web service.
+
+Debian's production CI infrastructure allows unrestricted network
+access, in Ubuntu's infrastructure access to sites other than
+`*.ubuntu.com` and `*.launchpad.net` happens via a proxy (limited to
+DNS and http/https).
+
 .. vim: ft=rst tw=72

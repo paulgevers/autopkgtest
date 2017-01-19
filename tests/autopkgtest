@@ -1704,7 +1704,7 @@ Restrictions: needs-root
 
         # modify fake apt-cache to show single-line P-L
         with open(os.path.join(self.chroot, 'usr', 'bin', 'apt-cache'), 'w') as f:
-            f.write('if [ "$1" = showsrc ]; then printf "Package-List: $3 deb utils optional arch=any\\nFormat: 1.0\\n"; fi\n')
+            f.write('if [ "$1" = showsrc ]; then printf "Package-List: $3 deb utils optional arch=any\\n"; fi\n')
 
         p = self.build_src('Tests: pass\nDepends:\nRestrictions: needs-root\n',
                            {'pass': '#!/bin/sh\necho I am fine\n'})

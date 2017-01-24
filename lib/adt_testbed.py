@@ -522,6 +522,7 @@ Description: satisfy autopkgtest test dependencies
                                           '--assume-yes --fix-broken '
                                           '-o APT::Status-Fd=3 '
                                           '-o APT::Install-Recommends=%s '
+                                          '-o Dpkg::Options::=--force-confnew '
                                           '-o Debug::pkgProblemResolver=true 3>&2 2>&1' %
                                           (' '.join(self.eatmydata_prefix), recommends)],
                                          kind='install', stderr=subprocess.PIPE)

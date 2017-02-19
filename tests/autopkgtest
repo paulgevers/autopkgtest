@@ -43,13 +43,19 @@ import testarchive
 
 # in some corner cases apt-get download might not be available in a build
 # environment, so check if this actually works
-have_apt = subprocess.call(['apt-get', 'download', 'gir1.2-json-1.0'],
-                           stdout=subprocess.PIPE, stderr=subprocess.PIPE,
-                           cwd=os.environ.get('TMPDIR', '/tmp')) == 0
+try:
+    have_apt = subprocess.call(['apt-get', 'download', 'gir1.2-json-1.0'],
+                               stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                               cwd=os.environ.get('TMPDIR', '/tmp')) == 0
+except OSError:
+    have_apt = False
 
-have_apt_src = subprocess.call(['apt-cache', 'showsrc', 'coreutils'],
-                               stdout=subprocess.PIPE,
-                               stderr=subprocess.STDOUT) == 0
+try:
+    have_apt_src = subprocess.call(['apt-cache', 'showsrc', 'coreutils'],
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.STDOUT) == 0
+except OSError:
+    have_apt_src = False
 
 have_ubuntu_device_flash = subprocess.call(['which', 'ubuntu-device-flash'],
                                            stdout=subprocess.PIPE,
@@ -920,10 +926,9 @@ bad                  FAIL non-zero exit status 1
     @unittest.skipIf(os.getuid() == 0, 'needs to run as user')
     @unittest.skipIf(os.path.exists('/usr/lib/python3/dist-packages/wand/'),
                      'needs python3-wand uninstalled')
-    @unittest.skipUnless(have_apt, 'needs apt-get download working')
-    @unittest.skipUnless(subprocess.call(['apt-cache', 'show', 'python3-wand'],
-                                         stdout=subprocess.PIPE,
-                                         stderr=subprocess.STDOUT) == 0,
+    @unittest.skipUnless(have_apt and subprocess.call(['apt-cache', 'show', 'python3-wand'],
+                                                      stdout=subprocess.PIPE,
+                                                      stderr=subprocess.STDOUT) == 0,
                          'needs python3-wand package')
     def test_tmp_install_imagemagick(self):
         '''temp dir unpack of imagemagick dependencies'''

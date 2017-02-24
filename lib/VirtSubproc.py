@@ -700,6 +700,14 @@ def prepare():
     sethandlers(handler)
 
 
+def cmd_auxverb_debug_fail(c, ce):
+    cmdnumargs(c, ce)
+    try:
+        adtlog.info(caller.hook_debug_fail())
+    except AttributeError:
+        pass
+
+
 def mainloop():
     global in_mainloop
     in_mainloop = True

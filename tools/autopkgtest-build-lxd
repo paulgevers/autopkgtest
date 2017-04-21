@@ -83,15 +83,16 @@ setup() {
 
     ARCH=$(lxc exec "$CONTAINER" -- dpkg --print-architecture </dev/null)
     DISTRO=$(lxc exec "$CONTAINER" -- sh -ec 'lsb_release -si 2>/dev/null || . /etc/os-release; echo "${NAME% *}"' </dev/null)
-    RELEASE=$(lxc exec "$CONTAINER" -- sh -ec 'lsb_release -sc 2>/dev/null || awk "/^deb/ {sub(/\\[.*\\]/, \"\", \$0); print \$3; quit}" /etc/apt/sources.list' </dev/null)
-    echo "Container finished booting. Distribution $DISTRO, release $RELEASE, architecture $ARCH"
+    CRELEASE=$(lxc exec "$CONTAINER" -- sh -ec 'lsb_release -sc 2>/dev/null || awk "/^deb/ {sub(/\\[.*\\]/, \"\", \$0); print \$3; quit}" /etc/apt/sources.list' </dev/null)
+    echo "Container finished booting. Distribution $DISTRO, release $CRELEASE, architecture $ARCH"
+    RELEASE=${RELEASE:-${CRELEASE}}
 
     # find setup-testbed script
     for script in $(dirname $(dirname "$0"))/setup-commands/setup-testbed \
                   /usr/share/autopkgtest/setup-commands/setup-testbed; do
         if [ -r "$script" ]; then
             echo "Running setup script $script..."
-            lxc exec "$CONTAINER" -- env MIRROR=${MIRROR:-} sh < "$script"
+            lxc exec "$CONTAINER" -- env MIRROR=${MIRROR:-} RELEASE=${RELEASE} sh < "$script"
             break
         fi
     done

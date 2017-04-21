@@ -22,6 +22,12 @@ You can specify an apt proxy to use in the container in the
 environment variable. If you have an apt proxy configured on the host, the
 container will automatically use this, otherwise there is no default.
 
+For dist-upgrading \fIimage\fR to a newer release you can specify the
+destination release in the
+.B $RELEASE
+environment variable. This is useful when a new distribution series has just
+been opened and there are no standard images for that available yet.
+
 .SH EXAMPLE
 
 Build a local autopkgtest container image for Debian sid i386, based on the

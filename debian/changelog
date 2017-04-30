@@ -1,3 +1,39 @@
+autopkgtest (4.4) unstable; urgency=medium
+
+  [ Martin Pitt ]
+  * doc/README.package-tests.rst: Document network access (Closes: #851556)
+  * qemu: Robustify ssh port locks.
+    Stop assuming that /run/lock is user-writable (it is not in non-Debian
+    systems). Instead create the lock file in /tmp and use 'x' to avoid
+    /tmp file races.
+  * tests/autopkgtest: Fix crashes when running on non-apt system
+  * Fix candidate version detection for packages containing regexp operators
+    '+' and '.' are valid characters in a Debian package name. Escape them
+    in the call to apt-cache policy so that we get what we want to know.
+    (Closes: #855954)
+
+  [ Iain Lane ]
+  * Fix build_source to work if "Package-List" is the last line in the apt
+    output (Closes: #851899)
+  * autopkgtest-virt-lxd: Check uptime for reboot waiting. (LP: #1654025)
+  * Add a debug-fail hook and implement it for autopkgtest-virt-ssh.
+    At the minute, this is mainly so that the nova script can have its
+    failure information (`nova console-log') propagated up to the output, so
+    that in the case of kernel panics or other random failures we get useful
+    output that the driver of autopkgtest (e.g. autopkgtest-cloud) can look
+    at. (LP: #1630578)
+  * autopkgtest-build-lxd: Allow overriding the target release by setting
+    RELEASE=. This will cause the container to be dist-upgraded to the new
+    release. Useful for the very early stages of a release when the LXD
+    images on images.linuxcontainers.org don't exist yet.
+
+  [ Barry Warsaw ]
+  * Pass Dpkg::Options::=--force-confnew to apt-get install.
+    This avoids dpkg from prompting for conffile installation when you always
+    want the new conffile in the testbed anyway. (Closes: #852475)
+
+ -- Martin Pitt <mpitt@debian.org>  Sun, 30 Apr 2017 19:09:57 +0200
+
 autopkgtest (4.3) unstable; urgency=medium
 
   [ SZALAY Attila ]

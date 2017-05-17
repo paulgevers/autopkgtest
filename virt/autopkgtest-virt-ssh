@@ -246,7 +246,7 @@ def host_setup(command):
 
     try:
         if workdir is None:
-            workdir = tempfile.mkdtemp(prefix='autopkgtest-virt-ssh.')
+            workdir = tempfile.mkdtemp(prefix='autopkgtest-ssh.')
             os.chmod(workdir, 0o755)
         execute_setup_script(command)
         build_sshcmd()

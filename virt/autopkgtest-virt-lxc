@@ -221,7 +221,7 @@ def hook_open():
         # shared bind mount works poorly for unprivileged containers due to
         # mapped UIDs
         if args.sudo or os.geteuid() == 0:
-            shared_dir = tempfile.mkdtemp(prefix='autopkgtest-virt-lxc.shared.')
+            shared_dir = tempfile.mkdtemp(prefix='autopkgtest-lxc.')
     else:
         # don't change the name between resets, to provide stable downtmp paths
         os.makedirs(shared_dir)

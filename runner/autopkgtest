@@ -224,7 +224,7 @@ def cleanup():
             testbed.stop()
         if opts.output_dir is None and tmp is not None:
             shutil.rmtree(tmp, ignore_errors=True)
-    except:
+    except Exception:
         print_exception(sys.exc_info(),
                         '%s\n: error cleaning up:\n' % os.path.basename(sys.argv[0]))
         sys.exit(20)
@@ -663,7 +663,7 @@ def main():
         testbed.start()
         testbed.open()
         process_actions()
-    except:
+    except Exception:
         errorcode = print_exception(sys.exc_info(), '')
     if tmp:
         create_testinfo(vserver_args)

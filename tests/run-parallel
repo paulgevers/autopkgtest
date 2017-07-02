@@ -9,7 +9,6 @@ $MYDIR/pycodestyle
 $MYDIR/pyflakes
 $MYDIR/testdesc
 $MYDIR/autopkgtest_args
-$MYDIR/run_args
 set +e
 
 # get sudo password early, to avoid asking for it in background jobs

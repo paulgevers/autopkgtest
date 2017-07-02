@@ -103,10 +103,6 @@ setup() {
 # main
 #
 
-if [ "${0%adt-build-lxd}" != "$0" ]; then
-    echo "WARNING: Deprecated command, please call this as autopkgtest-build-lxd" >&2
-fi
-
 if [ -z "${1:-}" ]; then
     echo "Usage: $0 <image>" >&2
     exit 1
@@ -124,17 +120,12 @@ setup
 # afterwards
 DISTROLC=$(echo "$DISTRO" | tr '[:upper:]' '[:lower:]')
 ALIAS="autopkgtest/$DISTROLC/$RELEASE/$ARCH"
-if [ "${0%adt-build-lxd}" != "$0" ]; then
-    OLDALIAS="adt/$DISTROLC/$RELEASE/$ARCH"
-else
-    OLDALIAS=""
-fi
 DESCRIPTION="autopkgtest $DISTRO $RELEASE $ARCH"
 
-lxc publish "$CONTAINER" ${OLDALIAS:+--alias $OLDALIAS} --alias "$ALIAS" --public description="$DESCRIPTION" distribution="$DISTROLC" release="$RELEASE" architecture="$ARCH"
+lxc publish "$CONTAINER" --alias "$ALIAS" --public description="$DESCRIPTION" distribution="$DISTROLC" release="$RELEASE" architecture="$ARCH"
 
 # clean up old images
-for i in $(lxc image list | grep "$DESCRIPTION" | grep -v "$ALIAS${OLDALIAS:+\\|$OLDALIAS}" | cut -d'|' -f3); do
+for i in $(lxc image list | grep "$DESCRIPTION" | grep -v "$ALIAS" | cut -d'|' -f3); do
     echo "Removing previous image $i"
     lxc image delete "$i"
 done

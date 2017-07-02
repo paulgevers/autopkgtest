@@ -39,9 +39,7 @@ ifeq (, $(findstring nocheck, $(DEB_BUILD_OPTIONS)))
 	tests/pycodestyle || true
 	tests/testdesc
 	tests/autopkgtest_args
-	tests/run_args
 	env NO_PKG_MANGLE=1 tests/autopkgtest NullRunner
-	env NO_PKG_MANGLE=1 tests/adt-run NullRunner
 endif
 
 # necessary until we move to compat level 9

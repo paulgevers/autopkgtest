@@ -570,7 +570,7 @@ def hook_open():
         setup_config(shareddir)
         make_auxverb(shareddir)
         determine_normal_user(shareddir)
-    except:
+    except Exception:
         # Clean up on failure
         hook_cleanup()
         raise

@@ -268,7 +268,7 @@ def hook_open():
         ]
         if args.sudo:
             VirtSubproc.auxverb = ['sudo', '--preserve-env'] + VirtSubproc.auxverb
-    except:
+    except Exception:
         # Clean up on failure
         hook_cleanup()
         raise

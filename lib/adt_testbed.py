@@ -362,10 +362,8 @@ class Testbed:
             self.sp.stdin.write('\n')
             self.sp.stdin.flush()
             self.lastsend = string
-        except:
-            (type, value, dummy) = sys.exc_info()
-            self.bomb('cannot send to testbed: %s' % traceback.
-                      format_exception_only(type, value))
+        except Exception as e:
+            self.bomb('cannot send to testbed: %s' % e)
 
     def expect(self, keyword, nresults):
         line = self.sp.stdout.readline()

@@ -683,13 +683,13 @@ def error_cleanup():
         except Quit as q:
             sys.stderr.write(q.m)
             sys.stderr.write('\n')
-        except:
+        except Exception:
             sys.stderr.write('Unexpected cleanup error:\n')
             traceback.print_exc()
             sys.stderr.write('\n')
         if not ok:
             sys.stderr.write('while cleaning up because of another error:\n')
-    except:
+    except Exception:
         pass
 
 
@@ -721,7 +721,7 @@ def mainloop():
             sys.stderr.write(q.m)
             sys.stderr.write('\n')
         sys.exit(q.ec)
-    except:
+    except Exception:
         error_cleanup()
         sys.stderr.write('Unexpected error:\n')
         traceback.print_exc()

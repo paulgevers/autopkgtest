@@ -169,7 +169,7 @@ def hook_open():
             '[ -z "$KILL" ] || kill -9 $KILL >/dev/null 2>&1 || true;'
             'exit $RC', '--'
         ]
-    except:
+    except Exception:
         # Clean up on failure
         VirtSubproc.execute_timeout(None, 300, ['lxc', 'delete', '--force', container_name])
         raise

@@ -15,8 +15,8 @@ if ! type pyflakes3 >/dev/null 2>&1; then
     exit 0
 fi
 
-pyflakes3 $rootdir/lib $rootdir/runner/autopkgtest $testdir/autopkgtest $testdir/adt-run \
-    $testdir/testdesc $testdir/run_args $testdir/*.py \
+pyflakes3 $rootdir/lib $rootdir/runner/autopkgtest $testdir/autopkgtest \
+    $testdir/testdesc $testdir/autopkgtest_args $testdir/*.py \
     $rootdir/tools/autopkgtest-buildvm-ubuntu-cloud
 
 for v in chroot null schroot lxc lxd qemu ssh; do

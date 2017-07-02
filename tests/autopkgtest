@@ -3131,7 +3131,6 @@ Depends: nonexisting'''
         # test should succeed, but skip the Lxd test (if present)
         self.assertIn(code, [0, 2], err)
         self.assertRegex(err, 'autopkgtest\s+PASS')
-        self.assertRegex(err, 'adt-run\s+PASS')
         self.assertRegex(err, 'installed\s+PASS')
         if code == 2:
             self.assertRegex(err, 'lxd\s+SKIP')

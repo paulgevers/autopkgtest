@@ -51,7 +51,6 @@ programs =	tools/autopkgtest-buildvm-ubuntu-cloud \
 
 pythonfiles =	lib/VirtSubproc.py \
 		lib/adtlog.py \
-		lib/adt_run_args.py \
 		lib/autopkgtest_args.py \
 		lib/adt_testbed.py \
 		lib/adt_binaries.py \
@@ -82,14 +81,6 @@ install:
 	$(INSTALL_PROG) setup-commands/*[!~] $(datadir)/setup-commands
 	$(INSTALL_PROG) ssh-setup/[a-z]*[!~] $(datadir)/ssh-setup
 	$(INSTALL_DATA) ssh-setup/SKELETON $(datadir)/ssh-setup
-	# legacy CLI
-	ln -s autopkgtest $(bindir)/adt-run
-	ln -s autopkgtest-build-lxc $(bindir)/adt-build-lxc
-	ln -s autopkgtest-build-lxd $(bindir)/adt-build-lxd
-	ln -s autopkgtest-buildvm-ubuntu-cloud $(bindir)/adt-buildvm-ubuntu-cloud
-	$(INSTALL_DATA) runner/adt-run.1 $(man1dir)
-	# legacy virt runners
-	for v in $(virts); do ln -s autopkgtest-virt-$$v $(bindir)/adt-virt-$$(basename $$v); done
 
 clean:
 	rm -f */*.pyc

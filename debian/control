@@ -26,6 +26,7 @@ Depends: python3,
  ${misc:Depends}
 Recommends: autodep8
 Suggests: schroot, lxc, lxd-client, qemu-system, qemu-utils
+Breaks: debci (<< 1.7~)
 Description: automatic as-installed testing for Debian packages
  autopkgtest runs tests on binary packages.  The tests are run on the
  package as installed on a testbed system (which may be found via a

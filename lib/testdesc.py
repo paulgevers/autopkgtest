@@ -545,7 +545,7 @@ def parse_click_manifest(manifest, testbed_caps, clickdeps, use_installed,
             try:
                 repo = manifest_j['x-source']['vcs-bzr']
                 adtlog.info('checking out click source from %s' % repo)
-                d = tempfile.mkdtemp(prefix='adt.clicksrc.')
+                d = tempfile.mkdtemp(prefix='autopkgtest.clicksrc.')
                 atexit.register(shutil.rmtree, d, ignore_errors=True)
                 try:
                     subprocess.check_call(['bzr', 'checkout', '--lightweight',

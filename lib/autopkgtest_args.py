@@ -1,8 +1,4 @@
 # autopkgtest_args is part of autopkgtest
-# This is a simplified version of the old adt_run_args.py. It accepts only
-# exactly one tested source package, but the order of arguments is not relevant
-# any more.
-
 # autopkgtest is a tool for testing Debian binary packages
 #
 # autopkgtest is Copyright (C) 2006-2016 Canonical Ltd.
@@ -67,8 +63,7 @@ def read_changes(parser, changes):
 def process_package_arguments(parser, args):
     '''Check positional arguments and produce adt_run_args compatible actions list'''
 
-    # TODO: This should be simplified once the old adt_run_args CLI gets
-    # dropped.
+    # TODO: This should be simplified now that the old adt_run_args CLI got dropped
     # Sort action list by deb << dsc and click-source << click, for a "do what
     # I mean" compatible adt_run_args action list
 

@@ -49,14 +49,7 @@ import testdesc
 import adt_testbed
 import adt_binaries
 
-if os.path.basename(sys.argv[0]) == 'adt-run':
-    # legacy CLI
-    from adt_run_args import parse_args
-    adtlog.warning('"adt-run" is deprecated, please use "autopkgtest" (see manpage)')
-    legacy_cli = True
-else:
-    from autopkgtest_args import parse_args
-    legacy_cli = False
+from autopkgtest_args import parse_args
 
 # ---------- global variables
 
@@ -110,7 +103,7 @@ def setup_trace():
 
     if opts.logfile is not None:
         # tee stdout/err into log file
-        (fd, fifo_log) = tempfile.mkstemp(prefix='adt-fifo-log.')
+        (fd, fifo_log) = tempfile.mkstemp(prefix='autopkgtest-fifo.')
         os.close(fd)
         os.unlink(fifo_log)
         os.mkfifo(fifo_log)
@@ -525,14 +518,10 @@ def process_actions():
     global actions, binaries, errorcode
 
     binaries = adt_binaries.DebBinaries(testbed, tmp)
-    if legacy_cli:
-        control_override = None
-        testname = None
-    else:
-        if opts.override_control and not os.access(opts.override_control, os.R_OK):
-            adtlog.bomb('cannot read ' + opts.override_control)
-        control_override = opts.override_control
-        testname = opts.testname
+    if opts.override_control and not os.access(opts.override_control, os.R_OK):
+        adtlog.bomb('cannot read ' + opts.override_control)
+    control_override = opts.override_control
+    testname = opts.testname
     pending_click_source = None
     tests_tree = None
 

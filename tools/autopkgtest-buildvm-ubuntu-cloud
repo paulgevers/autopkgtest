@@ -361,10 +361,4 @@ resize_image(image, args.disk_size)
 seed = build_seed(args.mirror, args.proxy, args.no_apt_upgrade,
                   args.metadata, args.userdata, args.post_command, args.verbose)
 boot_image(image, seed, args.qemu_command, args.verbose, args.timeout)
-
-if 'adt-buildvm' in sys.argv[0]:
-    fname = 'adt-%s-%s-cloud.img' % (args.release, args.arch)
-else:
-    fname = 'autopkgtest-%s-%s.img' % (args.release, args.arch)
-
-install_image(image, os.path.join(args.output_dir, fname))
+install_image(image, os.path.join(args.output_dir, 'autopkgtest-%s-%s.img' % (args.release, args.arch)))

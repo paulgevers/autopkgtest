@@ -41,12 +41,7 @@ EOF
 fi
 
 ARCH=${3:-}
-if [ "${0%adt-build-lxc}" != "$0" ]; then
-    echo "WARNING: Deprecated command, please call this as autopkgtest-build-lxc" >&2
-    NAME="adt-${RELEASE}${ARCH:+-$ARCH}"
-else
-    NAME="autopkgtest-${RELEASE}${ARCH:+-$ARCH}"
-fi
+NAME="autopkgtest-${RELEASE}${ARCH:+-$ARCH}"
 
 SCRIPT=${4:-}
 if [ -n "$SCRIPT" -a ! -r "$SCRIPT" ]; then

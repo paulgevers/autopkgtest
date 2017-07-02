@@ -2384,14 +2384,8 @@ class DebTestsVirtContainer(DebTestsVirtFS):
         outdir = os.path.join(self.workdir, 'out')
         os.mkdir(outdir)
 
-        # special-case LXC runner, --ephemeral does not support reboot with LXC 1.x
-        if not shutil.which('lxc-copy'):
-            virt_args = [a for a in self.virt_args if a != '--ephemeral']
-        else:
-            virt_args = self.virt_args
         (code, out, err) = self.runtest(['--output-dir=' + outdir, '-B', p,
-                                         '--setup-commands-boot=echo BOOTSTAMP >/run/bootstamp'],
-                                        virt_args=virt_args)
+                                         '--setup-commands-boot=echo BOOTSTAMP >/run/bootstamp'])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -2443,13 +2437,7 @@ class DebTestsVirtContainer(DebTestsVirtFS):
         outdir = os.path.join(self.workdir, 'out')
         os.mkdir(outdir)
 
-        # special-case LXC runner, --ephemeral does not support reboot with LXC 1.x
-        if not shutil.which('lxc-copy'):
-            virt_args = [a for a in self.virt_args if a != '--ephemeral']
-        else:
-            virt_args = self.virt_args
-        (code, out, err) = self.runtest(['--output-dir=' + outdir, '-B', p +
-                                         '//'], virt_args)
+        (code, out, err) = self.runtest(['--output-dir=' + outdir, '-B', p + '//'])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -2525,11 +2513,8 @@ class DebTestsVirtContainer(DebTestsVirtFS):
                                  '[ "$USER" = "root" ] || echo "USER invalid: $USER" >&2\n'
                                  './test_built\n./test_abspath\n'})
 
-        # special-case LXC runner, --ephemeral does not support reboot
-        virt_args = [a for a in self.virt_args if a != '--ephemeral']
         (code, out, err) = self.runtest(['-B', '-d', p, '--setup-commands',
-                                         'apt-get install --reinstall -y cron'],
-                                        virt_args=virt_args)
+                                         'apt-get install --reinstall -y cron'])
 
         # test should succeed
         self.assertEqual(code, 0, err)
@@ -2553,7 +2538,7 @@ class LxcRunner(AdtTestCase, DebTestsVirtContainer):
     def __init__(self, *args, **kwargs):
         self.container_name = os.environ.get('AUTOPKGTEST_TEST_LXC')
         if self.container_name:
-            vargs = ['lxc', '--ephemeral', self.container_name]
+            vargs = ['lxc', self.container_name]
             # check for unprivileged containers
             if os.getuid() > 0 and subprocess.call(
                     ['lxc-info', '-n', self.container_name],

@@ -54,7 +54,7 @@ class T(unittest.TestCase):
 
     @patch('argparse.ArgumentParser.error')
     def err(self, arguments, err_re, *args, default_virt=True, **kwargs):
-        acts = self.parse(arguments, default_virt)[1]
+        self.parse(arguments, default_virt)[1]
         self.assertGreaterEqual(argparse.ArgumentParser.error.call_count, 1)
         self.assertRegex(argparse.ArgumentParser.error.call_args_list[0][0][0],
                          err_re)
@@ -164,8 +164,7 @@ Files:
             acts,
             [('binary', os.path.join(self.workdir.name, 'testbin1_0.1_all.deb'), None),
              ('binary', os.path.join(self.workdir.name, 'testbin2_0.1_all.deb'), None),
-             ('source', os.path.join(self.workdir.name, 'testsrc_1.dsc'), False),
-            ])
+             ('source', os.path.join(self.workdir.name, 'testsrc_1.dsc'), False)])
 
     def test_changes_no_source(self):
         ch = os.path.join(self.workdir.name, 'foo.changes')
@@ -202,7 +201,6 @@ Files:
 
     def test_only_debs(self):
         self.err([self.testdeb1], 'must specify .*source.* to test')
-
 
     #
     # Test options
@@ -267,8 +265,7 @@ Files:
         self.assertEqual(args.testname, 'foo')
 
         self.assertEqual(acts, [('binary', self.testdeb1, None),
-                                ('source', 'testsrc_1.dsc', False),
-                               ])
+                                ('source', 'testsrc_1.dsc', False)])
 
     def test_read_file_spaces(self):
         argfile = os.path.join(self.workdir.name, 'myopts')
@@ -381,7 +378,7 @@ Files:
 
     def test_triple_dash_virt_server(self):
         (args, acts, virt) = self.parse([self.testdsc, '---', 'foo', '--fooarg'],
-                                       default_virt=False)
+                                        default_virt=False)
         self.assertEqual(acts, [('source', self.testdsc, True)])
         self.assertEqual(virt, ['autopkgtest-virt-foo', '--fooarg'])
 

@@ -143,6 +143,13 @@ setup() {
 
 proxy_detect
 
+# lxc templates for debian and ubuntu differ; ubuntu uses
+# $RELEASE/rootfs-$ARCH, while debian uses debian/rootfs-$RELEASE-$ARCH
+CACHE="$RELEASE"
+if [ "$DISTRO" = debian ]; then
+    CACHE=debian
+fi
+
 if [ ! -e $LXCDIR/$NAME ]; then
     # first-time run: just create the container
     $LXC_CREATE_PREFIX lxc-create -B best --name=$NAME $LXC_ARGS
@@ -150,7 +157,7 @@ if [ ! -e $LXCDIR/$NAME ]; then
 else
     # remove LXC rootfs caches; on btrfs this might be a subvolume, otherwise
     # rm it
-    btrfs subvolume delete /var/cache/lxc/$RELEASE/rootfs-* 2>/dev/null || rm -rf /var/cache/lxc/$RELEASE/rootfs-*
+    btrfs subvolume delete /var/cache/lxc/$CACHE/rootfs-* 2>/dev/null || rm -rf /var/cache/lxc/$CACHE/rootfs-*
     # create a new rootfs in a temp container
     $LXC_CREATE_PREFIX lxc-create -B best --name=${NAME}.new $LXC_ARGS
     setup ${NAME}.new

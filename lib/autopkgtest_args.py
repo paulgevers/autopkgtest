@@ -256,9 +256,9 @@ for details.'''
     g_setup.add_argument('--apt-pocket', action='append',
                          metavar='POCKETNAME[=pkgname,src:srcname,...]',
                          default=[],
-                         help='Enable additional apt source for POCKETNAME. '
+                         help='Enable additional apt source for release-POCKETNAME. '
                          'If packages are given, set up apt pinning to use '
-                         'only those packages from POCKETNAME; src:srcname '
+                         'only those packages from release-POCKETNAME; src:srcname '
                          ' expands to all binaries of srcname')
     g_setup.add_argument('--copy', metavar='HOSTFILE:TESTBEDFILE',
                          action='append', default=[],

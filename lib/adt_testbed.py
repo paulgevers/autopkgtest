@@ -1179,6 +1179,7 @@ fi
         script += '''REL=$(sed -rn '/^(deb|deb-src) .*(ubuntu.com|debian.org|ftpmaster|file:\/\/\/tmp\/testarchive)/ { s/^[^ ]+ +(\[.*\] *)?[^ ]* +([^ -]+) +.*$/\\2/p}' $SRCS | head -n1); '''
 
         script += 'mkdir -p /etc/apt/preferences.d; '
+        script += 'mkdir -p /etc/apt/apt.conf.d; '
         script += 'PKGS="%s"; ' % ' '.join(binpkgs)
 
         # translate src:name entries into binaries of that source
@@ -1188,10 +1189,11 @@ fi
                 '''sort -u | tr '\\n' ' ')"; ''' % \
                 ' '.join(srcpkgs)
 
-        # prefer given packages from pocket, other packages from
-        # default $REL (prio 990), but make $REL-pocket available for
-        # dependency resolution (prio 500)
-        script += 'printf "Package: $PKGS\\nPin: release a=${REL}-%(pocket)s\\nPin-Priority: 995\\n\\nPackage: *\\nPin: release a=$REL\\nPin-Priority: 990\\n\\nPackage: *\\nPin: release a=${REL}-updates\\nPin-Priority: 990\\n\\nPackage: *\\nPin: release a=${REL}-%(pocket)s\\nPin-Priority: 500\\n" > /etc/apt/preferences.d/autopkgtest-${REL}-%(pocket)s; ' % \
+        # prefer given packages from series, but make sure that other packages
+        # are taken from default release as much as possible
+        script += 'printf "Package: $PKGS\\nPin: release a=${REL}-%(pocket)s\\nPin-Priority: 995\\n" > /etc/apt/preferences.d/autopkgtest-${REL}-%(pocket)s; ' % \
+            {'pocket': pocket}
+        script += 'printf "APT::Default-Release "${REL}";\\n" > /etc/apt/apt.conf.d/autopkgtest-${REL}-%(pocket)s; ' % \
             {'pocket': pocket}
         self.check_exec(['sh', '-ec', script])
         self.apt_pin_for_pockets.append(pocket)

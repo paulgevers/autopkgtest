@@ -46,7 +46,7 @@ timeouts = {'short': 100, 'copy': 300, 'install': 3000, 'test': 10000,
 class Testbed:
     def __init__(self, vserver_argv, output_dir, user,
                  setup_commands=[], setup_commands_boot=[], add_apt_pockets=[],
-                 copy_files=[], add_apt_sources=[]):
+                 copy_files=[], add_apt_sources=[], apt_default_release=None):
         self.sp = None
         self.lastsend = None
         self.scratch = None
@@ -64,6 +64,7 @@ class Testbed:
         self.setup_commands_boot = setup_commands_boot
         self.add_apt_pockets = add_apt_pockets
         self.add_apt_sources = add_apt_sources
+        self.default_release = apt_default_release
         self.copy_files = copy_files
         self.initial_kernel_version = None
         # tests might install a different kernel; [(testname, reboot_marker, kver)]
@@ -262,13 +263,20 @@ class Testbed:
     def run_setup_commands(self):
         '''Run --setup-commmands and --copy'''
 
-        if not self.setup_commands and not self.add_apt_pockets and not self.copy_files and not self.add_apt_sources:
+        if not self.setup_commands and not self.add_apt_pockets and not self.copy_files and not self.add_apt_sources and not self.default_release:
             return
 
         adtlog.info('@@@@@@@@@@@@@@@@@@@@ test bed setup')
         for (host, tb) in self.copy_files:
             adtlog.debug('Copying file %s to testbed %s' % (host, tb))
             Path(self, host, tb, os.path.isdir(host)).copydown()
+
+        # Make sure default release is set regardless of other options if so
+        # required by --apt-default-release. Typically this would be used in
+        # combination with --add-apt-pocket or --pin-packages and it wouldn't
+        # be needed, but let's not assume there is no other use case.
+        if self.default_release:
+            self._set_default_release()
 
         self.check_exec(['sh', '-ec', ': > /etc/apt/sources.list.d/autopkgtest-add-apt-sources.list'])
         for source in self.add_apt_sources:
@@ -1208,11 +1216,7 @@ fi
             else:
                 binpkgs.append(i)
 
-        # get release name
-        script = 'SRCS=$(ls /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null|| true); '
-        script += '''REL=$(sed -rn '/^(deb|deb-src) .*(ubuntu.com|debian.org|ftpmaster|file:\/\/\/tmp\/testarchive)/ { s/\[.*\] +//; s/^[^ ]+ +[^ ]* +([^ -]+) +.*$/\\1/p }' $SRCS | head -n1); '''
-
-        script += 'mkdir -p /etc/apt/preferences.d; '
+        script = 'mkdir -p /etc/apt/preferences.d; '
         script += 'PKGS="%s"; ' % ' '.join(binpkgs)
 
         # translate src:name entries into binaries of that source
@@ -1222,13 +1226,33 @@ fi
                 '''sort -u | tr '\\n' ' ')"; ''' % \
                 ' '.join(srcpkgs)
 
-        # prefer given packages from pocket, other packages from
-        # default $REL (prio 900), but make $REL-pocket available for
-        # dependency resolution (prio 800)
-        script += 'printf "Package: $PKGS\\nPin: release a=${REL}-%(pocket)s\\nPin-Priority: 990\\n\\nPackage: *\\nPin: release a=$REL\\nPin-Priority: 900\\n\\nPackage: *\\nPin: release a=${REL}-updates\\nPin-Priority: 900\\n\\nPackage: *\\nPin: release a=${REL}-%(pocket)s\\nPin-Priority: 800\\n" > /etc/apt/preferences.d/autopkgtest-${REL}-%(pocket)s; ' % \
-            {'pocket': pocket}
+        # prefer given packages from series, but make sure that other packages
+        # are taken from default release as much as possible
+        script += 'printf "Package: $PKGS\\nPin: release a=%(default)s-%(pocket)s\\nPin-Priority: 995\\n" > /etc/apt/preferences.d/autopkgtest-%(default)s-%(pocket)s; ' % \
+            {'pocket': pocket, 'default': self._get_default_release()}
         self.check_exec(['sh', '-ec', script])
+        self._set_default_release()
         self.apt_pin_for_pockets.append(pocket)
+
+    def _get_default_release(self):
+        '''Get the release name which occurs first in apt sources'''
+        # Note: we ignore the current value of APT::Default-Release
+
+        # This can be set via --apt-default-release.
+        if self.default_release is None:
+
+            script = 'SRCS=$(ls /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null|| true); '
+            script += '''sed -rn '/^(deb|deb-src) .*(ubuntu.com|debian.org|ftpmaster|file:\/\/\/tmp\/testarchive)/ { s/\[.*\] +//; s/^[^ ]+ +[^ ]* +([^ -]+) +.*$/\\1/p }' $SRCS | head -n1'''
+            self.default_release = self.check_exec(['sh', '-ec', script], stdout=True).strip()
+
+        return self.default_release
+
+    def _set_default_release(self):
+        '''Set APT::Default-Release to enable pinning to do it's job.'''
+        script = 'mkdir -p /etc/apt/apt.conf.d; '
+        script += 'printf "APT::Default-Release \\"%(default)s\\";\\n" > /etc/apt/apt.conf.d/autopkgtest-default-release; ' % \
+            {'default': self._get_default_release()}
+        self.check_exec(['sh', '-ec', script])
 
 
 class Path:

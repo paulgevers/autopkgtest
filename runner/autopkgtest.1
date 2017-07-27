@@ -257,6 +257,14 @@ Any \fB\-\-add\-apt\-source\fR or \fB\-\-apt\-pocket\fR options take effect
 first, so this will upgrade packages from those sources if appropriate.
 
 .TP
+.BI --apt-default-release= SUITE
+Set's \fBAPT::Default-Release\fR value to the provided value. For apt pinning
+(related to \fB\-\-apt\-pocket\fR, and \fB\-\-pin\-packages\fR) to work
+properly, \fBAPT::Default-Release\fR must be set to the release that should
+provide the packages that are not pinned. For Debian and Ubuntu, this is
+normally automatically detected from the first entry in /etc/apt/sources.list.
+
+.TP
 .BI \-\-apt\-pocket= pocket[=pkgname,src:srcname,...]
 Add apt sources for \fIrelease\fR-\fIpocket\fR. This finds the first
 .B deb

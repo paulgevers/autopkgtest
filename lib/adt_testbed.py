@@ -1203,10 +1203,9 @@ fi
         # are taken from default release as much as possible
         script += 'printf "Package: $PKGS\\nPin: release a=%(default)s-%(pocket)s\\nPin-Priority: 995\\n" > /etc/apt/preferences.d/autopkgtest-%(default)s-%(pocket)s; ' % \
             {'pocket': pocket, 'default': self._get_default_release()}
-        script += 'printf "APT::Default-Release "%(default)s";\\n" > /etc/apt/apt.conf.d/autopkgtest-%(default)s-%(pocket)s; ' % \
-            {'pocket': pocket, 'default': self._get_default_release()}
         self.check_exec(['sh', '-ec', script])
-        self.apt_pin_for_pockets.append(pocket)
+        self._set_default_release()
+        self.apt_pin_for_releases.append(release)
 
     def _get_default_release(self):
         '''Get the release name which occurs first in apt sources'''
@@ -1219,6 +1218,12 @@ fi
             self.default_release = self.check_exec(['sh', '-ec', script], stdout=True).strip()
 
         return self.default_release
+
+    def _set_default_release(self):
+        '''Set APT::Default-Release to enable pinning to do it's job.'''
+        script = 'printf "APT::Default-Release \\"%(default)s\\";\\n" > /etc/apt/apt.conf.d/autopkgtest-default-release; ' % \
+            {'default': self._get_default_release()}
+        self.check_exec(['sh', '-ec', script])
 
 
 class Path:

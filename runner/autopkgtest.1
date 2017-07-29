@@ -242,12 +242,22 @@ lead to an infinite loop). Otherwise, they are just like the
 This option can be specified multiple times.
 
 .TP
+.BI \-\-add\-apt\-source= "'deb http://MIRROR SUITE COMPONENT...'"
+Add the given apt source to
+.B /etc/apt/sources.list.d
+and update it, before running any \-\-setup\-commands.
+
+This option can be specified multiple times.
+
+.TP
 .BR --apt-upgrade " | " -U
 Run
 .B apt\-get update
 and
 .B apt\-get dist-upgrade -y
 in the testbed before running the tests.
+Any \fB\-\-add\-apt\-source\fR or \fB\-\-apt\-pocket\fR options take effect
+first, so this will upgrade packages from those sources if appropriate.
 
 .TP
 .BI \-\-apt\-pocket= pocket[=pkgname,src:srcname,...]

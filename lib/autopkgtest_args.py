@@ -253,6 +253,11 @@ for details.'''
                          action='append', default=[],
                          help='Run these commands after --setup-commands, '
                          'and also every time the testbed is rebooted')
+    g_setup.add_argument('--add-apt-source', action='append',
+                         dest='add_apt_sources',
+                         metavar='"deb http://MIRROR SUITE COMPONENT..."',
+                         default=[],
+                         help='Enable additional apt sources')
     g_setup.add_argument('--apt-pocket', action='append',
                          metavar='POCKETNAME[=pkgname,src:srcname,...]',
                          default=[],

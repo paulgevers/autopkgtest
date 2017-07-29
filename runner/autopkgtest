@@ -648,7 +648,8 @@ def main():
                                       setup_commands=opts.setup_commands,
                                       setup_commands_boot=opts.setup_commands_boot,
                                       add_apt_pockets=opts.apt_pocket,
-                                      copy_files=opts.copy)
+                                      copy_files=opts.copy,
+                                      add_apt_sources=getattr(opts, 'add_apt_sources', []))
         testbed.start()
         testbed.open()
         process_actions()

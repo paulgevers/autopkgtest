@@ -1902,6 +1902,27 @@ Pin: release a=fluffy-proposed
 Pin-Priority: 800
 ''')
 
+    def test_add_apt_source(self):
+        '''--add-apt-source'''
+
+        p = self.build_src('Tests: pass\nDepends:\nRestrictions: needs-root\n',
+                           {'pass': '#!/bin/sh -e\ntest -e /etc/apt/sources.list.d/autopkgtest-add-apt-sources.list'})
+
+        apt_dir = os.path.join(self.chroot, 'etc', 'apt')
+
+        (code, out, err) = self.runtest(['-B', '-d', p, '--add-apt-source', 'deb http://foo.ubuntu.com/ fluffy-proposed main'])
+
+        # test should succeed
+        self.assertEqual(code, 0, err)
+        self.assertRegex(out, 'pass\s+PASS', out)
+
+        # verify proposed.list
+        with open(os.path.join(apt_dir, 'sources.list.d', 'autopkgtest-add-apt-sources.list')) as f:
+            self.assertEqual(f.read(), 'deb http://foo.ubuntu.com/ fluffy-proposed main\n')
+
+        # should not have any apt pinning
+        self.assertFalse(os.path.exists(os.path.join(apt_dir, 'preferences.d')))
+
     def test_tree_garbage(self):
         '''copied source tree contains only expected files'''
 

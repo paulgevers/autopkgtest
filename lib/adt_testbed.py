@@ -46,7 +46,7 @@ timeouts = {'short': 100, 'copy': 300, 'install': 3000, 'test': 10000,
 class Testbed:
     def __init__(self, vserver_argv, output_dir, user,
                  setup_commands=[], setup_commands_boot=[], add_apt_pockets=[],
-                 copy_files=[]):
+                 copy_files=[], add_apt_sources=[]):
         self.sp = None
         self.lastsend = None
         self.scratch = None
@@ -63,6 +63,7 @@ class Testbed:
         self.setup_commands = setup_commands
         self.setup_commands_boot = setup_commands_boot
         self.add_apt_pockets = add_apt_pockets
+        self.add_apt_sources = add_apt_sources
         self.copy_files = copy_files
         self.initial_kernel_version = None
         # tests might install a different kernel; [(testname, reboot_marker, kver)]
@@ -261,13 +262,31 @@ class Testbed:
     def run_setup_commands(self):
         '''Run --setup-commmands and --copy'''
 
-        if not self.setup_commands and not self.add_apt_pockets and not self.copy_files:
+        if not self.setup_commands and not self.add_apt_pockets and not self.copy_files and not self.add_apt_sources:
             return
 
         adtlog.info('@@@@@@@@@@@@@@@@@@@@ test bed setup')
         for (host, tb) in self.copy_files:
             adtlog.debug('Copying file %s to testbed %s' % (host, tb))
             Path(self, host, tb, os.path.isdir(host)).copydown()
+
+        self.check_exec(['sh', '-ec', ': > /etc/apt/sources.list.d/autopkgtest-add-apt-sources.list'])
+        for source in self.add_apt_sources:
+            script = '''
+            echo "$1" >> /etc/apt/sources.list.d/autopkgtest-add-apt-sources.list
+            for retry in 1 2 3; do
+                apt-get --no-list-cleanup \\
+                        -o Dir::Etc::sourcelist=/etc/apt/sources.list.d/autopkgtest-add-apt-sources.list \\
+                        -o Dir::Etc::sourceparts=/dev/null \\
+                        update 2>&1 && break || \\
+                        if [ $retry == 3 ] ; then
+                            return 1
+                        else
+                            sleep 15
+                        fi
+            done
+            '''
+            self.check_exec(['sh', '-ec', script, 'sh', source])
 
         # create apt sources for --apt-pocket
         for pocket in self.add_apt_pockets:

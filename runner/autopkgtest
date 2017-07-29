@@ -650,6 +650,7 @@ def main():
                                       add_apt_pockets=opts.apt_pocket,
                                       copy_files=opts.copy,
                                       add_apt_sources=getattr(opts, 'add_apt_sources', []),
+                                      pin_packages=opts.pin_packages,
                                       apt_default_release=opts.apt_default_release)
         testbed.start()
         testbed.open()

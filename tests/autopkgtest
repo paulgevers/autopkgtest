@@ -1897,6 +1897,12 @@ Pin: release a=fluffy-updates
 Pin-Priority: 990
 ''')
 
+        # should set up APT::Default-Release
+        self.assertEqual(os.listdir(os.path.join(apt_dir, 'apt.conf.d')),
+                         ['autopkgtest-default-release'])
+        with open(os.path.join(apt_dir, 'apt.conf.d', 'autopkgtest-default-release')) as f:
+            self.assertEqual(f.read(), 'APT::Default-Release "fluffy";\n')
+
     def test_apt_default_release(self):
         '''--apt-default-release'''
 
@@ -1937,6 +1943,40 @@ Pin-Priority: 990
 
         # should not have any apt pinning
         self.assertFalse(os.path.exists(os.path.join(apt_dir, 'preferences.d')))
+
+        # should not set up APT::Default-Release
+        self.assertFalse(os.path.exists(os.path.join(apt_dir, 'apt.conf.d')))
+
+    def test_add_apt_source_with_pinned_packages(self):
+        '''--add-apt-source with --pin-packages'''
+
+        p = self.build_src('Tests: pass\nDepends:\nRestrictions: needs-root\n',
+                           {'pass': '#!/bin/sh -e\ntest -e /etc/apt/sources.list.d/autopkgtest-add-apt-sources.list'})
+
+        apt_dir = os.path.join(self.chroot, 'etc', 'apt')
+        with open(os.path.join(apt_dir, 'sources.list'), 'w') as f:
+            f.write('''# comment
+deb http://foo.ubuntu.com/ fluffy main non-free
+''')
+
+        (code, out, err) = self.runtest(['-B', '-d', p, '--add-apt-source', 'deb http://foo.ubuntu.com/ fluffy-proposed main', '--pin-packages', 'fluffy-proposed=foo,bar'])
+
+        # test should succeed
+        self.assertEqual(code, 0, err)
+        self.assertRegex(out, 'pass\s+PASS', out)
+
+        # verify proposed.list
+        with open(os.path.join(apt_dir, 'sources.list.d', 'autopkgtest-add-apt-sources.list')) as f:
+            self.assertEqual(f.read(), 'deb http://foo.ubuntu.com/ fluffy-proposed main\n')
+
+        # should set up apt pinning
+        self.assertEqual(os.listdir(os.path.join(apt_dir, 'preferences.d')),
+                         ['autopkgtest-fluffy-proposed'])
+        with open(os.path.join(apt_dir, 'preferences.d', 'autopkgtest-fluffy-proposed')) as f:
+            self.assertEqual(f.read(), '''Package: foo bar
+Pin: release a=fluffy-proposed
+Pin-Priority: 995
+''')
 
         # should set up APT::Default-Release
         self.assertEqual(os.listdir(os.path.join(apt_dir, 'apt.conf.d')),

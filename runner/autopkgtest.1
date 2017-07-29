@@ -304,6 +304,14 @@ thus you can use these files in the setup commands.
 Set arbitrary environment variable in the build and test. Can be specified
 multiple times.
 
+.TP
+.BI --pin-packages= RELEASE=PACKAGE[,PACKAGE2]
+Set's \fBAPT::Default-Release\fR value to the provided value. For apt pinning
+(related to \fB\-\-apt\-pocket\fR, and \fB\-\-pin\-packages\fR) to work
+properly, \fBAPT::Default-Release\fR must be set to the release that should
+provide the packages that are not pinned. For Debian and Ubuntu, this is
+normally automatically detected from the first entry in /etc/apt/sources.list.
+
 .SH USER/PRIVILEGE HANDLING OPTIONS
 
 .TP

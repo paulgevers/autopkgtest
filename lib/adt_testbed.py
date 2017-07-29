@@ -46,7 +46,7 @@ timeouts = {'short': 100, 'copy': 300, 'install': 3000, 'test': 10000,
 class Testbed:
     def __init__(self, vserver_argv, output_dir, user,
                  setup_commands=[], setup_commands_boot=[], add_apt_pockets=[],
-                 copy_files=[], add_apt_sources=[], apt_default_release=None):
+                 copy_files=[], pin_packages=[], add_apt_sources=[], apt_default_release=None):
         self.sp = None
         self.lastsend = None
         self.scratch = None
@@ -64,6 +64,7 @@ class Testbed:
         self.setup_commands_boot = setup_commands_boot
         self.add_apt_pockets = add_apt_pockets
         self.add_apt_sources = add_apt_sources
+        self.pin_packages = pin_packages
         self.default_release = apt_default_release
         self.copy_files = copy_files
         self.initial_kernel_version = None
@@ -73,7 +74,7 @@ class Testbed:
         self.last_test_name = ''
         self.last_reboot_marker = ''
         self.eatmydata_prefix = []
-        self.apt_pin_for_pockets = []
+        self.apt_pin_for_releases = []
         self.nproc = None
         self.cpu_model = None
         self.cpu_flags = None
@@ -208,7 +209,7 @@ class Testbed:
     def _opened(self, pl):
         self.scratch = pl[0]
         self.deps_installed = []
-        self.apt_pin_for_pockets = []
+        self.apt_pin_for_releases = []
         self.recommends_installed = False
         self.exec_cmd = list(map(urllib.parse.unquote, self.command('print-execute-command', (), 1)[0].split(',')))
         self.caps = self.command('capabilities', (), None)
@@ -263,7 +264,7 @@ class Testbed:
     def run_setup_commands(self):
         '''Run --setup-commmands and --copy'''
 
-        if not self.setup_commands and not self.add_apt_pockets and not self.copy_files and not self.add_apt_sources and not self.default_release:
+        if not self.setup_commands and not self.add_apt_pockets and not self.copy_files and not self.add_apt_sources and not self.pin_packages and not self.default_release:
             return
 
         adtlog.info('@@@@@@@@@@@@@@@@@@@@ test bed setup')
@@ -297,7 +298,13 @@ class Testbed:
                 (pocket, pkglist) = pocket.split('=', 1)
             except ValueError:
                 continue
-            self._create_apt_pinning_for_packages(pocket, pkglist)
+            self._create_apt_pinning_for_packages(self._get_default_release() + '-' + pocket, pkglist,
+                                                      [self._get_default_release() + '-updates'])
+
+        # create apt pinning for --pin-packages
+        for package_set in self.pin_packages:
+            (release, pkglist) = package_set.split('=', 1)
+            self._create_apt_pinning_for_packages(release, pkglist)
 
         # record the mtimes of dirs affecting the boot
         boot_dirs = '/boot /etc/init /etc/init.d /etc/systemd/system /lib/systemd/system'
@@ -563,11 +570,13 @@ Description: satisfy autopkgtest test dependencies
                                   stderr=subprocess.PIPE)[0]
 
             if rc != 0:
-                if self.apt_pin_for_pockets:
-                    pocket = self.apt_pin_for_pockets.pop()
+                if self.apt_pin_for_releases:
+                    release = self.apt_pin_for_releases.pop()
                     adtlog.warning('Test dependencies are unsatisfiable with using apt pinning. '
-                                   'Retrying with using all packages from %s' % pocket)
-                    self.check_exec(['/bin/sh', '-ec', 'rm /etc/apt/preferences.d/autopkgtest-*-' + pocket])
+                                   'Retrying with using all packages from %s' % release)
+                    self.check_exec(['/bin/sh', '-ec', 'rm /etc/apt/preferences.d/autopkgtest-' + release])
+                    if not self.apt_pin_for_releases:
+                        self.check_exec(['/bin/sh', '-ec', 'rm -f /etc/apt/apt.conf.d/autopkgtest-default-release'])
                     continue
 
                 if shell_on_failure:
@@ -1176,8 +1185,9 @@ fi
     # helper methods
     #
 
-    def _create_apt_pinning_for_packages(self, pocket, pkglist):
-        '''Create apt pinning for --apt-pocket=pocket=pkglist'''
+    def _create_apt_pinning_for_packages(self, release, pkglist, default_releases=[]):
+        '''Create apt pinning for --apt-pocket=pocket=pkglist and
+           --pin-packages=release=pkglist'''
 
         # sort pkglist into source and binary packages
         binpkgs = []
@@ -1202,8 +1212,11 @@ fi
 
         # prefer given packages from series, but make sure that other packages
         # are taken from default release as much as possible
-        script += 'printf "Package: $PKGS\\nPin: release a=%(default)s-%(pocket)s\\nPin-Priority: 995\\n" > /etc/apt/preferences.d/autopkgtest-%(default)s-%(pocket)s; ' % \
-            {'pocket': pocket, 'default': self._get_default_release()}
+        script += 'printf "Package: $PKGS\\nPin: release a=%(release)s\\nPin-Priority: 995\\n" > /etc/apt/preferences.d/autopkgtest-%(release)s; ' % \
+            {'release': release}
+        for default in default_releases:
+            script += 'printf "\nPackage: *\\nPin: release a=%(default)s\\nPin-Priority: 990\\n" >> /etc/apt/preferences.d/autopkgtest-%(release)s; ' % \
+            {'release': release, 'default': default}
         self.check_exec(['sh', '-ec', script])
         self._set_default_release()
         self.apt_pin_for_releases.append(release)

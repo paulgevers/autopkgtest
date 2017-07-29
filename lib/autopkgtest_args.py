@@ -258,6 +258,13 @@ for details.'''
                          metavar='"deb http://MIRROR SUITE COMPONENT..."',
                          default=[],
                          help='Enable additional apt sources')
+    g_setup.add_argument('--pin-packages', action='append',
+                         dest='pin_packages',
+                         metavar='RELEASE=pkgname,src:srcname,...',
+                         default=[],
+                         help='Enable testing with packages from a different release. '
+                         'Sets up apt pinning to use only those packages from RELEASE; '
+                         'src:srcname expands to all binaries of srcname.')
     g_setup.add_argument('--apt-pocket', action='append',
                          metavar='POCKETNAME[=pkgname,src:srcname,...]',
                          default=[],
@@ -265,7 +272,7 @@ for details.'''
                          'If packages are given, set up apt pinning to use '
                          'only those packages from release-POCKETNAME; src:srcname '
                          ' expands to all binaries of srcname')
-    g_setup.add_argument('--apt-default-release', 
+    g_setup.add_argument('--apt-default-release',
                          dest='apt_default_release',
                          metavar='SUITENAME_OR_CODENAME',
                          help='Define APT::Default-Release. For apt pinning to work '

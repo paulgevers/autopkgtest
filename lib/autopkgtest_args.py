@@ -265,6 +265,14 @@ for details.'''
                          'If packages are given, set up apt pinning to use '
                          'only those packages from release-POCKETNAME; src:srcname '
                          ' expands to all binaries of srcname')
+    g_setup.add_argument('--apt-default-release', 
+                         dest='apt_default_release',
+                         metavar='SUITENAME_OR_CODENAME',
+                         help='Define APT::Default-Release. For apt pinning to work '
+                         'properly, APT::Default-Release must be set to the release '
+                         'that should provide the packages that are not pinned. For '
+                         'Debian and Ubuntu, this is normally automatically detected '
+                         'from the first entry in /etc/apt/sources.list.')
     g_setup.add_argument('--copy', metavar='HOSTFILE:TESTBEDFILE',
                          action='append', default=[],
                          help='Copy file or dir from host into testbed after '

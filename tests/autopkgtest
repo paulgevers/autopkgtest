@@ -1852,6 +1852,9 @@ deb http://foo.ubuntu.com/ fluffy-proposed restricted
         # should not have any apt pinning
         self.assertFalse(os.path.exists(os.path.join(apt_dir, 'preferences.d')))
 
+        # should not set up APT::Default-Release
+        self.assertFalse(os.path.exists(os.path.join(apt_dir, 'apt.conf.d')))
+
     def test_apt_pocket_selected(self):
         '''--apt-pocket with package list'''
 
@@ -1887,20 +1890,18 @@ deb [trusted=yes arch=6510] http://foo.ubuntu.com/ fluffy-proposed main 6510
         with open(os.path.join(apt_dir, 'preferences.d', 'autopkgtest-fluffy-proposed')) as f:
             self.assertEqual(f.read(), '''Package: foo bar
 Pin: release a=fluffy-proposed
-Pin-Priority: 990
-
-Package: *
-Pin: release a=fluffy
-Pin-Priority: 900
+Pin-Priority: 995
 
 Package: *
 Pin: release a=fluffy-updates
-Pin-Priority: 900
-
-Package: *
-Pin: release a=fluffy-proposed
-Pin-Priority: 800
+Pin-Priority: 990
 ''')
+
+        # should set up APT::Default-Release
+        self.assertEqual(os.listdir(os.path.join(apt_dir, 'apt.conf.d')),
+                         ['autopkgtest-default-release'])
+        with open(os.path.join(apt_dir, 'apt.conf.d', 'autopkgtest-default-release')) as f:
+            self.assertEqual(f.read(), 'APT::Default-Release "fluffy";\n')
 
     def test_tree_garbage(self):
         '''copied source tree contains only expected files'''

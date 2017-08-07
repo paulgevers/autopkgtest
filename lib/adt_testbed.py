@@ -1216,7 +1216,7 @@ fi
             {'release': release}
         for default in default_releases:
             script += 'printf "\nPackage: *\\nPin: release a=%(default)s\\nPin-Priority: 990\\n" >> /etc/apt/preferences.d/autopkgtest-%(release)s; ' % \
-            {'release': release, 'default': default}
+              {'release': release, 'default': default}
         self.check_exec(['sh', '-ec', script])
         self._set_default_release()
         self.apt_pin_for_releases.append(release)

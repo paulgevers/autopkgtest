@@ -7,7 +7,16 @@ if [ "$arch" != i386 -a "$arch" != amd64 ]; then
     exit 0
 fi
 
-if [ -e /etc/default/lxd-bridge ]; then
+# Detect LXD API extensions
+lxd_extension() {
+    lxc info | grep -q "^\- ${1}$"
+}
+
+# Configure LXD networking
+if lxd_extension "network"; then
+    lxc network create lxdbr0 ipv4.address=10.0.8.1/24 ipv4.nat=true ipv6.address=fd3b:ba81:269c:19c4::1/64 --force-local
+    lxc network attach-profile lxdbr0 default eth0 --force-local
+else
     cat <<EOF > /etc/default/lxd-bridge
  USE_LXD_BRIDGE="true"
  LXD_BRIDGE="lxdbr0"
@@ -26,9 +35,12 @@ if [ -e /etc/default/lxd-bridge ]; then
  LXD_IPV6_NAT="false"
  LXD_IPV6_PROXY="false"
 EOF
-else
-    lxc network create lxdbr0 ipv4.address=10.0.8.1/24 ipv4.nat=true ipv6.address=fd3b:ba81:269c:19c4::1/64 --force-local
-    lxc network attach-profile lxdbr0 default eth0 --force-local
+fi
+
+# Configure LXD storage
+if lxd_extension "storage"; then
+    lxc storage create default dir
+    lxc profile device add default root disk path=/ pool=default
 fi
 
 # work around broken PTMU in Canonical Scalingstack

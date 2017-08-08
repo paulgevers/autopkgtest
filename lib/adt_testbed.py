@@ -1176,7 +1176,7 @@ fi
 
         # get release name
         script = 'SRCS=$(ls /etc/apt/sources.list /etc/apt/sources.list.d/*.list 2>/dev/null|| true); '
-        script += '''REL=$(sed -rn '/^(deb|deb-src) .*(ubuntu.com|debian.org|ftpmaster|file:\/\/\/tmp\/testarchive)/ { s/^[^ ]+ +(\[.*\] *)?[^ ]* +([^ -]+) +.*$/\\2/p}' $SRCS | head -n1); '''
+        script += '''REL=$(sed -rn '/^(deb|deb-src) .*(ubuntu.com|debian.org|ftpmaster|file:\/\/\/tmp\/testarchive)/ { s/^[^ ]+ +[^ ]* +([^ -]+) +.*$/\\1/p }' $SRCS | head -n1); '''
 
         script += 'mkdir -p /etc/apt/preferences.d; '
         script += 'PKGS="%s"; ' % ' '.join(binpkgs)

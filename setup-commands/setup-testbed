@@ -122,10 +122,10 @@ fi
 
 # set up apt sources
 if [ -z "${MIRROR:-}" ]; then
-    MIRROR=`awk '/^deb .*(debian|ubuntu)/ { sub(/\[.*\]/, "", $0); print $2; exit }' "$root/etc/apt/sources.list"`
+    MIRROR=`awk '/^deb .*(debian|ubuntu|kali)/ { sub(/\[.*\]/, "", $0); print $2; exit }' "$root/etc/apt/sources.list"`
 fi
 if [ -z "${RELEASE:-}" ]; then
-    RELEASE=`awk '/^deb .*(debian|ubuntu)/ { sub(/\[.*\]/, "", $0); print $3; exit }' "$root/etc/apt/sources.list"`
+    RELEASE=`awk '/^deb .*(debian|ubuntu|kali)/ { sub(/\[.*\]/, "", $0); print $3; exit }' "$root/etc/apt/sources.list"`
 fi
 if [ "${MIRROR%ubuntu*}" != "$MIRROR" ]; then
     cat << EOF > "$root/etc/apt/sources.list"

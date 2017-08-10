@@ -243,19 +243,11 @@ Source package header
 ---------------------
 
 To allow test execution environments to discover packages which provide
-tests, their source packages should have a ``Testsuite:`` header
+tests, their source packages need to have a ``Testsuite:`` header
 containing ``autopkgtest`` (which is currently the only defined value).
 Multiple values get comma separated, as usual in control files.
-
-This tag is added automatically by dpkg-source version 1.17.11 or later.
-For earlier Debian/Ubuntu releases you need to set it manually in
-debian/control by adding
-
-::
-
-    Testsuite: autopkgtest
-
-in the ``Source:`` paragraph.
+This tag is added automatically by dpkg-source version 1.17.11 or later,
+so normally you don't need to worry about this field.
 
 Automatic test control file for known package types
 ---------------------------------------------------

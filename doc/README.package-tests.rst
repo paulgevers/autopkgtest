@@ -8,12 +8,14 @@ Overview
 --------
 
 The source package provides a test metadata file
-``debian/tests/control``. This is a file containing zero or more
+``debian/tests/control``. This enumerates the tests and specifies their
+dependencies and requirements for the testbed. It contains zero or more
 RFC822-style stanzas, along these lines:
 
 ::
 
     Tests: fred, bill, bongo
+    Depends: pkg1, pkg2 [amd64] | pkg3 (>= 3)
     Restrictions: needs-root, breaks-testbed
 
 This example defines three tests, called ``fred``, ``bill`` and
@@ -47,6 +49,28 @@ Tests must declare all applicable Restrictions - see below.
 
 The '#' character introduces a comment. Everything from '#' to the end
 of line will be entirely ignored.
+
+Examples
+--------
+Simplest possible control file that installs all of the source package's
+binary packages and runs the standalone ``debian/tests/smoke`` test
+script as user, without any further limitations:
+
+::
+
+    Tests: smoke
+
+
+Control file for an inline test command that just calls a program
+``foo-cli`` from package ``foo`` (which usually should be a binary of
+the source package that contains this test control) as root, and makes
+sure it exits with zero:
+
+::
+
+    Test-Command: foo-cli --list --verbose
+    Depends: foo
+    Restrictions: needs-root
 
 Control fields
 --------------

@@ -82,16 +82,6 @@ class DebBinaries:
             return
         adtlog.debug('Binaries: publish')
 
-        try:
-            with open(os.path.join(self.dir.host, 'Packages'), 'w') as f:
-                subprocess.check_call(['apt-ftparchive', 'packages', '.'],
-                                      cwd=self.dir.host, stdout=f)
-            with open(os.path.join(self.dir.host, 'Release'), 'w') as f:
-                subprocess.call(['apt-ftparchive', 'release', '.'],
-                                cwd=self.dir.host, stdout=f)
-        except subprocess.CalledProcessError as e:
-            adtlog.bomb('apt-ftparchive failed: %s' % e)
-
         # copy binaries directory to testbed; self.dir.tb might have changed
         # since last time due to a reset, so update it
         self.dir.tb = os.path.join(self.testbed.scratch, 'binaries')
@@ -100,6 +90,8 @@ class DebBinaries:
 
         aptupdate_out = adt_testbed.TempPath(self.testbed, 'apt-update.out')
         script = '''
+  type apt-ftparchive >/dev/null 2>&1 || DEBIAN_FRONTEND=noninteractive apt-get install -y apt-utils 2>&1
+  (cd %(d)s; apt-ftparchive packages . > Packages; apt-ftparchive release . > Release)
   printf 'Package: *\\nPin: origin ""\\nPin-Priority: 1002\\n' > /etc/apt/preferences.d/90autopkgtest
   echo "deb [trusted=yes] file://%(d)s /" >/etc/apt/sources.list.d/autopkgtest.list
   if [ "x`ls /var/lib/dpkg/updates`" != x ]; then

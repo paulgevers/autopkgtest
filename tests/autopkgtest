@@ -2826,9 +2826,7 @@ class SchrootRunner(AdtTestCase, DebTestsVirtFS, DebTestsFailureModes):
                 self.assertNotIn('autopkgtest-satdep', contents)
 
         # check binaries
-        bins = os.listdir(os.path.join(outdir, 'binaries'))
-        self.assertEqual(set(bins),
-                         set(['Release', 'Packages', 'testpkg.deb']))
+        self.assertEqual(os.listdir(os.path.join(outdir, 'binaries')), ['testpkg.deb'])
 
         # check testinfo
         with open(os.path.join(outdir, 'testinfo.json')) as f:

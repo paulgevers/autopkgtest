@@ -1,3 +1,57 @@
+autopkgtest (5.0) unstable; urgency=medium
+
+  [ Martin Pitt ]
+  * Drop obsolete adt-* CLI
+    autopkgtest 4.0 with its "autopkgtest" program has been around for a
+    year, Debian's and Ubuntu's CI moved to that, and the Debian 9.0 release
+    is behind us. Drop "adt-run" and the corresponding adt-virt-* and
+    adt-build-* command line interfaces now.
+    Add Breaks: for debci for versions that still relied on adt-*.
+  * lxc, qemu, ssh: Shorten path of shared directory.
+    This helps to reduce socket path lengths in tests.
+    (See Debian #860554, LP: #1680577)
+  * Drop obsolete ubuntu-touch-session setup script.
+    This hasn't been maintained/tested for ages, and with the demise of
+    Ubuntu Touch this is now completely obsolete. (Closes: #835836)
+  * Avoid bare "except:" clauses
+  * tests/autopkgtest_args: pyflakes/pycodestyle fixes
+  * tests: Don't run LXC tests with --ephemeral.
+    It's not the default and ephemeral containers tend to fail to start too
+    often.
+  * tests/testpkg: Update Standards-Version and debhelper level.
+    Priority "extra" is deprecated, so move to "optional".
+  * README.package-tests.rst: Clarify role of control file, add simple
+    examples (Closes: #870654)
+  * README.package-tests.rst: Update Testsuite: documentation.
+    All supported Debian releases now have a new enough dpkg, and Ubuntu
+    14.04 will not get new tests any more. (Closes: #876008)
+  * Run apt-ftparchive for local debs on testbed instead of host.
+    This is slightly more correct as it will produce the format that the
+    testbed's apt expects (although that doesn't matter much). It also
+    allows autopkgtest to be run on non-Debian hosts.
+    As apt-utils is not essential, install it if necessary.
+  * README.package-tests.rst: Clarify Testsuite: values
+    `autopkgtest` is not any more the only defined value for Testsuite:, as
+    the paragraph below already explains.
+  * setup-commands/setup-testbed: Look at /etc/os-release for determining
+    distribution name. Stop hardcoding "debian|ubuntu|kali" and get this
+    information from os-release's ID field. (Closes: #868678)
+  * debian/rules: Drop obsolete pysupport override.
+    Not necessary any more since dh compat level 9.
+  * Bump Standards-Version to 4.1.0. (No changes necessary.)
+
+  [ Stéphane Graber ]
+  * debian/tests/lxd: Update to support LXD network/storage API
+
+  [ Steve Langasek ]
+  * Fix release name parsing with arch-qualified sources.list
+    (Closes: #870393)
+
+  [ Antonio Terceiro ]
+  * autopkgtest-build-lxc: Correctly clean cache for Debian containers
+
+ -- Martin Pitt <mpitt@debian.org>  Sun, 17 Sep 2017 16:50:21 +0200
+
 autopkgtest (4.4) unstable; urgency=medium
 
   [ Martin Pitt ]

@@ -21,7 +21,6 @@
 # installed as /usr/share/doc/autopkgtest/CREDITS).
 
 import os
-import subprocess
 import atexit
 import shutil
 import errno

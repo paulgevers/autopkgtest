@@ -121,11 +121,22 @@ if [ ! -e "$root/etc/default/grub.d/90-autopkgtest.cfg" ] && chroot "$root" whic
 fi
 
 # set up apt sources
+if [ -e "$root/etc/os-release" ]; then
+    DISTRO_ID=`. "$root/etc/os-release" && echo "$ID" || echo INVALID`
+fi
 if [ -z "${MIRROR:-}" ]; then
-    MIRROR=`awk '/^deb .*(debian|ubuntu|kali)/ { sub(/\[.*\]/, "", $0); print $2; exit }' "$root/etc/apt/sources.list"`
+    MIRROR=`awk '/^deb .*'"$DISTRO_ID"'/ { sub(/\[.*\]/, "", $0); print $2; exit }' "$root/etc/apt/sources.list"`
 fi
 if [ -z "${RELEASE:-}" ]; then
-    RELEASE=`awk '/^deb .*(debian|ubuntu|kali)/ { sub(/\[.*\]/, "", $0); print $3; exit }' "$root/etc/apt/sources.list"`
+    RELEASE=`awk '/^deb .*'"$DISTRO_ID"'/ { sub(/\[.*\]/, "", $0); print $3; exit }' "$root/etc/apt/sources.list"`
+fi
+if [ -z "$RELEASE" ]; then
+    echo 'Failed to auto-detect distribution release name; set $RELEASE explicitly' >&2
+    exit 1
+fi
+if [ -z "$MIRROR" ]; then
+    echo 'Failed to auto-detect apt mirror; set $MIRROR explicitly' >&2
+    exit 1
 fi
 if [ "${MIRROR%ubuntu*}" != "$MIRROR" ]; then
     cat << EOF > "$root/etc/apt/sources.list"

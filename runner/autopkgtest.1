@@ -192,11 +192,8 @@ logstream it can be very hard to diagnose problems.
 .BI \-\-setup\-commands= commands
 Run
 .I commands
-after opening the testbed. This can be used e. g. to enable additional apt
-sources, run
-.B apt-get update
-or similar.
-If
+after opening the testbed. This can be used to do anything that isn't
+supported by an existing autopkgtest command. If
 .I commands
 is an existing file name, the commands are read from that; otherwise it
 is a string with the actual commands that gets run as-is. File names
